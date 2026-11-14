@@ -34,7 +34,7 @@ export default {
     const upload = async (file, fname) => {
       const fd = new FormData(); fd.append('file', file, fname); fd.append('network', 'public');
       const r = await fetch('https://uploads.pinata.cloud/v3/files', { method: 'POST', headers: { Authorization: 'Bearer ' + env.PINATA_JWT }, body: fd });
-      const d = await r.json().catch(() => ({})); if (!r.ok || !d.data || !d.data.cid) throw new Error('Pinata: ' + r.status);
+      const d = await r.json().catch(() => ({})); if (!r.ok || !d.data || !d.data.cid) throw new Error('Pinata ' + r.status + ': ' + String((d.error && (d.error.reason || d.error.details || d.error.message)) || d.error || d.message || '').slice(0, 160));
       return 'https://ipfs.io/ipfs/' + d.data.cid;
     };
     try {
@@ -43,6 +43,6 @@ export default {
       if (twitter) meta.twitter = twitter; if (telegram) meta.telegram = telegram; if (website) meta.website = website;
       const uri = await upload(new File([JSON.stringify(meta)], 'metadata.json', { type: 'application/json' }), 'metadata.json');
       return reply(200, { uri, image: img });
-    } catch (e) { return reply(502, { error: 'Не удалось загрузить в IPFS' }); }
+    } catch (e) { return reply(502, { error: 'Не удалось загрузить в IPFS', detail: String(e.message || e).slice(0, 200) }); } // detail — код и причина от Pinata, без секретов
   },
 };

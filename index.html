@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Membuy</title>
+<meta name="description" content="Membuy — терминал для покупки и продажи мемкоинов Solana.">
+<meta name="theme-color" content="#120f24">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="demo" id="demoBar" hidden>Демо-режим: монеты и сделки учебные, настоящие деньги не используются</div>
+<header class="top"><div class="wrap">
+  <a class="logo" href="#market"><i>M</i>Membuy</a>
+  <nav class="tabs" aria-label="Разделы"><a href="#market" data-nav="market">Рынок</a><a href="#feed" data-nav="feed">Лента</a><a href="#leaders" data-nav="leaders">Рейтинг</a><a href="#profile" data-nav="profile">Профиль</a></nav>
+  <span class="sp"></span><a class="ico" href="#search" aria-label="Поиск"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></a><a class="ico" id="bell" href="#notes" aria-label="Уведомления"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0112 0c0 6 2 7 2 7H4s2-1 2-7"/><path d="M10 20a2 2 0 004 0"/></svg></a><span id="walletSlot"></span>
+</div></header>
+<main class="wrap"><div id="view"></div>
+  <footer><div class="langs chips" role="group" aria-label="Язык"></div><p>Membuy — интерфейс для обмена монет. Ключи и средства остаются в вашем кошельке. Мемкоины крайне рискованны: цена может упасть до нуля. Это не инвестиционная рекомендация.</p></footer>
+</main>
+<nav class="bnav" aria-label="Разделы"><a href="#market" data-nav="market">Рынок</a><a href="#feed" data-nav="feed">Лента</a><a href="#leaders" data-nav="leaders">Рейтинг</a><a href="#profile" data-nav="profile">Профиль</a></nav>
+<div id="toasts" aria-live="polite"></div>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/util.js"></script>
+<script src="js/store.js"></script>
+<script src="js/data/demo.js"></script>
+<script src="js/data/live.js"></script>
+<script src="js/data/social.js"></script>
+<script src="js/data/ads.js"></script>
+<script src="js/wallet.js"></script>
+<script src="js/swap.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/ui/components.js"></script>
+<script src="js/ui/market.js"></script>
+<script src="js/ui/token.js"></script>
+<script src="js/ui/feed.js"></script>
+<script src="js/ui/leaders.js"></script>
+<script src="js/ui/portfolio.js"></script>
+<script src="js/ui/create.js"></script>
+<script src="js/ui/adsview.js"></script>
+<script src="js/ui/more.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

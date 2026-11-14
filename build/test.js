@@ -1,0 +1,68 @@
+// Сквозной тест демо-режима: node build/test.js  (нужен Playwright)
+const { chromium } = require('playwright'); const path = require('path');
+const URL = 'file://' + path.join(__dirname, '..', 'index.html'), SHOT = process.env.SHOT_DIR;
+// PNG 2×2 для проверки загрузки фото
+const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4nGP8z8Dwn4GBgYGJAQoAHxcCAr7cKUIAAAAASUVORK5CYII=', 'base64');
+(async () => {
+  const b = await chromium.launch(), errs = [], res = []; const ok = (name, cond) => { res.push((cond ? 'PASS ' : 'FAIL ') + name); };
+  for (const [w, h, n] of [[1280, 860, 'desktop'], [390, 844, 'mobile']]) {
+    const ctx = await b.newContext({ viewport: { width: w, height: h } }), p = await ctx.newPage();
+    p.on('pageerror', e => errs.push(n + ': ' + e.message)); p.on('console', c => { if (c.type() === 'error') errs.push(n + ' console: ' + c.text()); });
+    const go = async hsh => { await p.goto(URL + '#' + hsh); await p.waitForTimeout(450); };
+    const sw = async name => ok(`${n} нет горизонтальной прокрутки: ${name}`, await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+    const shot = async name => { if (SHOT) await p.screenshot({ path: `${SHOT}/t-${n}-${name}.png` }); };
+    await go('t-YAK'); await p.click('#panel .chip[data-v="0.1"]'); await p.waitForTimeout(250); await p.click('#go'); await p.waitForTimeout(500);
+    ok(n + ' покупка одним нажатием без подключённого кошелька', await p.evaluate(() => MB.store.get().wallet.connected && !!MB.store.get().holdings.YAK) && (await p.textContent('#tstatus')).includes('Куплено'));
+    await p.click('#go'); await p.waitForTimeout(250); ok(n + ' пустая сумма: понятная ошибка', (await p.textContent('#tstatus')).includes('Введите сумму'));
+    await p.click('#sellall'); await p.waitForTimeout(350); await p.click('#go'); await p.waitForTimeout(500); ok(n + ' «Продать всё» закрывает позицию', await p.evaluate(() => !MB.store.get().holdings.YAK));
+    await p.evaluate(() => MB.store.reset()); await p.waitForTimeout(200);
+    await go('market'); await p.waitForTimeout(600); const el0 = await p.locator('#list a.row >> nth=0').elementHandle(); await p.waitForTimeout(3200); ok(n + ' список не перерисовывается на тике', await el0.evaluate(e => e.isConnected));
+    ok(n + ' рынок: 12 монет + реклама', await p.locator('#list a.row:not(.ad)').count() === 12 && await p.locator('#list .ad').count() === 1); await sw('рынок');
+    await p.fill('#q', 'plov'); await p.waitForTimeout(300); ok(n + ' поиск на рынке', await p.locator('#list a.row').count() === 1); await p.fill('#q', '');
+    await p.click('#walletBtn'); await p.waitForTimeout(300); ok(n + ' кошелёк подключён', (await p.textContent('#walletBtn')).includes('SOL'));
+    await go('t-PLOV'); await p.fill('#amt', '1'); await p.waitForTimeout(300); ok(n + ' котировка покупки', (await p.textContent('#quote')).includes('Вы получите')); await p.click('#go'); await p.waitForTimeout(400);
+    ok(n + ' статус сделки виден под кнопкой', (await p.textContent('#tstatus')).includes('Куплено')); ok(n + ' блок «Ваша позиция»', await p.locator('#mypos:not([hidden])').count() === 1 && (await p.textContent('#mypos')).includes('Средняя цена входа'));
+    await p.click('[data-ct=candle]'); await p.waitForTimeout(300); ok(n + ' свечной график включён и нарисован', await p.evaluate(async () => { const c = document.querySelector('#cv'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let k = 0; for (let i = 3; i < d.length; i += 4) if (d[i]) k++; return MB.store.get().chartType === 'candle' && k > 2000 && (await MB.data.candles('PLOV', '1d')).every(x => x.h >= Math.max(x.o, x.c) && x.l <= Math.min(x.o, x.c)); }));
+    await p.click('[data-ct=line]'); await p.click('#fav'); ok(n + ' избранное', await p.evaluate(() => MB.store.get().fav.includes('PLOV')));
+    ok(n + ' покупка записана', await p.evaluate(() => !!MB.store.get().holdings.PLOV)); await sw('монета'); await shot('token');
+    await p.click('.seg button[data-s=sell]'); await p.click('#panel .chip[data-p="50"]'); await p.waitForTimeout(300); await p.click('#go'); await p.waitForTimeout(400); ok(n + ' продажа половины', await p.evaluate(() => MB.store.get().trades.length === 2));
+    await go('market'); await p.click('[data-f=fav]'); await p.waitForTimeout(300); ok(n + ' фильтр «Избранное»', await p.locator('#list a.row').count() === 1); await p.click('[data-f=trend]'); await go('t-PLOV');
+    ok(n + ' монета открывается на вкладке «Купить»', await p.locator('.seg .on.buy').count() === 1); await p.click('.seg button[data-s=sell]');
+    await p.fill('#amt', '999999999'); await p.waitForTimeout(300); await p.click('#go'); await p.waitForTimeout(300); ok(n + ' продажа сверх остатка отклонена с пояснением', await p.evaluate(() => MB.store.get().trades.length === 2) && (await p.textContent('#tstatus')).includes('Недостаточно монет'));
+    await go('feed'); ok(n + ' лента: посты и реклама', await p.locator('.post').count() >= 10 && await p.locator('#flist .ad').count() >= 1);
+    await p.fill('#ptext', 'Мой первый пост <b>тест</b>'); await p.selectOption('#pcoin', 'PLOV'); await p.click('#psend'); await p.waitForTimeout(300);
+    ok(n + ' поле поста очищено после публикации', (await p.inputValue('#ptext')) === '');
+    ok(n + ' пост опубликован, HTML экранирован', await p.evaluate(() => MB.store.get().myPosts.length === 1 && !document.querySelector('.post b b') && document.querySelector('.pt2').textContent.includes('<b>тест</b>')));
+    await p.click('[data-like] >> nth=0'); await p.waitForTimeout(200); ok(n + ' лайк', await p.evaluate(() => MB.store.get().liked.length === 1));
+    await p.click('[data-follow] >> nth=0'); await p.waitForTimeout(200); ok(n + ' подписка', await p.evaluate(() => MB.store.get().following.length === 1));
+    await p.click('[data-tab=following]'); await p.waitForTimeout(200); ok(n + ' вкладка «Подписки»', await p.locator('.post').count() >= 1); await p.click('[data-tab=top]'); await p.waitForTimeout(200); await sw('лента'); await shot('feed');
+    await go('leaders'); await p.waitForTimeout(300); ok(n + ' рейтинг: 13 строк с пользователем', await p.locator('.lrow').count() === 13 && await p.locator('.lrow.me').count() === 1); await p.click('[data-per=w]'); await p.waitForTimeout(200); await sw('рейтинг'); await shot('leaders');
+    await p.click('[data-tab=squads]'); await p.waitForTimeout(200); await p.fill('#sq', 'Тестовый'); await p.click('#sqgo'); await p.waitForTimeout(300); ok(n + ' отряд создан', await p.evaluate(() => MB.store.get().squad === 'Тестовый'));
+    await p.click('[data-tab=rewards]'); await p.waitForTimeout(200); ok(n + ' награды: фонд $0', (await p.textContent('#lbody')).includes('$0'));
+    await go('create'); await p.fill('#cname', 'Test Coin'); await p.fill('#csym', 'plov'); await p.click('form button[type=submit]'); await p.waitForTimeout(300); ok(n + ' занятый тикер отклонён', await p.evaluate(() => MB.store.get().coins.length === 0));
+    await p.fill('#csym', 'TST'); await p.fill('#cdesc', 'Описание'); await p.click('form button[type=submit]'); await p.waitForTimeout(600); ok(n + ' монета создана и открыта', await p.evaluate(() => location.hash === '#t-TST' && MB.store.get().coins.length === 1)); await shot('newcoin');
+    await p.reload(); await p.waitForTimeout(500); ok(n + ' созданная монета сохраняется после перезагрузки', await p.evaluate(() => MB.providers.demo.has('TST')));
+    await go('ads'); await p.fill('#atitle', 'Мой проект'); await p.fill('#atext', 'Лучший проект на свете'); await p.fill('#alink', 'javascript:alert(1)'); await p.click('#aform button[type=submit]'); await p.waitForTimeout(250); ok(n + ' опасная ссылка в рекламе отклонена', await p.evaluate(() => MB.store.get().campaigns.length === 0));
+    await p.fill('#alink', 'https://example.com'); await p.fill('#adays', '5'); await p.waitForTimeout(150); ok(n + ' цена кампании 5 дн. в ленте = $25', (await p.textContent('#aprice')).includes('25')); await p.click('#aform button[type=submit]'); await p.waitForTimeout(300);
+    ok(n + ' кампания создана, доход $25', await p.evaluate(() => MB.store.get().campaigns.length === 1) && (await p.textContent('#income')).includes('25')); await sw('реклама'); await shot('ads');
+    await go('feed'); ok(n + ' своя реклама показана в ленте', (await p.textContent('#flist')).includes('Мой проект'));
+    await go('invite'); ok(n + ' реферальная ссылка', (await p.inputValue('#rlink')).includes('?ref=')); await p.click('#rcopy'); await p.waitForTimeout(200); await sw('приглашения');
+    await go('prefs'); await p.fill('#pname', 'x'); await p.click('#pform button[type=submit]'); await p.waitForTimeout(200); await p.fill('#pname', 'ismoil_fx'); await p.click('#pform button[type=submit]'); await p.waitForTimeout(250); ok(n + ' имя сохранено, короткое отклонено', await p.evaluate(() => MB.store.get().profile.name === 'ismoil_fx' && MB.store.get().myPosts[0].user === 'ismoil_fx'));
+    await go('profile'); await p.waitForTimeout(300); ok(n + ' без фото показаны буквы', await p.locator('.prof span.ava').count() === 1);
+    await p.setInputFiles('#pfile', { name: 'me.png', mimeType: 'image/png', buffer: PNG }); await p.waitForTimeout(500); ok(n + ' фото профиля загружено и показано', await p.locator('.prof img.ava').count() === 1 && await p.evaluate(() => MB.store.get().profile.avatar.startsWith('data:image/jpeg')));
+    await p.setInputFiles('#pfile', { name: 'bad.txt', mimeType: 'text/plain', buffer: Buffer.from('not an image') }); await p.waitForTimeout(300); ok(n + ' не-картинка отклонена, фото осталось', await p.locator('.prof img.ava').count() === 1);
+    await go('feed'); ok(n + ' фото в своих постах ленты', await p.locator('.post .ph img.ava').count() >= 1); await go('leaders'); await p.waitForTimeout(300); ok(n + ' фото в рейтинге', await p.locator('.lrow.me img.ava').count() === 1);
+    await p.reload(); await p.waitForTimeout(500); ok(n + ' фото сохраняется после перезагрузки', await p.locator('.lrow.me img.ava').count() === 1);
+    await go('prefs'); await p.fill('#pbio', 'Трейдер'); await p.click('#pform button[type=submit]'); await p.waitForTimeout(250); ok(n + ' сохранение профиля не стирает фото', await p.evaluate(() => !!MB.store.get().profile.avatar));
+    await p.click('#pdel'); await p.waitForTimeout(250); ok(n + ' удаление фото возвращает буквы', await p.evaluate(() => MB.store.get().profile.avatar === '') && await p.locator('#pform span.ava').count() === 1);
+    await p.setInputFiles('#pfile2', { name: 'me.png', mimeType: 'image/png', buffer: PNG }); await p.waitForTimeout(500);
+    await go('search'); ok(n + ' недавно просмотренные', await p.locator('#sres a.row').count() >= 2); await p.fill('#sq2', 'yak'); await p.waitForTimeout(300); ok(n + ' поиск', await p.locator('#sres a.row').count() === 1);
+    await go('notes'); ok(n + ' уведомления', await p.locator('.row').count() >= 3);
+    await p.waitForTimeout(11000); await go('profile'); await p.waitForTimeout(400); ok(n + ' профиль: имя, монеты, график', (await p.textContent('.prof')).includes('ismoil_fx') && await p.locator('.list a.row').count() >= 1 && await p.evaluate(() => MB.store.get().equity.length >= 1)); await sw('профиль'); await shot('profile');
+    await p.click('[data-tab=hist]'); await p.waitForTimeout(300); ok(n + ' история сделок', await p.locator('.list .row').count() === 2);
+    await go('prefs'); await p.click('#preset'); await p.click('#pyes'); await p.waitForTimeout(400); ok(n + ' сброс демо-счёта', await p.evaluate(() => MB.store.get().trades.length === 0 && !MB.store.get().wallet.connected));
+    await ctx.close();
+  }
+  console.log(res.join('\n')); console.log('\nИтого:', res.filter(r => r.startsWith('PASS')).length, 'из', res.length, '| ошибки в консоли:', errs.length ? errs : 'нет'); await b.close();
+  process.exit(res.some(r => r.startsWith('FAIL')) || errs.length ? 1 : 0);
+})();

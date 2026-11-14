@@ -1,0 +1,1167 @@
+<title>Membuy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Membuy. Тарх: мобильное приложение — шапка, один столбец, нижняя навигация; на широком экране монета в две колонки. Один тёмный вид. */
+:root{
+  --bg:#120f24; --surface:#1b1736; --surface2:#262049; --line:#372f6a; --text:#f4f1ff; --muted:#a8a1cf;
+  --accent:#ffb224; --accent-ink:#2a1a00; --up:#3ddc97; --down:#ff6b6b; --buy:#3ddc97; --sell:#ff6b6b;
+  --display:Unbounded,"Segoe UI",Arial,sans-serif; --body:Manrope,"Segoe UI",Arial,sans-serif;
+  --r:16px; color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.5;font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--bg)}
+a{color:inherit;text-decoration:none}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:#120f24ee;backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:18px;height:60px}
+.logo{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.02em;display:flex;align-items:center;gap:9px}
+.logo i{width:30px;height:30px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-style:normal;font-size:16px;transform:rotate(-6deg)}
+.tabs{display:flex;gap:4px;margin-left:8px}
+.tabs a{padding:8px 14px;border-radius:10px;color:var(--muted);font-weight:600;font-size:15px}
+.tabs a.on{background:var(--surface2);color:var(--text)}
+.top .sp{flex:1}
+.demo{background:var(--accent);color:var(--accent-ink);font-size:13px;font-weight:700;text-align:center;padding-block:6px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:10px 16px;font-weight:700;font-size:15px;cursor:pointer;white-space:nowrap}
+.btn.accent{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--surface2);border:1px solid var(--line)}
+.btn.sm{padding:7px 12px;font-size:13px;margin-top:12px}
+.btn.big{width:100%;padding:15px;font-size:17px;border-radius:14px}
+.btn.buy{background:var(--buy);color:#04291a}.btn.sell{background:var(--sell);color:#330707}
+.btn:disabled{opacity:.6;cursor:wait}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--up);display:inline-block}
+
+main{padding-block:20px 110px}
+.hero{padding-block:14px 20px}
+.hero h1{font-family:var(--display);font-weight:800;font-size:clamp(24px,5.2vw,40px);line-height:1.12;text-wrap:balance}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);max-width:560px;margin-top:10px}
+.tools{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:14px}
+.search{flex:1 1 240px;min-width:0}
+.search input{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.search input::placeholder{color:var(--muted)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer}
+.chip.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+a.row:hover{border-color:var(--accent)}
+.ava{border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;color:#fff;flex:none;object-fit:cover}
+.nm{min-width:0}.nm b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm small,.pr small{color:var(--muted);font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr{text-align:right}.pr b{display:block}
+.chg{font-size:13px;font-weight:700}.up{color:var(--up)}.down{color:var(--down)}
+.spark{display:block}
+@media(max-width:520px){.spark{display:none}.row{grid-template-columns:auto minmax(0,1fr) auto}}
+.tag{font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px}
+.tag.buy{background:#3ddc9722;color:var(--up)}.tag.sell{background:#ff6b6b22;color:var(--down)}
+
+.back{display:inline-block;color:var(--muted);font-weight:600;margin-bottom:14px}
+.tgrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+@media(max-width:860px){.tgrid{grid-template-columns:minmax(0,1fr)}}
+.tmain{min-width:0;display:flex;flex-direction:column;gap:14px}
+.thead{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.thead h1{font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2}
+.thead small{color:var(--muted)}
+.px{margin-left:auto;text-align:right}.px b{display:block;font-size:26px;font-family:var(--display);font-weight:700}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.chartc canvas{display:block;width:100%;height:280px;margin-top:10px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stats div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+dt{color:var(--muted);font-size:13px}dd{font-weight:700}
+.about h2{font-size:15px;margin-bottom:6px}.about p{color:var(--muted)}
+.panel{position:sticky;top:calc(76px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:12px}
+@media(max-width:860px){.panel{position:static}.tmain{display:contents}.thead{order:1}.chartc{order:2}}
+@media(max-width:520px){.lg{display:none}.top .wrap{gap:8px}.logo{font-size:17px;gap:7px}.logo i{width:28px;height:28px}.ico{width:36px;height:36px}.top .btn{padding:9px 12px;font-size:14px}}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--surface2);border-radius:12px;padding:4px}
+.seg button{border:0;background:none;padding:10px;border-radius:9px;font-weight:700;color:var(--muted);cursor:pointer}
+.seg .on.buy{background:var(--buy);color:#04291a}.seg .on.sell{background:var(--sell);color:#330707}
+.fld{display:flex;flex-direction:column;gap:6px}.fld>span{font-size:13px;color:var(--muted);font-weight:600}
+.fld input,.fld select{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-size:20px;font-weight:700;width:100%}
+.fld small{color:var(--muted);font-size:13px}
+.fld.inline{flex-direction:row;align-items:center;justify-content:space-between}.fld.inline select{width:auto;font-size:15px;padding:8px 10px}
+.quote{background:var(--bg);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.quote div:not(.hint){display:flex;justify-content:space-between;gap:12px;align-items:baseline}.quote dd{text-align:right}
+.hint{color:var(--muted);font-size:14px}
+.fine{color:var(--muted);font-size:12.5px;text-align:center}
+
+.pt{font-family:var(--display);font-size:24px;font-weight:700;margin-bottom:14px}
+.wcard{margin-bottom:14px}.wcard small{color:var(--muted)}
+.tot{display:block;font-family:var(--display);font-size:34px;font-weight:800;margin:2px 0 8px}
+.wline{display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between;font-size:14px;color:var(--muted)}
+.empty{text-align:center;padding:44px 16px;background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);display:flex;flex-direction:column;gap:10px;align-items:center}
+.empty p{color:var(--muted);max-width:360px}
+
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#1b1736f5;backdrop-filter:blur(10px);border-top:1px solid var(--line);display:none;padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.bnav a{flex:1;text-align:center;padding:10px 4px;border-radius:12px;color:var(--muted);font-weight:700;font-size:14px}
+.bnav a.on{color:var(--accent-ink);background:var(--accent)}
+@media(max-width:700px){.bnav{display:flex;gap:6px}.tabs{display:none}}
+footer{color:var(--muted);font-size:13px;padding-block:22px;border-top:1px solid var(--line);margin-top:26px}
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:50;display:flex;flex-direction:column;gap:8px;align-items:center;width:min(92vw,420px)}
+.toast{background:var(--text);color:var(--bg);font-weight:700;padding:12px 18px;border-radius:12px;box-shadow:0 10px 30px #0008;text-align:center}
+.toast.err{background:var(--down);color:#330707}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* --- Лента, рейтинг, профиль, формы, реклама --- */
+.ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--surface2);border:1px solid var(--line);position:relative;flex:none}
+.ico.has::after{content:"";position:absolute;top:7px;right:7px;width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.tabsx{margin-bottom:14px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.h2{font-family:var(--display);font-size:16px;font-weight:700;margin:6px 0}
+.note{background:#ffb22418;border:1px solid #ffb22466;color:#ffe2a8;border-radius:14px;padding:12px 14px;font-size:14px;margin-bottom:14px}
+.inp,.form input:not([type=checkbox]),.form textarea,.form select,.composer textarea,.composer select{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%;font-size:16px;font-weight:600;min-width:0}
+.form{display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
+.form .fld input,.form .fld select{font-size:16px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.crow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.crow .inp,.crow select{flex:1 1 160px;width:auto}
+.composer{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.composer textarea{resize:vertical;font-weight:400}
+.cnt{color:var(--muted);font-size:13px;margin-left:auto}
+.post{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
+.ph{display:flex;align-items:center;gap:12px}.ph .nm{flex:1}
+.pt2{font-size:16px;overflow-wrap:anywhere}
+.pos{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:12px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.pos .kv{text-align:right}.pos .kv small{display:block;color:var(--muted);font-size:12px}
+@media(max-width:480px){.pos{grid-template-columns:auto minmax(0,1fr) auto}.pos .kv:nth-of-type(2){display:none}}
+.acts{display:flex;gap:16px;align-items:center}
+.act{background:none;border:0;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;padding:4px 0}
+button.act.on{color:var(--accent)}
+.row.ad{border-style:dashed;grid-template-columns:auto minmax(0,1fr) auto}
+.adtag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:4px 8px}
+.row.ad .nm small{white-space:normal}
+.lrow{grid-template-columns:auto auto minmax(0,1fr) auto}
+.lrow.me,.mecard{border-color:var(--accent)}
+.mecard{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.rk{width:26px;text-align:center;font-family:var(--display);font-weight:700;color:var(--muted)}.rk.top{color:var(--accent)}
+.sm2{padding:4px 10px;font-size:12px;margin-top:4px}
+.prof{display:flex;gap:16px;align-items:center;margin-bottom:14px}
+.prof h1{font-family:var(--display);font-size:22px;font-weight:700;overflow-wrap:anywhere}
+.prof small{display:block;color:var(--muted);font-size:13px;white-space:normal}.prof small b{display:inline;color:var(--text)}
+.qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+@media(max-width:700px){.qgrid{grid-template-columns:1fr 1fr}}
+.qgrid .btn{white-space:normal;text-align:center}
+.wcard canvas{display:block;width:100%;height:150px;margin-top:10px}
+.code{font-family:var(--display);font-size:24px;letter-spacing:.06em;color:var(--accent)}
+.ol{padding-left:20px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.camp{grid-template-columns:minmax(0,1fr) auto}.camp .nm small{white-space:normal}
+.prev{display:inline-grid;place-items:center;width:72px;height:72px;border-radius:50%;border:1px dashed var(--line);background:var(--bg)}
+.shead{display:flex;justify-content:space-between;align-items:center}
+.lnk{color:var(--accent);font-weight:700}
+.stats{margin-bottom:14px}
+
+/* --- График: вид, позиция, статус сделки --- */
+.ctools{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.favb{margin-top:6px;padding:5px 12px;font-size:13px}.favb.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.mphead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mp{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:8px}
+.tstatus{min-height:0;font-weight:700;text-align:center;border-radius:12px;font-size:15px}
+.tstatus.ok{background:#3ddc9722;color:var(--up);padding:12px}.tstatus.err{background:#ff6b6b22;color:var(--down);padding:12px}
+@media(max-width:860px){.mypos{order:3}.panel{order:4}.stats{order:5}.about{order:6}}
+
+/* --- Фото профиля --- */
+.pava{display:flex;flex-direction:column;align-items:center;gap:8px;flex:none}
+.photob{font-size:12px;padding:5px 10px;cursor:pointer}
+img.ava{display:block}
+
+/* --- Языки --- */
+footer .langs{margin-bottom:12px}
+</style>
+<div class="demo" id="demoBar" hidden>Демо-режим: монеты и сделки учебные, настоящие деньги не используются</div>
+<header class="top"><div class="wrap">
+  <a class="logo" href="#market"><i>M</i>Membuy</a>
+  <nav class="tabs" aria-label="Разделы"><a href="#market" data-nav="market">Рынок</a><a href="#feed" data-nav="feed">Лента</a><a href="#leaders" data-nav="leaders">Рейтинг</a><a href="#profile" data-nav="profile">Профиль</a></nav>
+  <span class="sp"></span><a class="ico" href="#search" aria-label="Поиск"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></a><a class="ico" id="bell" href="#notes" aria-label="Уведомления"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0112 0c0 6 2 7 2 7H4s2-1 2-7"/><path d="M10 20a2 2 0 004 0"/></svg></a><span id="walletSlot"></span>
+</div></header>
+<main class="wrap"><div id="view"></div>
+  <footer><div class="langs chips" role="group" aria-label="Язык"></div><p>Membuy — интерфейс для обмена монет. Ключи и средства остаются в вашем кошельке. Мемкоины крайне рискованны: цена может упасть до нуля. Это не инвестиционная рекомендация.</p></footer>
+</main>
+<nav class="bnav" aria-label="Разделы"><a href="#market" data-nav="market">Рынок</a><a href="#feed" data-nav="feed">Лента</a><a href="#leaders" data-nav="leaders">Рейтинг</a><a href="#profile" data-nav="profile">Профиль</a></nav>
+<div id="toasts" aria-live="polite"></div>
+<script>
+/* Membuy — настройки. Меняйте только этот файл. */
+window.MB = window.MB || {};
+MB.config = {
+  MODE: 'demo',                 // 'demo' — учебные данные и сделки; 'live' — Phantom + Jupiter + DexScreener
+  APP_NAME: 'Membuy',
+  PLATFORM_FEE_BPS: 50,         // комиссия площадки: 50 = 0.5%
+  FEE_ACCOUNT: '',              // live: ваш токен-аккаунт для комиссии Jupiter (пусто = без комиссии)
+  DEFAULT_SLIPPAGE_BPS: 100,    // проскальзывание по умолчанию: 1%
+  SOL_USD_DEMO: 150,            // условная цена SOL в демо-режиме
+  DEMO_START_SOL: 5,
+  RPC_URL: 'https://api.mainnet-beta.solana.com',
+  JUP_API: 'https://lite-api.jup.ag/swap/v1',
+  DEX_API: 'https://api.dexscreener.com',
+  GECKO_API: 'https://api.geckoterminal.com/api/v2',
+  WEB3_CDN: 'https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js',
+  SOL_MINT: 'So11111111111111111111111111111111111111112',
+};
+
+// Проверка живого режима без пересборки: откройте сайт со ссылкой ...?mode=live
+try { const m = new URLSearchParams(location.search).get('mode'); if (m === 'live' || m === 'demo') MB.config.MODE = m; } catch (e) { /* нет location */ }
+MB.config.LIVE = MB.config.MODE === 'live';
+// Разделы, которые работают только с выдуманными данными, в живом режиме скрыты
+MB.config.DEMO_ONLY = ['feed', 'leaders', 'create', 'ads', 'invite'];
+
+/* Языки интерфейса. Экраны пишутся на русском, а этот модуль переводит готовый текст страницы.
+   Порядок поиска перевода: точное совпадение (D) → шаблоны с подстановкой (R) → замена фрагментов (F).
+   Чтобы добавить язык: допишите код в LANGS и ещё один перевод в конец каждой строки D, R и F. */
+MB.i18n = (() => {
+  const LANGS = [['ru', 'Русский'], ['en', 'English'], ['tg', 'Тоҷикӣ']], KEY = 'membuy-lang';
+  let lang = 'ru'; try { const s = localStorage.getItem(KEY); if (LANGS.some(l => l[0] === s)) lang = s; } catch (e) { /* хранилище недоступно */ }
+  const idx = () => LANGS.findIndex(l => l[0] === lang) - 1;
+
+  // Точные совпадения: 'русский': ['English', 'Тоҷикӣ']
+  const D = {
+    // Шапка, навигация, общее
+    'Демо-режим: монеты и сделки учебные, настоящие деньги не используются': ['Demo mode: coins and trades are for practice, no real money is used', 'Речаи демо: тангаҳо ва савдоҳо омӯзишӣ мебошанд, пули воқеӣ истифода намешавад'],
+    'Рынок': ['Market', 'Бозор'], 'Лента': ['Feed', 'Лента'], 'Рейтинг': ['Leaderboard', 'Рейтинг'], 'Профиль': ['Profile', 'Профил'],
+    'Разделы': ['Sections', 'Бахшҳо'], 'Поиск': ['Search', 'Ҷустуҷӯ'], 'Уведомления': ['Notifications', 'Огоҳиҳо'],
+    'Подключить': ['Connect', 'Пайваст'], 'кошелёк': ['wallet', 'кардани ҳамён'], 'Подключить кошелёк': ['Connect wallet', 'Пайваст кардани ҳамён'], 'Отключить кошелёк': ['Disconnect wallet', 'Қатъ кардани ҳамён'],
+    'Кошелёк подключён': ['Wallet connected', 'Ҳамён пайваст шуд'], 'Кошелёк отключён': ['Wallet disconnected', 'Ҳамён қатъ шуд'],
+    'Membuy — интерфейс для обмена монет. Ключи и средства остаются в вашем кошельке. Мемкоины крайне рискованны: цена может упасть до нуля. Это не инвестиционная рекомендация.': ['Membuy is an interface for swapping coins. Your keys and funds stay in your wallet. Memecoins are extremely risky: the price can fall to zero. This is not investment advice.', 'Membuy — интерфейс барои иваз кардани тангаҳо. Калидҳо ва маблағ дар ҳамёни шумо мемонанд. Мемкоинҳо хеле хатарноканд: нарх метавонад то сифр афтад. Ин маслиҳати сармоягузорӣ нест.'],
+    'Язык': ['Language', 'Забон'], 'Удалить': ['Delete', 'Нест кардан'], 'Сохранить': ['Save', 'Нигоҳ доштан'], 'Отмена': ['Cancel', 'Бекор кардан'], 'Повторить': ['Retry', 'Такрор'],
+    // Рынок
+    'Мемкоины Solana': ['Solana memecoins', 'Мемкоинҳои Solana'], 'в одном месте': ['in one place', 'дар як ҷо'],
+    'Находите монеты, смотрите графики и меняйте SOL на монету за пару касаний. Ключи остаются в вашем кошельке.': ['Find coins, watch charts and swap SOL for a coin in a couple of taps. Your keys stay in your wallet.', 'Тангаҳоро ёбед, графикҳоро бинед ва SOL-ро бо ду-се ламс ба танга иваз кунед. Калидҳо дар ҳамёни шумо мемонанд.'],
+    'Название или тикер': ['Name or ticker', 'Ном ё тикер'], 'Поиск монеты': ['Search for a coin', 'Ҷустуҷӯи танга'], 'Сортировка': ['Sorting', 'Тартиб'],
+    'В тренде': ['Trending', 'Дар тренд'], 'Новые': ['New', 'Нав'], 'Растут': ['Gainers', 'Болораванда'], 'По объёму': ['By volume', 'Аз рӯи ҳаҷм'], '★ Избранное': ['★ Favourites', '★ Интихобшуда'],
+    'Ничего не найдено': ['Nothing found', 'Чизе ёфт нашуд'], 'Попробуйте другое название или тикер.': ['Try another name or ticker.', 'Ном ё тикери дигарро санҷед.'],
+    'В избранном пусто': ['No favourites yet', 'Интихобшуда холӣ аст'], 'Откройте монету и нажмите «В избранное».': ['Open a coin and tap “Add to favourites”.', 'Тангаро кушоед ва «Ба интихобшуда»-ро пахш кунед.'],
+    'Не удалось загрузить монеты': ['Could not load coins', 'Тангаҳо бор нашуданд'], 'Реклама': ['Ad', 'Реклама'],
+    // Монета и сделка
+    '← Все монеты': ['← All coins', '← Ҳамаи тангаҳо'], 'Загружаем монету…': ['Loading coin…', 'Танга бор мешавад…'], 'Монета не найдена': ['Coin not found', 'Танга ёфт нашуд'], 'Возможно, ссылка устарела.': ['The link may be outdated.', 'Шояд пайванд кӯҳна шудааст.'], 'К списку монет': ['Back to coins', 'Ба рӯйхати тангаҳо'],
+    '★ В избранном': ['★ In favourites', '★ Дар интихобшуда'], '☆ В избранное': ['☆ Add to favourites', '☆ Ба интихобшуда'],
+    '1 ч': ['1h', '1 с'], '1 д': ['1d', '1 р'], '7 д': ['7d', '7 р'], 'Линия': ['Line', 'Хат'], 'Свечи': ['Candles', 'Шамъҳо'], 'Вид графика': ['Chart type', 'Намуди график'],
+    'Купить': ['Buy', 'Харидан'], 'Продать': ['Sell', 'Фурӯхтан'], 'Продать всё': ['Sell all', 'Ҳамаро фурӯхтан'], 'Покупаем…': ['Buying…', 'Харида мешавад…'], 'Продаём…': ['Selling…', 'Фурӯхта мешавад…'],
+    'Проскальзывание': ['Slippage', 'Лағжиши нарх'], 'Введите сумму, чтобы увидеть расчёт.': ['Enter an amount to see the quote.', 'Барои дидани ҳисоб маблағро ворид кунед.'], 'Введите сумму': ['Enter an amount', 'Маблағро ворид кунед'],
+    'Вы получите': ['You receive', 'Шумо мегиред'], 'Минимум с учётом проскальзывания': ['Minimum after slippage', 'Камтарин бо назардошти лағжиш'], 'Сумма сделки': ['Trade value', 'Маблағи савдо'], 'Влияние на цену': ['Price impact', 'Таъсир ба нарх'],
+    'Демо-режим: сделка учебная, настоящие деньги не списываются.': ['Demo mode: this is a practice trade, no real money is charged.', 'Речаи демо: савдо омӯзишӣ аст, пули воқеӣ гирифта намешавад.'],
+    'Сделка подписывается в вашем кошельке. Мемкоины очень рискованны.': ['You sign the trade in your wallet. Memecoins are very risky.', 'Савдо дар ҳамёни шумо имзо мешавад. Мемкоинҳо хеле хатарноканд.'],
+    'Ваша позиция': ['Your position', 'Мавқеи шумо'], 'Монет': ['Coins', 'Тангаҳо'], 'Стоимость': ['Value', 'Арзиш'], 'Средняя цена входа': ['Average entry price', 'Нархи миёнаи вуруд'], 'Результат': ['Result', 'Натиҷа'],
+    'Капитализация': ['Market cap', 'Капитализатсия'], 'Объём за 24 ч': ['24h volume', 'Ҳаҷм дар 24 с'], 'Ликвидность': ['Liquidity', 'Ликвидият'], 'Держатели': ['Holders', 'Дорандагон'], 'Возраст': ['Age', 'Синну сол'], 'меньше дня': ['under a day', 'камтар аз як рӯз'],
+    'О монете': ['About the coin', 'Дар бораи танга'], 'Соцсеть монеты →': ['Coin’s social page →', 'Шабакаи иҷтимоии танга →'], 'Нет данных для графика': ['No chart data', 'Барои график маълумот нест'], 'вход': ['entry', 'вуруд'],
+    'Сначала подключите кошелёк': ['Connect your wallet first', 'Аввал ҳамёнро пайваст кунед'], 'Недостаточно SOL': ['Not enough SOL', 'SOL нокифоя аст'], 'Недостаточно монет': ['Not enough coins', 'Танга нокифоя аст'],
+    'Не удалось рассчитать сделку': ['Could not quote the trade', 'Савдо ҳисоб карда нашуд'], 'Не удалось получить котировку': ['Could not get a quote', 'Нарх гирифта нашуд'], 'Не удалось подготовить сделку': ['Could not prepare the trade', 'Савдо омода карда нашуд'], 'Не удалось загрузить библиотеку Solana': ['Could not load the Solana library', 'Китобхонаи Solana бор нашуд'],
+    'Кошелёк Phantom не найден. Установите Phantom и откройте сайт в его браузере.': ['Phantom wallet not found. Install Phantom and open the site in its browser.', 'Ҳамёни Phantom ёфт нашуд. Phantom-ро насб кунед ва сайтро дар браузери он кушоед.'],
+    // Лента
+    'Все': ['All', 'Ҳама'], 'Подписки': ['Following', 'Обунаҳо'], 'Лучшие': ['Top', 'Беҳтаринҳо'], 'только что': ['just now', 'ҳозир'],
+    'Вы подписаны': ['Following', 'Шумо обуна ҳастед'], 'Подписаться': ['Follow', 'Обуна шудан'], 'Купил': ['Bought', 'Харид'], 'Продал': ['Sold', 'Фурӯхт'], 'Сумма': ['Amount', 'Маблағ'], 'Позиция': ['Position', 'Мавқеъ'], 'позиция закрыта': ['position closed', 'мавқеъ баста шуд'],
+    'Здесь пока пусто': ['Nothing here yet', 'Ин ҷо ҳоло холӣ аст'], 'Подпишитесь на трейдеров во вкладке «Все» или в рейтинге.': ['Follow traders in the “All” tab or on the leaderboard.', 'Ба трейдерҳо дар варақаи «Ҳама» ё дар рейтинг обуна шавед.'], 'Постов пока нет.': ['No posts yet.', 'Ҳоло пост нест.'],
+    'Подключите кошелёк, чтобы писать посты.': ['Connect your wallet to write posts.', 'Барои навиштани пост ҳамёнро пайваст кунед.'], 'Текст поста': ['Post text', 'Матни пост'], 'Что думаете о рынке?': ['What do you think about the market?', 'Дар бораи бозор чӣ фикр доред?'],
+    'Прикрепить монету': ['Attach a coin', 'Замима кардани танга'], 'Без монеты': ['No coin', 'Бе танга'], 'Опубликовать': ['Post', 'Нашр кардан'], 'Напишите текст поста': ['Write the post text', 'Матни постро нависед'], 'Пост опубликован': ['Post published', 'Пост нашр шуд'], 'Пост длиннее 280 знаков': ['The post is longer than 280 characters', 'Пост аз 280 аломат дарозтар аст'],
+    // Рейтинг
+    'Трейдеры': ['Traders', 'Трейдерҳо'], 'Отряды': ['Squads', 'Дастаҳо'], 'Награды': ['Rewards', 'Мукофотҳо'], 'День': ['Day', 'Рӯз'], 'Неделя': ['Week', 'Ҳафта'], 'Месяц': ['Month', 'Моҳ'],
+    'Подключите кошелёк, чтобы попасть в рейтинг.': ['Connect your wallet to join the leaderboard.', 'Барои ворид шудан ба рейтинг ҳамёнро пайваст кунед.'],
+    'Создайте свой отряд': ['Create your squad', 'Дастаи худро созед'], 'Отряд — команда трейдеров с общим результатом.': ['A squad is a team of traders with a shared result.', 'Даста — гурӯҳи трейдерҳо бо натиҷаи умумӣ.'], 'Название отряда': ['Squad name', 'Номи даста'], 'Создать отряд': ['Create squad', 'Сохтани даста'], 'Отряд создан': ['Squad created', 'Даста сохта шуд'], 'Название отряда: от 3 до 20 знаков': ['Squad name: 3 to 20 characters', 'Номи даста: аз 3 то 20 аломат'],
+    'Награды трейдерам — в планах': ['Trader rewards are planned', 'Мукофот ба трейдерҳо — дар нақша'],
+    'Идея: часть комиссии площадки раз в неделю делится между лучшими трейдерами. Сейчас призового фонда нет: он появится только после запуска торговли и сервера, который считает результаты.': ['The idea: once a week, part of the platform fee is shared among the best traders. There is no prize pool yet: it will appear only after live trading and a server that counts results are launched.', 'Ғоя: як қисми комиссияи платформа ҳар ҳафта байни беҳтарин трейдерҳо тақсим мешавад. Ҳоло фонди мукофот нест: он танҳо пас аз оғози савдои воқеӣ ва сервере, ки натиҷаҳоро ҳисоб мекунад, пайдо мешавад.'],
+    'Призовой фонд сейчас': ['Prize pool now', 'Фонди мукофот ҳоло'], 'Источник фонда': ['Pool source', 'Манбаи фонд'], 'Доля комиссии': ['Share of fees', 'Ҳиссаи комиссия'], 'Выплаты': ['Payouts', 'Пардохтҳо'], 'Раз в неделю': ['Weekly', 'Ҳар ҳафта'],
+    'Памирцы': ['Pamiris', 'Помириҳо'], 'Чайхана': ['Chaikhana', 'Чойхона'], 'Тандыр': ['Tandoor', 'Танӯр'], 'Навруз': ['Navruz', 'Наврӯз'], 'Дутар': ['Dutar', 'Дутор'],
+    // Профиль
+    'Кошелёк не подключён': ['Wallet not connected', 'Ҳамён пайваст нест'], 'Подключите кошелёк, чтобы видеть свои монеты, сделки и результат.': ['Connect your wallet to see your coins, trades and result.', 'Барои дидани тангаҳо, савдоҳо ва натиҷаи худ ҳамёнро пайваст кунед.'],
+    'Загрузить фото': ['Upload photo', 'Бор кардани акс'], 'Сменить фото': ['Change photo', 'Иваз кардани акс'], 'Удалить фото': ['Remove photo', 'Нест кардани акс'], 'Фото профиля': ['Profile photo', 'Акси профил'], 'Фото профиля обновлено': ['Profile photo updated', 'Акси профил нав шуд'], 'Фото удалено': ['Photo removed', 'Акс нест карда шуд'],
+    'Пригласить друзей': ['Invite friends', 'Даъвати дӯстон'], 'Создать монету': ['Create a coin', 'Сохтани танга'], 'Настройки': ['Settings', 'Танзимот'],
+    'Стоимость портфеля': ['Portfolio value', 'Арзиши портфел'], 'График стоимости портфеля': ['Portfolio value chart', 'Графики арзиши портфел'], 'Монеты': ['Coins', 'Тангаҳо'], 'История': ['History', 'Таърих'],
+    'Монет пока нет': ['No coins yet', 'Ҳоло танга нест'], 'Купите первую монету на экране «Рынок».': ['Buy your first coin on the Market screen.', 'Тангаи аввалро дар экрани «Бозор» харед.'], 'Открыть рынок': ['Open market', 'Кушодани бозор'],
+    'Покупка': ['Buy', 'Харид'], 'Продажа': ['Sell', 'Фурӯш'], 'Сделок пока нет': ['No trades yet', 'Ҳоло савдо нест'], 'Здесь появятся ваши покупки и продажи.': ['Your buys and sells will appear here.', 'Харид ва фурӯшҳои шумо дар ин ҷо пайдо мешаванд.'],
+    // Создание монеты
+    '← Профиль': ['← Profile', '← Профил'], 'Картинка': ['Image', 'Расм'], 'Картинка монеты': ['Coin image', 'Расми танга'], 'Выбрать файл': ['Choose file', 'Интихоби файл'], 'Название': ['Name', 'Ном'], 'Тикер': ['Ticker', 'Тикер'],
+    'Например, Tilla': ['For example, Tilla', 'Масалан, Tilla'], 'Например, TILLA': ['For example, TILLA', 'Масалан, TILLA'], 'Описание (необязательно)': ['Description (optional)', 'Тавсиф (ихтиёрӣ)'], 'Коротко о монете': ['A few words about the coin', 'Мухтасар дар бораи танга'], 'Ссылка на соцсеть (необязательно)': ['Social link (optional)', 'Пайванд ба шабакаи иҷтимоӣ (ихтиёрӣ)'],
+    'Данные монеты нельзя изменить после создания.': ['Coin data cannot be changed after creation.', 'Маълумоти тангаро пас аз сохтан иваз кардан мумкин нест.'],
+    'Демо: монета появится только в этом браузере, в блокчейне её не будет. Для настоящего выпуска нужен смарт-контракт с аудитом.': ['Demo: the coin will exist only in this browser, not on the blockchain. A real launch needs an audited smart contract.', 'Демо: танга танҳо дар ҳамин браузер пайдо мешавад, дар блокчейн намешавад. Барои барориши воқеӣ смарт-контракт бо аудит лозим аст.'],
+    'Название: от 2 до 32 знаков': ['Name: 2 to 32 characters', 'Ном: аз 2 то 32 аломат'], 'Тикер: от 2 до 10 латинских букв или цифр': ['Ticker: 2 to 10 Latin letters or digits', 'Тикер: аз 2 то 10 ҳарфи лотинӣ ё рақам'], 'Монета с таким тикером уже есть': ['A coin with this ticker already exists', 'Танга бо чунин тикер аллакай ҳаст'],
+    'Ссылка должна начинаться с https://': ['The link must start with https://', 'Пайванд бояд бо https:// оғоз шавад'], 'Выберите картинку': ['Choose an image', 'Расмро интихоб кунед'], 'Файл больше 15 МБ': ['The file is larger than 15 MB', 'Файл аз 15 МБ калонтар аст'], 'Не удалось прочитать файл': ['Could not read the file', 'Файл хонда нашуд'], 'Этот файл не открывается как картинка': ['This file cannot be opened as an image', 'Ин файл ҳамчун расм кушода намешавад'],
+    // Реклама
+    'Демо: оплата не списывается, объявление видно только в этом браузере. Для настоящей рекламы нужен сервер с приёмом оплаты и проверкой объявлений.': ['Demo: nothing is charged and the ad is visible only in this browser. Real advertising needs a server that takes payment and reviews ads.', 'Демо: пардохт гирифта намешавад, эълон танҳо дар ҳамин браузер дида мешавад. Барои рекламаи воқеӣ сервер бо қабули пардохт ва санҷиши эълонҳо лозим аст.'],
+    'Доход площадки (демо)': ['Platform income (demo)', 'Даромади платформа (демо)'], 'Новая кампания': ['New campaign', 'Маъракаи нав'], 'Заголовок (до 40 знаков)': ['Headline (up to 40 characters)', 'Сарлавҳа (то 40 аломат)'], 'Текст (до 90 знаков)': ['Text (up to 90 characters)', 'Матн (то 90 аломат)'],
+    'Ссылка': ['Link', 'Пайванд'], 'Место показа': ['Placement', 'Ҷойи намоиш'], 'Дней (1–30)': ['Days (1–30)', 'Рӯз (1–30)'], 'Так объявление увидят пользователи': ['How users will see the ad', 'Корбарон эълонро чунин мебинанд'],
+    'Заголовок объявления': ['Ad headline', 'Сарлавҳаи эълон'], 'Текст объявления': ['Ad text', 'Матни эълон'], 'Стоимость кампании': ['Campaign cost', 'Арзиши маърака'], 'Запустить кампанию': ['Start campaign', 'Оғози маърака'],
+    'Объявления помечаются словом «Реклама». Запрещены обещания дохода, обман и чужие товарные знаки.': ['Ads are labelled “Ad”. Promises of income, deception and other people’s trademarks are not allowed.', 'Эълонҳо бо калимаи «Реклама» қайд мешаванд. Ваъдаи даромад, фиреб ва тамғаҳои молии бегона манъ аст.'],
+    'Мои кампании': ['My campaigns', 'Маъракаҳои ман'], 'Кампаний пока нет': ['No campaigns yet', 'Ҳоло маърака нест'], 'Создайте первую кампанию в форме выше.': ['Create your first campaign in the form above.', 'Маъракаи аввалро дар шакли боло созед.'], 'Пауза': ['Pause', 'Таваққуф'], 'Запустить': ['Resume', 'Оғоз'], 'Кампания запущена': ['Campaign started', 'Маърака оғоз шуд'],
+    'Заголовок: от 3 до 40 знаков': ['Headline: 3 to 40 characters', 'Сарлавҳа: аз 3 то 40 аломат'], 'Текст: от 5 до 90 знаков': ['Text: 5 to 90 characters', 'Матн: аз 5 то 90 аломат'], 'Выберите место показа': ['Choose a placement', 'Ҷойи намоишро интихоб кунед'], 'Срок: от 1 до 30 дней': ['Duration: 1 to 30 days', 'Мӯҳлат: аз 1 то 30 рӯз'],
+    'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
+    'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
+    'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
+    // Приглашения
+    'Демо: ссылка и код работают как образец. Начисления появятся после запуска сервера, который считает сделки приглашённых.': ['Demo: the link and code are samples. Earnings will appear after the server that counts invited users’ trades is launched.', 'Демо: пайванд ва код ҳамчун намуна кор мекунанд. Ҳисобкунӣ пас аз оғози сервере, ки савдоҳои даъватшудагонро ҳисоб мекунад, пайдо мешавад.'],
+    'Ваш код': ['Your code', 'Коди шумо'], 'Ваша ссылка': ['Your link', 'Пайванди шумо'], 'Скопировать ссылку': ['Copy link', 'Нусхабардории пайванд'], 'Ссылка скопирована': ['Link copied', 'Пайванд нусхабардорӣ шуд'], 'Ссылка выделена — скопируйте её': ['The link is selected — copy it', 'Пайванд интихоб шуд — онро нусхабардорӣ кунед'],
+    'Приглашено': ['Invited', 'Даъватшуда'], 'Заработано': ['Earned', 'Ба даст омада'], 'Ваша доля': ['Your share', 'Ҳиссаи шумо'], '20% комиссии': ['20% of fees', '20% комиссия'], 'Как это будет работать': ['How it will work', 'Ин чӣ гуна кор мекунад'],
+    'Друг открывает Membuy по вашей ссылке и подключает кошелёк.': ['A friend opens Membuy with your link and connects a wallet.', 'Дӯстатон Membuy-ро бо пайванди шумо мекушояд ва ҳамёнро пайваст мекунад.'], '20% этой комиссии начисляется вам.': ['20% of that fee goes to you.', '20% ин комиссия ба шумо дода мешавад.'],
+    // Настройки
+    'Имя (латиница, цифры, _)': ['Name (Latin letters, digits, _)', 'Ном (ҳарфҳои лотинӣ, рақамҳо, _)'], 'О себе': ['About you', 'Дар бораи худ'], 'Сделки': ['Trades', 'Савдоҳо'], 'Проскальзывание по умолчанию': ['Default slippage', 'Лағжиши пешфарз'], 'Уведомления о сделках': ['Trade notifications', 'Огоҳиҳо дар бораи савдо'],
+    'Режим': ['Mode', 'Реҷа'], 'Демо: учебные монеты и сделки.': ['Demo: practice coins and trades.', 'Демо: тангаҳо ва савдоҳои омӯзишӣ.'], 'Живой режим: настоящие сделки.': ['Live mode: real trades.', 'Реҷаи воқеӣ: савдоҳои ҳақиқӣ.'],
+    'Сбросить демо-счёт': ['Reset demo account', 'Аз нав кардани ҳисоби демо'], 'Удалить все демо-данные?': ['Delete all demo data?', 'Ҳамаи маълумоти демо нест карда шавад?'], 'Да, сбросить': ['Yes, reset', 'Ҳа, аз нав кун'], 'Демо-счёт сброшен': ['Demo account reset', 'Ҳисоби демо аз нав шуд'],
+    'Профиль сохранён': ['Profile saved', 'Профил нигоҳ дошта шуд'], 'Имя: 3–20 латинских букв, цифр или _': ['Name: 3–20 Latin letters, digits or _', 'Ном: 3–20 ҳарфи лотинӣ, рақам ё _'],
+    // Поиск и уведомления
+    'Просмотренные недавно': ['Recently viewed', 'Ба наздикӣ дидашуда'], 'Очистить': ['Clear', 'Тоза кардан'], 'Пока пусто': ['Nothing yet', 'Ҳоло холӣ'], 'Здесь появятся монеты, которые вы открывали.': ['Coins you open will appear here.', 'Тангаҳое, ки шумо мекушоед, дар ин ҷо пайдо мешаванд.'],
+    'Уведомлений нет': ['No notifications', 'Огоҳӣ нест'], 'Здесь появятся сообщения о сделках и кампаниях.': ['Messages about trades and campaigns will appear here.', 'Паёмҳо дар бораи савдо ва маъракаҳо дар ин ҷо пайдо мешаванд.'],
+    // Демо-содержимое: описания монет и посты
+    'Пёс, который охраняет казан. Монета сообщества любителей плова.': ['The dog that guards the cauldron. A community coin for plov lovers.', 'Саге, ки дегро посбонӣ мекунад. Тангаи ҷомеаи дӯстдорони оши палав.'],
+    'Кот, который ворует самсу прямо из тандыра.': ['The cat that steals samsa straight from the tandoor.', 'Гурбае, ки самбӯсаро рост аз танӯр медуздад.'], 'Самый спокойный як Памира. Держит и не продаёт.': ['The calmest yak in the Pamirs. Holds and never sells.', 'Оромтарин қӯтоси Помир. Нигоҳ медорад ва намефурӯшад.'],
+    'Лягушка из чайханы. Пьёт зелёный чай и не торопится.': ['The frog from the chaikhana. Drinks green tea and takes its time.', 'Қурбоққа аз чойхона. Чойи кабуд менӯшад ва шитоб намекунад.'], 'Дракон длиной в одну лапшу.': ['A dragon one noodle long.', 'Аждаҳое ба дарозии як лағмон.'],
+    'Маленький, солёный, твёрдый. Как рынок.': ['Small, salty, hard. Like the market.', 'Хурд, шӯр, сахт. Мисли бозор.'], 'Обезьянка, которая нашла первый самородок. «Тилло» — золото.': ['The little monkey that found its first nugget. “Tillo” means gold.', 'Маймунчае, ки аввалин порчаи тиллоро ёфт.'],
+    'Медведь, который знает, где лучший ош.': ['The bear that knows where the best osh is.', 'Хирсе, ки медонад беҳтарин ош дар куҷост.'], 'Росток сумалака. Растёт раз в год, зато сильно.': ['A sumalak sprout. Grows once a year, but strongly.', 'Сабзаи суманак. Дар як сол як бор мерӯяд, вале бо қувват.'],
+    'Играет на дутаре, пока график падает.': ['Plays the dutar while the chart falls.', 'То вақте ки график меафтад, дутор менавозад.'], 'Кит, который пьёт только кок-чай.': ['The whale that drinks only green tea.', 'Наҳанге, ки танҳо чойи кабуд менӯшад.'], 'Младший брат Samsa Cat. Очень маленький.': ['Samsa Cat’s little brother. Very small.', 'Бародари хурдии Samsa Cat. Хеле хурд.'],
+    'Держу и не дёргаюсь. Казан большой, всем хватит.': ['Holding and staying calm. The cauldron is big, there is enough for everyone.', 'Нигоҳ медорам ва ором ҳастам. Дег калон аст, ба ҳама мерасад.'], 'Нашёл рано. Посмотрим, куда дойдёт.': ['Found it early. Let’s see how far it goes.', 'Барвақт ёфтам. Мебинем, то куҷо мерасад.'],
+    'Спокойная монета для спокойных людей.': ['A calm coin for calm people.', 'Тангаи ором барои одамони ором.'], 'Зашёл маленькой суммой. Объём растёт.': ['Entered with a small amount. Volume is growing.', 'Бо маблағи хурд даромадам. Ҳаҷм меафзояд.'], 'Сезонная история, но график красивый.': ['A seasonal story, but the chart is beautiful.', 'Қиссаи мавсимӣ, аммо график зебост.'],
+    'Вышел наполовину, остальное оставил.': ['Sold half, kept the rest.', 'Нисфашро фурӯхтам, боқимондаро нигоҳ доштам.'], 'Ошибся со входом. Фиксирую убыток и иду дальше.': ['Got the entry wrong. Taking the loss and moving on.', 'Дар вуруд хато кардам. Зарарро қабул мекунам ва пеш меравам.'],
+    'Самый честный график на рынке за неделю.': ['The most honest chart on the market this week.', 'Ростқавлтарин график дар бозор дар ин ҳафта.'], 'Кит не спит. Ликвидность хорошая.': ['The whale is awake. Liquidity is good.', 'Наҳанг бедор аст. Ликвидият хуб аст.'], 'Музыка играет, график падает. Жду.': ['The music plays, the chart falls. Waiting.', 'Мусиқӣ менавозад, график меафтад. Интизорам.'],
+  };
+  // Шаблоны: [регулярное выражение, English, Тоҷикӣ]
+  const R = [
+    [/^Куплено (.+) за (.+)$/, 'Bought $1 for $2', 'Харида шуд: $1 ба $2'], [/^Продано (.+) за (.+)$/, 'Sold $1 for $2', 'Фурӯхта шуд: $1 ба $2'],
+    [/^Куплено (.+)$/, 'Bought $1', 'Харида шуд: $1'], [/^Продано (.+)$/, 'Sold $1', 'Фурӯхта шуд: $1'],
+    [/^Купить (.+)$/, 'Buy $1', 'Харидани $1'], [/^Продать (.+)$/, 'Sell $1', 'Фурӯхтани $1'],
+    [/^Монета (.+) создана$/, 'Coin $1 created', 'Тангаи $1 сохта шуд'], [/^Кампания «(.+)» запущена$/, 'Campaign “$1” started', 'Маъракаи «$1» оғоз шуд'],
+    [/^из (\d+)$/, 'of $1', 'аз $1'], [/^Сумма, (.+)$/, 'Amount, $1', 'Маблағ, $1'], [/^График цены (.+)$/, '$1 price chart', 'Графики нархи $1'], [/^Уведомления: новых (\d+)$/, 'Notifications: $1 new', 'Огоҳиҳо: $1 нав'],
+  ];
+  // Фрагменты внутри составных строк: [русский, English, Тоҷикӣ]. Длинные раньше коротких.
+  const F = [
+    ['С каждой его сделки площадка берёт комиссию', 'The platform takes a fee on each of their trades:', 'Аз ҳар савдои ӯ платформа комиссия мегирад:'], ['подключите кошелёк', 'connect a wallet', 'ҳамёнро пайваст кунед'], ['при капитализации', 'at market cap', 'бо капитализатсияи'],
+    ['Комиссия Membuy', 'Membuy fee', 'Комиссияи Membuy'], ['идёт, осталось', 'running, left:', 'фаъол, боқӣ:'], ['— моя позиция', '— my position', '— мавқеи ман'], ['В списке монет', 'In the coin list', 'Дар рӯйхати тангаҳо'],
+    ['Без описания', 'No bio', 'Бе тавсиф'], ['SOL свободно', 'SOL free', 'SOL озод'], ['Ваше место:', 'Your rank:', 'Ҷойи шумо:'], ['Ваш отряд:', 'Your squad:', 'Дастаи шумо:'], ['Участников:', 'Members:', 'Аъзо:'], ['1 участник', '1 member', '1 аъзо'],
+    ['· Переходы:', '· Clicks:', '· Гузариш:'], ['Просмотры:', 'Views:', 'Тамошо:'], ['Результат:', 'Result:', 'Натиҷа:'], ['Подписки:', 'Following:', 'Обунаҳо:'], ['· Постов:', '· Posts:', '· Постҳо:'], ['· Отряд:', '· Squad:', '· Даста:'],
+    ['Доступно:', 'Available:', 'Дастрас:'], ['дн. назад', 'd ago', 'рӯз пеш'], ['мин назад', 'min ago', 'дақ пеш'], ['ч назад', 'h ago', 'соат пеш'], ['на паузе', 'paused', 'дар таваққуф'], ['В ленте', 'In the feed', 'Дар лента'],
+    ['Показы:', 'Impressions:', 'Намоиш:'], ['· кап.', '· mcap', '· кап.'], ['в день', 'per day', 'дар як рӯз'], ['· по ', '· at ', '· бо нархи '], ['(вы)', '(you)', '(шумо)'], ['дн.', 'd', 'рӯз'],
+  ];
+  const cyr = /[А-Яа-яЁёҚқҒғҲҳҶҷӢӣӮӯ]/, misses = new Set();
+  /** Переводит строку. exactOnly — только точные совпадения (для текста, который пишут пользователи). */
+  function tr(s, exactOnly) {
+    if (lang === 'ru' || typeof s !== 'string') return s;
+    const m = s.match(/^([\s ]*)([\s\S]*?)([\s ]*)$/), core = m[2]; if (!core || !cyr.test(core)) return s;
+    const i = idx(), d = D[core]; if (d) return m[1] + d[i] + m[3];
+    if (exactOnly) return s;
+    for (const r of R) if (r[0].test(core)) return m[1] + core.replace(r[0], r[i + 1]) + m[3];
+    let out = core, hit = false; for (const f of F) if (out.includes(f[0])) { out = out.split(f[0]).join(f[i + 1]); hit = true; }
+    // В список непереведённого не попадают числа с единицами и инициалы на аватарах
+    if (!hit && !/^[\d\s$+−.,%≈#()·:-]*(тыс\.|млн|млрд|ҳаз\.)?$/.test(core) && !/^[А-ЯЁ]{1,2}$/.test(core)) misses.add(core);
+    return m[1] + out + m[3];
+  }
+  const ATTRS = ['placeholder', 'title', 'aria-label', 'alt'], UGC = '.pt2, .ad .nm, .about p, .thead h1, .prof h1, .camp .nm b';
+  function node(n) {
+    if (n.nodeType === 3) {
+      if (n.__out !== n.nodeValue) n.__src = n.nodeValue;   // текст изменило приложение — запоминаем исходник
+      const p = n.parentElement; if (!p || /^(SCRIPT|STYLE)$/.test(p.tagName) || p.closest('[data-lang]')) return;   // названия языков не переводим
+      const out = tr(n.__src, !!p.closest(UGC)); n.__out = out; if (out !== n.nodeValue) n.nodeValue = out;
+    } else if (n.nodeType === 1) {
+      if (/^(SCRIPT|STYLE)$/.test(n.tagName)) return;
+      for (const a of ATTRS) if (n.hasAttribute(a)) { const st = n.__attr = n.__attr || {}, v = n.getAttribute(a); if (!st[a] || st[a].out !== v) st[a] = { src: v }; const out = tr(st[a].src); st[a].out = out; if (out !== v) n.setAttribute(a, out); }
+      n.childNodes.forEach(node);
+    }
+  }
+  let obs = null;
+  return {
+    LANGS, misses, t: s => tr(s), get lang() { return lang; },
+    /** Локаль для чисел и дат. Для таджикского используется русская запись чисел. */
+    locale: () => (lang === 'en' ? 'en-US' : 'ru-RU'),
+    units: () => (lang === 'en' ? ['K', 'M', 'B'] : lang === 'tg' ? [' ҳаз.', ' млн', ' млрд'] : [' тыс.', ' млн', ' млрд']),
+    set(l) { if (!LANGS.some(x => x[0] === l) || l === lang) return; lang = l; try { localStorage.setItem(KEY, l); } catch (e) { /* игнорируем */ } document.documentElement.lang = l; MB.util.bus.emit('lang', l); node(document.body); },
+    /** Запускает перевод страницы и слежение за изменениями. */
+    start() { document.documentElement.lang = lang; node(document.body); obs = new MutationObserver(list => { for (const m of list) { if (m.type === 'childList') m.addedNodes.forEach(node); else node(m.target); } }); obs.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS }); },
+  };
+})();
+MB.t = MB.i18n.t;
+
+/* Общие помощники: форматирование, события, экранирование. */
+MB.util = (() => {
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const price = p => {
+    if (!isFinite(p) || p <= 0) return '$0';
+    if (p >= 1) return '$' + p.toLocaleString(MB.i18n.locale(), { maximumFractionDigits: 2 });
+    const d = Math.min(10, Math.max(4, 3 - Math.floor(Math.log10(p))));
+    return '$' + p.toFixed(d);
+  };
+  const usd = v => {
+    const a = Math.abs(v), s = v < 0 ? '−' : '';
+    const [k, mn, b] = MB.i18n.units();
+    if (a >= 1e9) return s + '$' + (a / 1e9).toFixed(2) + b;
+    if (a >= 1e6) return s + '$' + (a / 1e6).toFixed(2) + mn;
+    if (a >= 1e3) return s + '$' + (a / 1e3).toFixed(1) + k;
+    return s + '$' + a.toFixed(2);
+  };
+  const num = (v, d = 2) => Number(v).toLocaleString(MB.i18n.locale(), { maximumFractionDigits: d });
+  const pct = v => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%';
+  const short = a => a.length > 10 ? a.slice(0, 4) + '…' + a.slice(-4) : a;
+  const bus = { h: {}, on(e, f) { (this.h[e] = this.h[e] || []).push(f); }, off(e, f) { this.h[e] = (this.h[e] || []).filter(x => x !== f); }, emit(e, d) { (this.h[e] || []).forEach(f => f(d)); } };
+  const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  /** Читает файл-картинку, обрезает до квадрата size×size и возвращает data-URL (JPEG). */
+  const squareImage = (file, size = 96) => new Promise((ok, bad) => {
+    if (!file || !/^image\//.test(file.type)) return bad(new Error('Выберите картинку'));
+    if (file.size > 15 * 1024 * 1024) return bad(new Error('Файл больше 15 МБ'));
+    const fr = new FileReader(); fr.onerror = () => bad(new Error('Не удалось прочитать файл'));
+    fr.onload = () => { const img = new Image(); img.onerror = () => bad(new Error('Этот файл не открывается как картинка'));
+      img.onload = () => { const c = document.createElement('canvas'); c.width = c.height = size; const g = c.getContext('2d'), s = Math.min(img.width, img.height); g.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size); ok(c.toDataURL('image/jpeg', 0.82)); };
+      img.src = fr.result; };
+    fr.readAsDataURL(file);
+  });
+  return { esc, price, usd, num, pct, short, bus, rng, squareImage };
+})();
+
+/* Состояние приложения: кошелёк, позиции, история. В демо хранится в localStorage этого браузера. */
+MB.store = (() => {
+  const KEY = MB.config.MODE === 'live' ? 'membuy-live-v1' : 'membuy-demo-v1';
+  const fresh = () => ({
+    wallet: { connected: false, address: '', sol: 0 }, holdings: {}, trades: [], slippageBps: MB.config.DEFAULT_SLIPPAGE_BPS,
+    profile: { name: 'trader' + Math.floor(1000 + Math.random() * 9000), bio: '', avatar: '' }, following: [], liked: [], myPosts: [], squad: null,
+    campaigns: [], adStats: {}, coins: [], recent: [], notes: [], unread: 0, equity: [], notify: true, fav: [], chartType: 'line',
+  });
+  let state = fresh();
+  try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.wallet) state = Object.assign(fresh(), s); if (MB.config.MODE === 'live') state.wallet = { connected: false, address: '', sol: 0 }; } catch (e) { /* хранилище недоступно — работаем в памяти */ }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* игнорируем */ } };
+  return {
+    get: () => state,
+    set(patch) { Object.assign(state, patch); save(); MB.util.bus.emit('state', state); },
+    reset() { state = fresh(); save(); MB.util.bus.emit('state', state); },
+    /** Меняет состояние функцией и сохраняет. silent=true — без перерисовки экранов. */
+    update(fn, silent) { fn(state); save(); if (!silent) MB.util.bus.emit('state', state); },
+    note(text) { if (!state.notify) return; state.notes.unshift({ text, ts: Date.now() }); state.notes = state.notes.slice(0, 30); state.unread++; save(); },
+    /** Записывает исполненную сделку и обновляет позицию по средней цене. */
+    applyTrade(t) {
+      const h = state.holdings[t.id] || { qty: 0, costUsd: 0, sym: t.sym, name: t.name };
+      if (t.side === 'buy') { h.qty += t.tokens; h.costUsd += t.usd; state.wallet.sol -= t.sol; }
+      else { const part = Math.min(1, t.tokens / h.qty); h.costUsd -= h.costUsd * part; h.qty -= t.tokens; state.wallet.sol += t.sol; }
+      if (h.qty <= 1e-9) delete state.holdings[t.id]; else state.holdings[t.id] = h;
+      state.trades.unshift(t); state.trades = state.trades.slice(0, 100); this.note((t.side === 'buy' ? 'Куплено ' : 'Продано ') + MB.util.num(t.tokens, 2) + ' ' + t.sym); save(); MB.util.bus.emit('state', state);
+    },
+  };
+})();
+
+/* Демо-поставщик данных: выдуманные монеты, цены двигаются случайно. Интерфейс тот же, что у live.js. */
+MB.providers = MB.providers || {};
+MB.providers.demo = (() => {
+  const raw = [
+    ['PLOV', 'Plov Inu', 0.00042, 4.2e6, 38, 2, 'Пёс, который охраняет казан. Монета сообщества любителей плова.'],
+    ['SAMSA', 'Samsa Cat', 0.0000081, 8.1e5, 12, 1, 'Кот, который ворует самсу прямо из тандыра.'],
+    ['YAK', 'Pamir Yak', 0.0127, 1.27e7, 5, 41, 'Самый спокойный як Памира. Держит и не продаёт.'],
+    ['CHAI', 'Chai Frog', 0.00000312, 3.1e5, 96, 0, 'Лягушка из чайханы. Пьёт зелёный чай и не торопится.'],
+    ['LAGMAN', 'Lagman Dragon', 0.00191, 1.9e6, -14, 9, 'Дракон длиной в одну лапшу.'],
+    ['KURUT', 'Kurut Ball', 0.000064, 6.4e5, -31, 3, 'Маленький, солёный, твёрдый. Как рынок.'],
+    ['TILLA', 'Tilla', 0.0000231, 2.3e5, 210, 0, 'Обезьянка, которая нашла первый самородок. «Тилло» — золото.'],
+    ['OSH', 'Osh Bear', 0.0052, 5.2e6, 7, 17, 'Медведь, который знает, где лучший ош.'],
+    ['NAVRUZ', 'Navruz Sprout', 0.00078, 7.8e5, 64, 4, 'Росток сумалака. Растёт раз в год, зато сильно.'],
+    ['DUTAR', 'Dutar Monkey', 0.000118, 1.18e6, -6, 6, 'Играет на дутаре, пока график падает.'],
+    ['KOK', 'Kok Chai Whale', 0.0331, 3.3e7, 2, 88, 'Кит, который пьёт только кок-чай.'],
+    ['SOMSA', 'Mini Somsa', 0.00000094, 9.4e4, -52, 1, 'Младший брат Samsa Cat. Очень маленький.'],
+  ];
+  const tokens = raw.map(([sym, name, price, mc, chg, ageDays, desc], k) => {
+    const r = MB.util.rng(1000 + k * 77), n = 168, series = []; let p = price / (1 + chg / 100);
+    for (let i = 0; i < n; i++) { const drift = (price - p) / (n - i) * 0.9; p = Math.max(price * 0.05, p + drift + (r() - 0.5) * price * 0.06); series.push(p); }
+    series[n - 1] = price;
+    return { id: sym, sym, name, desc, mint: 'DEMO' + sym, price, mc, supply: mc / price, vol24: mc * (0.08 + r() * 0.5), chg24: chg, ageDays, holders: Math.round(200 + r() * mc / 900), liquidityUsd: mc * 0.12, hue: Math.round(r() * 360), series };
+  });
+  /** Собирает монету, созданную пользователем в демо-режиме. */
+  const build = c => { const price = 0.000004, n = 168, rr = MB.util.rng(c.seed), series = []; for (let i = 0; i < n; i++) series.push(price * (0.97 + rr() * 0.06)); series[n - 1] = price;
+    return { id: c.sym, sym: c.sym, name: c.name, desc: c.desc, mint: 'DEMO' + c.sym, price, mc: 4000, supply: 1e9, vol24: 600, chg24: 0, ageDays: (Date.now() - c.ts) / 864e5, holders: 1, liquidityUsd: 2400, hue: c.seed % 360, series, icon: c.icon, mine: true, links: c.links }; };
+  MB.store.get().coins.forEach(c => tokens.push(build(c)));
+  const r = MB.util.rng(42); let timer = null;
+  const tick = () => {
+    tokens.forEach(t => {
+      const step = (r() - 0.49) * 0.018; t.price = Math.max(t.price * 0.2, t.price * (1 + step));
+      t.series.push(t.price); t.series.shift(); t.mc = t.price * t.supply; t.chg24 = (t.price / t.series[t.series.length - 25] - 1) * 100;
+    });
+    MB.util.bus.emit('tick');
+  };
+  const sorters = { fav: (a, b) => b.vol24 - a.vol24, trend: (a, b) => b.vol24 / b.mc - a.vol24 / a.mc, fresh: (a, b) => a.ageDays - b.ageDays, gain: (a, b) => b.chg24 - a.chg24, vol: (a, b) => b.vol24 - a.vol24 };
+  return {
+    start() { if (!timer) timer = setInterval(tick, 2500); },
+    async list(filter = 'trend', q = '') { const s = q.trim().toLowerCase(), fav = MB.store.get().fav; return tokens.filter(t => filter !== 'fav' || fav.includes(t.id)).filter(t => !s || t.sym.toLowerCase().includes(s) || t.name.toLowerCase().includes(s)).sort(sorters[filter] || sorters.trend); },
+    async get(id) { return tokens.find(t => t.id === id) || null; },
+    async series(id, tf) { const t = tokens.find(x => x.id === id); if (!t) return []; return tf === '1h' ? t.series.slice(-24) : tf === '1d' ? t.series.slice(-72) : t.series; },
+    /** Свечи из ряда цен: tf 1h — по 1 точке на свечу, 1d — по 2, 1w — по 4. Тени детерминированы номером свечи. */
+    async candles(id, tf) {
+      const t = tokens.find(x => x.id === id); if (!t) return []; const g = tf === '1h' ? 1 : tf === '1d' ? 2 : 4, n = tf === '1h' ? 24 : tf === '1d' ? 72 : 168, s = t.series.slice(-n - 1), out = [];
+      for (let i = 1; i < s.length; i += g) { const part = s.slice(i, i + g), o = s[i - 1], c = part[part.length - 1], rr = MB.util.rng(t.hue * 1000 + i + s.length), w = Math.abs(c - o) * 0.6 + c * 0.004; out.push({ o, c, h: Math.max(o, c, ...part) + rr() * w, l: Math.max(c * 0.01, Math.min(o, c, ...part) - rr() * w) }); }
+      return out;
+    },
+    solUsd: async () => MB.config.SOL_USD_DEMO,
+    has: sym => tokens.some(t => t.sym.toLowerCase() === sym.toLowerCase()),
+    add(c) { const t = build(c); tokens.push(t); return t; },
+    all: () => tokens,
+  };
+})();
+
+/* Живой поставщик: DexScreener (список, цены) + GeckoTerminal (история цены). Сеть Solana.
+   ВНИМАНИЕ: написан по публичной документации API и не проверен в боевом режиме. */
+MB.providers = MB.providers || {};
+MB.providers.live = (() => {
+  const C = MB.config, cache = new Map(); let timer = null, solUsd = 0;
+  const j = async url => { const r = await fetch(url); if (!r.ok) throw new Error('Сеть: ' + r.status); return r.json(); };
+  const fromPair = p => ({
+    id: p.baseToken.address, sym: p.baseToken.symbol, name: p.baseToken.name, desc: '', mint: p.baseToken.address, pool: p.pairAddress,
+    price: +p.priceUsd || 0, mc: p.marketCap || p.fdv || 0, supply: (p.marketCap || p.fdv || 0) / (+p.priceUsd || 1), vol24: (p.volume && p.volume.h24) || 0,
+    chg24: (p.priceChange && p.priceChange.h24) || 0, ageDays: p.pairCreatedAt ? (Date.now() - p.pairCreatedAt) / 864e5 : 0, holders: null,
+    liquidityUsd: (p.liquidity && p.liquidity.usd) || 0, hue: parseInt(p.baseToken.address.slice(0, 3), 36) % 360, series: [], icon: p.info && p.info.imageUrl,
+  });
+  const best = pairs => (pairs || []).filter(p => p.chainId === 'solana').sort((a, b) => ((b.liquidity && b.liquidity.usd) || 0) - ((a.liquidity && a.liquidity.usd) || 0))[0];
+  const sorters = { trend: (a, b) => b.vol24 - a.vol24, fresh: (a, b) => a.ageDays - b.ageDays, gain: (a, b) => b.chg24 - a.chg24, vol: (a, b) => b.vol24 - a.vol24 };
+  async function trending() {
+    const boosts = await j(C.DEX_API + '/token-boosts/top/v1');
+    const mints = [...new Set(boosts.filter(b => b.chainId === 'solana').map(b => b.tokenAddress))].slice(0, 30);
+    if (!mints.length) return [];
+    const d = await j(C.DEX_API + '/latest/dex/tokens/' + mints.join(','));
+    const by = {}; (d.pairs || []).forEach(p => { (by[p.baseToken.address] = by[p.baseToken.address] || []).push(p); });
+    return Object.values(by).map(best).filter(Boolean).map(fromPair);
+  }
+  return {
+    start() { if (!timer) timer = setInterval(() => MB.util.bus.emit('refresh'), 15000); },
+    async list(filter = 'trend', q = '') {
+      let out;
+      if (q.trim()) { const d = await j(C.DEX_API + '/latest/dex/search?q=' + encodeURIComponent(q.trim())); const by = {}; (d.pairs || []).filter(p => p.chainId === 'solana').forEach(p => { (by[p.baseToken.address] = by[p.baseToken.address] || []).push(p); }); out = Object.values(by).map(best).map(fromPair); }
+      else out = await trending();
+      out.forEach(t => cache.set(t.id, t)); if (filter === 'fav') { const fav = MB.store.get().fav; out = out.filter(t => fav.includes(t.id)); }
+      return out.sort(sorters[filter] || sorters.trend);
+    },
+    async get(id) { const d = await j(C.DEX_API + '/latest/dex/tokens/' + id); const p = best(d.pairs); if (!p) return cache.get(id) || null; const t = fromPair(p); cache.set(id, t); return t; },
+    async series(id, tf) {
+      const t = cache.get(id) || await this.get(id); if (!t || !t.pool) return [];
+      const [unit, agg, limit] = tf === '1h' ? ['minute', 5, 12] : tf === '1d' ? ['hour', 1, 24] : ['hour', 4, 42];
+      const d = await j(`${C.GECKO_API}/networks/solana/pools/${t.pool}/ohlcv/${unit}?aggregate=${agg}&limit=${limit}`);
+      return ((d.data && d.data.attributes && d.data.attributes.ohlcv_list) || []).map(c => c[4]).reverse();
+    },
+    async candles(id, tf) {
+      const t = cache.get(id) || await this.get(id); if (!t || !t.pool) return [];
+      const [unit, agg, limit] = tf === '1h' ? ['minute', 5, 12] : tf === '1d' ? ['hour', 1, 24] : ['hour', 4, 42];
+      const d = await j(`${C.GECKO_API}/networks/solana/pools/${t.pool}/ohlcv/${unit}?aggregate=${agg}&limit=${limit}`);
+      return ((d.data && d.data.attributes && d.data.attributes.ohlcv_list) || []).map(c => ({ o: c[1], h: c[2], l: c[3], c: c[4] })).reverse();
+    },
+    async solUsd() { if (solUsd) return solUsd; const d = await j(C.DEX_API + '/latest/dex/tokens/' + C.SOL_MINT); const p = best(d.pairs); solUsd = p ? +p.priceUsd : 0; return solUsd; },
+  };
+})();
+
+/* Соцсеть (демо): трейдеры, посты, подписки, рейтинги, отряды. Всё хранится в браузере.
+   Для настоящей соцсети нужен сервер: этот модуль — единственное место, которое придётся заменить. */
+MB.social = (() => {
+  const S = MB.store, R = MB.util.rng(7);
+  const names = ['pamir_whale', 'choyxona_dev', 'samsa_sniper', 'navruz_bull', 'kok_trader', 'dutar_degen', 'oshpaz', 'tilla_hunter', 'yak_holder', 'lagman_long', 'kurut_king', 'plov_master'];
+  const users = names.map((name, k) => ({ name, hue: (k * 47) % 360, followers: Math.round(40 + R() * 4000), pnl: { d: Math.round((R() - 0.25) * 9000), w: Math.round((R() - 0.2) * 42000), m: Math.round((R() - 0.15) * 160000) } }));
+  const texts = [['PLOV', 'Держу и не дёргаюсь. Казан большой, всем хватит.'], ['TILLA', 'Нашёл рано. Посмотрим, куда дойдёт.'], ['YAK', 'Спокойная монета для спокойных людей.'], ['CHAI', 'Зашёл маленькой суммой. Объём растёт.'], ['NAVRUZ', 'Сезонная история, но график красивый.'], ['SAMSA', 'Вышел наполовину, остальное оставил.'], ['LAGMAN', 'Ошибся со входом. Фиксирую убыток и иду дальше.'], ['OSH', 'Самый честный график на рынке за неделю.'], ['KOK', 'Кит не спит. Ликвидность хорошая.'], ['DUTAR', 'Музыка играет, график падает. Жду.']];
+  const now = Date.now(); let seq = 1;
+  const posts = texts.map(([coin, text], k) => { const pos = Math.round(30 + R() * 4000), pnl = Math.round((R() - 0.3) * pos * 1.4); return { id: 'p' + seq++, kind: 'post', user: names[k % names.length], text, coin, posUsd: pos, pnlUsd: pnl, likes: Math.round(R() * 60), views: Math.round(200 + R() * 9000), ts: now - (k * 37 + 4) * 6e4 }; });
+  const user = n => users.find(u => u.name === n) || { name: n, hue: 200, followers: 0, pnl: { d: 0, w: 0, m: 0 } };
+  const me = () => S.get().profile.name;
+  let timer = null;
+  function activity() {
+    const toks = MB.providers.demo.all(), t = toks[Math.floor(R() * toks.length)], u = names[Math.floor(R() * names.length)];
+    posts.unshift({ id: 'p' + seq++, kind: 'trade', user: u, coin: t.id, side: R() > 0.3 ? 'buy' : 'sell', usd: Math.round(20 + R() * 900), mc: t.mc, ts: Date.now() });
+    if (posts.length > 60) posts.pop(); MB.util.bus.emit('social');
+  }
+  const squads = [['Памирцы', 14, 26790], ['Чайхана', 9, 21300], ['Тандыр', 16, 18400], ['Навруз', 4, 9800], ['Дутар', 11, 5200]].map(([name, members, pnl]) => ({ name, members, pnl }));
+  return {
+    start() { if (!timer && MB.config.MODE === 'demo') timer = setInterval(activity, 20000); },
+    user, me,
+    feed(tab) {
+      const st = S.get(), all = [...st.myPosts, ...posts].sort((a, b) => b.ts - a.ts);
+      if (tab === 'following') return all.filter(p => st.following.includes(p.user) || p.user === me());
+      if (tab === 'top') return all.filter(p => p.kind === 'post').sort((a, b) => (b.likes + (st.liked.includes(b.id) ? 1 : 0)) - (a.likes + (st.liked.includes(a.id) ? 1 : 0)));
+      return all;
+    },
+    like(id) { S.update(s => { const i = s.liked.indexOf(id); if (i >= 0) s.liked.splice(i, 1); else s.liked.push(id); }); },
+    follow(name) { S.update(s => { const i = s.following.indexOf(name); if (i >= 0) s.following.splice(i, 1); else { s.following.push(name); } }); },
+    publish(text, coin) { const t = text.trim(); if (!t) throw new Error('Напишите текст поста'); if (t.length > 280) throw new Error('Пост длиннее 280 знаков');
+      S.update(s => { s.myPosts.unshift({ id: 'm' + Date.now(), kind: 'post', user: s.profile.name, text: t, coin: coin || null, likes: 0, views: 1, ts: Date.now(), mine: true }); s.myPosts = s.myPosts.slice(0, 50); }); },
+    remove(id) { S.update(s => { s.myPosts = s.myPosts.filter(p => p.id !== id); }); },
+    /** Рейтинг трейдеров за период d | w | m; myPnl — результат пользователя в долларах. */
+    leaders(period, myPnl) { const st = S.get(), rows = users.map(u => ({ name: u.name, hue: u.hue, pnl: u.pnl[period] })); if (st.wallet.connected) rows.push({ name: me(), hue: 40, pnl: Math.round(myPnl), me: true }); return rows.sort((a, b) => b.pnl - a.pnl).map((r, i) => Object.assign(r, { rank: i + 1 })); },
+    squads() { const st = S.get(), rows = squads.slice(); if (st.squad) rows.push({ name: st.squad, members: 1, pnl: 0, mine: true }); return rows.sort((a, b) => b.pnl - a.pnl); },
+    createSquad(name) { const n = name.trim(); if (n.length < 3 || n.length > 20) throw new Error('Название отряда: от 3 до 20 знаков'); S.update(s => { s.squad = n; }); },
+  };
+})();
+
+/* Реклама (демо). Кампании хранятся в браузере, оплата не списывается.
+   Для настоящей рекламы нужен сервер: приём оплаты, модерация объявлений, общий показ всем посетителям. */
+MB.ads = (() => {
+  const S = MB.store;
+  const PLACEMENTS = { feed: { name: 'В ленте', day: 5 }, market: { name: 'В списке монет', day: 8 } };
+  const house = [
+    { id: 'h1', title: 'Исмоил FX — курс Форекс', text: '15 уроков на таджикском: от первой свечи до плана торговли.', link: '', placement: 'any', house: true },
+    { id: 'h2', title: 'Здесь может быть ваша реклама', text: 'Покажите свой проект трейдерам Membuy. От $5 в день.', link: '#ads', placement: 'any', house: true },
+  ];
+  const active = pl => S.get().campaigns.filter(c => c.status === 'active' && c.placement === pl && c.until > Date.now());
+  const safe = url => /^https:\/\/[^\s"'<>]+$/i.test(url);
+  return {
+    PLACEMENTS, safe,
+    /** Объявление для места показа; n — порядковый номер слота (для чередования). */
+    pick(pl, n = 0) { const pool = MB.config.LIVE ? house.filter(a => !a.link.startsWith('#')) : [...active(pl), ...house]; return pool[n % pool.length]; },
+    card(ad) {
+      const { esc } = MB.util; S.update(s => { const a = s.adStats[ad.id] = s.adStats[ad.id] || { views: 0, clicks: 0 }; a.views++; }, true);
+      const inner = `<span class="adtag">Реклама</span><span class="nm"><b>${esc(ad.title)}</b><small>${esc(ad.text)}</small></span>`;
+      if (!ad.link) return `<div class="row ad">${inner}</div>`;
+      const ext = !ad.link.startsWith('#');
+      return `<a class="row ad" data-ad="${esc(ad.id)}" href="${esc(ad.link)}" ${ext ? 'target="_blank" rel="noopener sponsored"' : ''}>${inner}<span class="pr"><b>→</b></span></a>`;
+    },
+    click(id) { S.update(s => { const a = s.adStats[id] = s.adStats[id] || { views: 0, clicks: 0 }; a.clicks++; }, true); },
+    price(pl, days) { return (PLACEMENTS[pl] ? PLACEMENTS[pl].day : 0) * days; },
+    create({ title, text, link, placement, days }) {
+      title = title.trim(); text = text.trim(); link = link.trim(); days = Math.round(+days);
+      if (title.length < 3 || title.length > 40) throw new Error('Заголовок: от 3 до 40 знаков');
+      if (text.length < 5 || text.length > 90) throw new Error('Текст: от 5 до 90 знаков');
+      if (!safe(link)) throw new Error('Ссылка должна начинаться с https://');
+      if (!PLACEMENTS[placement]) throw new Error('Выберите место показа');
+      if (!(days >= 1 && days <= 30)) throw new Error('Срок: от 1 до 30 дней');
+      const c = { id: 'c' + Date.now(), title, text, link, placement, days, total: this.price(placement, days), status: 'active', ts: Date.now(), until: Date.now() + days * 864e5 };
+      S.update(s => { s.campaigns.unshift(c); }); S.note('Кампания «' + title + '» запущена'); return c;
+    },
+    toggle(id) { S.update(s => { const c = s.campaigns.find(x => x.id === id); if (c) c.status = c.status === 'active' ? 'paused' : 'active'; }); },
+    remove(id) { S.update(s => { s.campaigns = s.campaigns.filter(c => c.id !== id); }); },
+    income() { return S.get().campaigns.reduce((a, c) => a + c.total, 0); },
+  };
+})();
+
+/* Кошелёк. Демо: учебный кошелёк с условными SOL. Live: Phantom (ключи остаются у пользователя). */
+MB.wallet = (() => {
+  const C = MB.config, S = MB.store;
+  const rpc = async (method, params) => { const r = await fetch(C.RPC_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) }); const d = await r.json(); if (d.error) throw new Error(d.error.message); return d.result; };
+  const provider = () => (window.phantom && window.phantom.solana) || (window.solana && window.solana.isPhantom ? window.solana : null);
+  return {
+    rpc, provider,
+    async connect() {
+      if (C.MODE === 'demo') { const st = S.get(); S.set({ wallet: { connected: true, address: 'Demo' + 'MB7xQ2kLp9aVn3TzR4', sol: st.wallet.sol || C.DEMO_START_SOL } }); return; }
+      const p = provider(); if (!p) throw new Error('Кошелёк Phantom не найден. Установите Phantom и откройте сайт в его браузере.');
+      const res = await p.connect(); const address = res.publicKey.toString();
+      S.set({ wallet: { connected: true, address, sol: 0 } }); await this.refresh();
+    },
+    /** Живой режим: читает из сети баланс SOL и монет кошелька (обе программы токенов Solana). */
+    async refresh() {
+      if (C.MODE === 'demo') return; const w = S.get().wallet; if (!w.connected) return;
+      const res = await rpc('getBalance', [w.address]), found = {};
+      for (const programId of ['TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb']) {
+        const r = await rpc('getTokenAccountsByOwner', [w.address, { programId }, { encoding: 'jsonParsed' }]).catch(() => ({ value: [] }));
+        for (const a of r.value || []) { const info = a.account.data.parsed.info, qty = info.tokenAmount.uiAmount || 0; if (qty > 0) found[info.mint] = (found[info.mint] || 0) + qty; }
+      }
+      S.update(s => { s.wallet = Object.assign({}, s.wallet, { sol: res.value / 1e9 });
+        const next = {}; for (const [mint, qty] of Object.entries(found)) { const old = s.holdings[mint]; next[mint] = { qty, costUsd: old && old.qty > 0 ? old.costUsd * Math.min(1, qty / old.qty) : 0, sym: old ? old.sym : mint.slice(0, 4), name: old ? old.name : MB.util.short(mint) }; }
+        s.holdings = next; });
+    },
+    async disconnect() { if (C.MODE !== 'demo') { const p = provider(); if (p) await p.disconnect(); } const w = S.get().wallet; S.set({ wallet: { connected: false, address: '', sol: C.MODE === 'demo' ? w.sol : 0 } }); },
+  };
+})();
+
+/* Обмен. quote() считает, сколько получит пользователь; execute() исполняет сделку.
+   Демо: простая модель цены с влиянием на цену. Live: Jupiter (не проверено в боевом режиме). */
+MB.swap = (() => {
+  const C = MB.config, S = MB.store;
+  const feeRate = () => C.PLATFORM_FEE_BPS / 1e4;
+  async function quote({ side, token, amount, slippageBps }) {
+    if (!(amount > 0)) return null;
+    const solUsd = await MB.data.solUsd();
+    if (C.MODE === 'demo') {
+      const usdIn = side === 'buy' ? amount * solUsd : amount * token.price;
+      const impact = Math.min(0.5, usdIn / (token.liquidityUsd * 2)), fee = usdIn * feeRate(), net = (usdIn - fee) * (1 - impact);
+      const out = side === 'buy' ? net / token.price : net / solUsd;
+      return { side, token, amountIn: amount, out, minOut: out * (1 - slippageBps / 1e4), impactPct: impact * 100, feeUsd: fee, usd: usdIn, solUsd, slippageBps };
+    }
+    const dec = await decimals(token.mint), inMint = side === 'buy' ? C.SOL_MINT : token.mint, outMint = side === 'buy' ? token.mint : C.SOL_MINT;
+    const raw = Math.round(amount * 10 ** (side === 'buy' ? 9 : dec));
+    const fee = C.FEE_ACCOUNT ? `&platformFeeBps=${C.PLATFORM_FEE_BPS}` : '';
+    const r = await fetch(`${C.JUP_API}/quote?inputMint=${inMint}&outputMint=${outMint}&amount=${raw}&slippageBps=${slippageBps}${fee}`);
+    if (!r.ok) throw new Error('Не удалось получить котировку');
+    const q = await r.json(), outDec = side === 'buy' ? dec : 9, out = q.outAmount / 10 ** outDec, usdIn = side === 'buy' ? amount * solUsd : amount * token.price;
+    return { side, token, amountIn: amount, out, minOut: q.otherAmountThreshold / 10 ** outDec, impactPct: (+q.priceImpactPct || 0) * 100, feeUsd: C.FEE_ACCOUNT ? usdIn * feeRate() : 0, usd: usdIn, solUsd, slippageBps, raw: q };
+  }
+  const decCache = {};
+  async function decimals(mint) { if (decCache[mint] != null) return decCache[mint]; const res = await MB.wallet.rpc('getTokenSupply', [mint]); return (decCache[mint] = res.value.decimals); }
+  const loadWeb3 = () => window.solanaWeb3 ? Promise.resolve() : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = C.WEB3_CDN; s.onload = ok; s.onerror = () => bad(new Error('Не удалось загрузить библиотеку Solana')); document.head.appendChild(s); });
+  async function execute(q) {
+    const st = S.get(); if (!st.wallet.connected) throw new Error('Сначала подключите кошелёк');
+    const sol = q.side === 'buy' ? q.amountIn : q.out, tokens = q.side === 'buy' ? q.out : q.amountIn;
+    if (q.side === 'buy' && q.amountIn > st.wallet.sol) throw new Error('Недостаточно SOL');
+    let sig = 'demo';
+    if (C.MODE === 'demo') {
+      const h = st.holdings[q.token.id]; if (q.side === 'sell' && (!h || h.qty + 1e-9 < q.amountIn)) throw new Error('Недостаточно монет');
+    } else {
+      await loadWeb3();
+      const body = { quoteResponse: q.raw, userPublicKey: st.wallet.address, dynamicComputeUnitLimit: true }; if (C.FEE_ACCOUNT) body.feeAccount = C.FEE_ACCOUNT;
+      const r = await fetch(`${C.JUP_API}/swap`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      if (!r.ok) throw new Error('Не удалось подготовить сделку');
+      const { swapTransaction } = await r.json(), bytes = Uint8Array.from(atob(swapTransaction), c => c.charCodeAt(0));
+      const tx = window.solanaWeb3.VersionedTransaction.deserialize(bytes);
+      const res = await MB.wallet.provider().signAndSendTransaction(tx); sig = res.signature;
+    }
+    S.applyTrade({ id: q.token.id, sym: q.token.sym, name: q.token.name, side: q.side, sol, tokens, usd: q.usd, price: q.token.price, feeUsd: q.feeUsd, ts: Date.now(), sig });
+    if (C.MODE !== 'demo') [4000, 15000].forEach(ms => setTimeout(() => MB.wallet.refresh().catch(() => {}), ms));
+    return sig;
+  }
+  return { quote, execute };
+})();
+
+/* Графики: спарклайн (SVG) и большой график цены (canvas): линия или свечи, с линией средней цены покупки. */
+MB.chart = {
+  spark(series, up) {
+    const s = series.slice(-32); if (s.length < 2) return '';
+    const lo = Math.min(...s), hi = Math.max(...s), W = 84, H = 30, pts = s.map((v, i) => `${(i / (s.length - 1) * W).toFixed(1)},${(H - 2 - (v - lo) / ((hi - lo) || 1) * (H - 4)).toFixed(1)}`).join(' ');
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="var(--${up ? 'up' : 'down'})" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+  },
+  /** opts: { type: 'line' | 'candle', candles: [{o,h,l,c}], avg: число (средняя цена покупки) } */
+  draw(canvas, series, opts = {}) {
+    const css = getComputedStyle(document.documentElement), col = n => css.getPropertyValue(n).trim();
+    const dpr = window.devicePixelRatio || 1, W = canvas.clientWidth, H = canvas.clientHeight; if (!W || !H) return;
+    canvas.width = W * dpr; canvas.height = H * dpr; const g = canvas.getContext('2d'); g.scale(dpr, dpr); g.clearRect(0, 0, W, H);
+    const cd = opts.type === 'candle' ? (opts.candles || []) : null, vals = cd ? cd.flatMap(c => [c.h, c.l]) : series.slice();
+    if ((cd ? cd.length : series.length) < 2) { g.fillStyle = col('--muted'); g.font = '14px Manrope, sans-serif'; g.fillText(MB.t('Нет данных для графика'), 12, 24); return; }
+    if (opts.avg > 0) vals.push(opts.avg);
+    const lo = Math.min(...vals), hi = Math.max(...vals), padR = 96, padY = 14, plotW = W - padR, y = v => padY + (hi - v) / ((hi - lo) || 1) * (H - padY * 2);
+    g.strokeStyle = col('--line'); g.fillStyle = col('--muted'); g.font = '12px Manrope, sans-serif'; g.lineWidth = 1;
+    for (let k = 0; k <= 3; k++) { const v = lo + (hi - lo) * k / 3, yy = y(v); g.globalAlpha = .5; g.beginPath(); g.moveTo(0, yy); g.lineTo(plotW, yy); g.stroke(); g.globalAlpha = 1; g.fillText(MB.util.price(v), plotW + 6, yy + 4); }
+    let last;
+    if (cd) {
+      const cw = plotW / cd.length, bw = Math.max(2, cw * 0.62);
+      cd.forEach((c, i) => { const x = i * cw + cw / 2, cl = col(c.c >= c.o ? '--up' : '--down'); g.strokeStyle = cl; g.fillStyle = cl; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x, y(c.h)); g.lineTo(x, y(c.l)); g.stroke(); const top = y(Math.max(c.o, c.c)); g.fillRect(x - bw / 2, top, bw, Math.max(1.5, y(Math.min(c.o, c.c)) - top)); });
+      last = cd[cd.length - 1].c;
+    } else {
+      const x = i => i / (series.length - 1) * plotW, up = series[series.length - 1] >= series[0], line = col(up ? '--up' : '--down');
+      const grad = g.createLinearGradient(0, 0, 0, H); grad.addColorStop(0, line + '55'); grad.addColorStop(1, line + '00');
+      g.beginPath(); series.forEach((v, i) => i ? g.lineTo(x(i), y(v)) : g.moveTo(x(i), y(v))); g.lineTo(plotW, H); g.lineTo(0, H); g.closePath(); g.fillStyle = grad; g.fill();
+      g.beginPath(); series.forEach((v, i) => i ? g.lineTo(x(i), y(v)) : g.moveTo(x(i), y(v))); g.strokeStyle = line; g.lineWidth = 2.5; g.lineJoin = 'round'; g.stroke();
+      last = series[series.length - 1]; g.beginPath(); g.arc(plotW, y(last), 4.5, 0, 7); g.fillStyle = line; g.fill();
+    }
+    const tag = (v, text, bg, fg, dash, shift = 0) => { const yy = y(v); g.setLineDash(dash); g.strokeStyle = bg; g.lineWidth = 1.2; g.beginPath(); g.moveTo(0, yy); g.lineTo(plotW, yy); g.stroke(); g.setLineDash([]); g.font = 'bold 12px Manrope, sans-serif'; const tw = g.measureText(text).width + 10; const ly = Math.max(10, Math.min(H - 10, yy + shift)); g.fillStyle = bg; g.fillRect(plotW + 2, ly - 10, Math.min(tw, padR - 4), 20); g.fillStyle = fg; g.fillText(text, plotW + 7, ly + 4); };
+    if (opts.avg > 0) { const d = y(opts.avg) - y(last); tag(opts.avg, MB.t('вход') + ' ' + MB.util.price(opts.avg).slice(1), col('--accent'), col('--accent-ink'), [6, 5], Math.abs(d) < 22 ? (d >= 0 ? 22 - d : -22 - d) : 0); }
+    tag(last, MB.util.price(last), col('--text'), col('--bg'), [2, 4]);
+  },
+};
+
+/* Общие элементы интерфейса. */
+MB.ui = MB.ui || {};
+(() => {
+  const { esc } = MB.util;
+  MB.ui.avatar = (t, size = 44) => t.icon
+    ? `<img class="ava" src="${esc(t.icon)}" alt="" width="${size}" height="${size}" style="width:${size}px;height:${size}px" loading="lazy">`
+    : `<span class="ava" aria-hidden="true" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.34)}px;background:linear-gradient(135deg,hsl(${t.hue} 80% 62%),hsl(${(t.hue + 50) % 360} 75% 42%))">${esc(t.sym.slice(0, 2))}</span>`;
+  /** Аватар пользователя: своё фото, если загружено; иначе буквы на цветном круге. */
+  MB.ui.userAva = (name, hue, size = 44) => {
+    const p = MB.store.get().profile, photo = name === p.name ? p.avatar : (MB.social.user(name).avatar || '');
+    return MB.ui.avatar({ sym: String(name).replace(/[^a-zа-я0-9]/gi, '').slice(0, 2).toUpperCase() || 'U', hue, icon: photo || undefined }, size);
+  };
+  MB.ui.chg = v => `<span class="chg ${v >= 0 ? 'up' : 'down'}">${MB.util.pct(v)}</span>`;
+  MB.ui.toast = (msg, kind = 'ok') => {
+    const box = document.getElementById('toasts'), el = document.createElement('div'); el.className = 'toast ' + kind; el.setAttribute('role', 'status'); el.textContent = msg; box.appendChild(el);
+    setTimeout(() => el.remove(), 4200);
+  };
+  MB.ui.empty = (title, text, action = '') => `<div class="empty"><b>${title}</b><p>${text}</p>${action}</div>`;
+  MB.ui.walletBtn = () => {
+    const w = MB.store.get().wallet;
+    return w.connected ? `<button class="btn ghost" id="walletBtn" title="Отключить кошелёк"><i class="dot"></i>${MB.util.num(w.sol, 3)} SOL</button>` : `<button class="btn accent" id="walletBtn">Подключить<span class="lg">&nbsp;кошелёк</span></button>`;
+  };
+})();
+
+/* Экран «Рынок»: поиск, фильтры, список монет. */
+MB.views = MB.views || {};
+MB.views.market = (() => {
+  const { esc, price, usd } = MB.util; let filter = 'trend', q = '', root;
+  const FILTERS = [['trend', 'В тренде'], ['fresh', 'Новые'], ['gain', 'Растут'], ['vol', 'По объёму'], ['fav', '★ Избранное']];
+  const row = t => `<a class="row" data-id="${esc(t.id)}" href="#t-${esc(t.id)}">
+      ${MB.ui.avatar(t)}<span class="nm"><b>${esc(t.name)}</b><small>${esc(t.sym)} · кап. ${usd(t.mc)}</small></span>
+      ${MB.chart.spark(t.series, t.chg24 >= 0)}<span class="pr"><b class="p">${price(t.price)}</b><span class="c">${MB.ui.chg(t.chg24)}</span></span></a>`;
+  async function fill() {
+    const list = root.querySelector('#list');
+    try { const items = await MB.data.list(filter, q); list.innerHTML = items.length ? items.map((t, i) => row(t) + (i === 3 && !q.trim() ? MB.ads.card(MB.ads.pick('market', 0)) : '')).join('') : (filter === 'fav' && !q.trim() ? MB.ui.empty('В избранном пусто', 'Откройте монету и нажмите «В избранное».') : MB.ui.empty('Ничего не найдено', 'Попробуйте другое название или тикер.')); }
+    catch (e) { list.innerHTML = MB.ui.empty('Не удалось загрузить монеты', esc(e.message), '<button class="btn ghost" id="retry">Повторить</button>'); const b = list.querySelector('#retry'); if (b) b.onclick = fill; }
+  }
+  return {
+    async mount(el) {
+      root = el;
+      el.innerHTML = `<section class="hero"><h1>Мемкоины Solana <span>в одном месте</span></h1><p>Находите монеты, смотрите графики и меняйте SOL на монету за пару касаний. Ключи остаются в вашем кошельке.</p></section>
+        <div class="tools"><label class="search"><span class="sr">Поиск монеты</span><input id="q" type="search" placeholder="Название или тикер" autocomplete="off" value="${esc(q)}"></label>
+        <div class="chips" role="tablist" aria-label="Сортировка">${FILTERS.map(([k, n]) => `<button class="chip ${k === filter ? 'on' : ''}" role="tab" aria-selected="${k === filter}" data-f="${k}">${n}</button>`).join('')}</div></div>
+        <div class="list" id="list" aria-live="off"></div>`;
+      el.querySelector('#q').addEventListener('input', e => { q = e.target.value; fill(); });
+      el.querySelectorAll('.chip').forEach(c => c.onclick = () => { filter = c.dataset.f; el.querySelectorAll('.chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-selected', x === c); }); fill(); });
+      await fill();
+    },
+    /** На тике меняем только цифры в готовых строках: список не перерисовывается, поэтому нажатия не теряются. */
+    async onTick() { if (!root) return; for (const a of root.querySelectorAll('#list a.row[data-id]')) { const t = await MB.data.get(a.dataset.id).catch(() => null); if (!t || !root) continue; a.querySelector('.p').textContent = price(t.price); a.querySelector('.c').innerHTML = MB.ui.chg(t.chg24); } },
+    unmount() { root = null; },
+  };
+})();
+
+/* Экран монеты: цена, график (линия или свечи), ваша позиция, показатели и панель покупки/продажи. */
+MB.views = MB.views || {};
+MB.views.token = (() => {
+  const { esc, price, usd, num } = MB.util; let root, token, side = 'buy', tf = '1d', quote = null, qSeq = 0, status = null, busy = false;
+  const hold = () => MB.store.get().holdings[token.id] || null, held = () => (hold() ? hold().qty : 0);
+  const presets = () => side === 'buy' ? [['0.1', 0.1], ['0.5', 0.5], ['1', 1]].map(([l, v]) => `<button type="button" class="chip" data-v="${v}">${l} SOL</button>`).join('') : [25, 50, 100].map(p => `<button type="button" class="chip" data-p="${p}">${p}%</button>`).join('');
+  /** Сумма из поля. При продаже число, почти равное остатку, считается «всем остатком», чтобы не оставалась пыль из-за округления. */
+  const amount = () => { const el = root.querySelector('#amt'); if (!el) return NaN; const a = parseFloat(String(el.value).replace(',', '.').replace(/\s/g, '')), h = held(); return side === 'sell' && h > 0 && Math.abs(a - h) <= h * 1e-4 ? h : a; };
+  function panel(keep) {
+    const st = MB.store.get(), w = st.wallet, unit = side === 'buy' ? 'SOL' : esc(token.sym), bal = side === 'buy' ? `${num(w.sol, 3)} SOL` : `${num(held(), 2)} ${esc(token.sym)}`;
+    const prev = keep && root.querySelector('#amt') ? root.querySelector('#amt').value : '';
+    root.querySelector('#panel').innerHTML = `<div class="seg" role="tablist"><button type="button" role="tab" aria-selected="${side === 'buy'}" class="${side === 'buy' ? 'on buy' : ''}" data-s="buy">Купить</button><button type="button" role="tab" aria-selected="${side === 'sell'}" class="${side === 'sell' ? 'on sell' : ''}" data-s="sell">Продать</button></div>
+      <label class="fld"><span>Сумма, ${unit}</span><input id="amt" inputmode="decimal" placeholder="0.0" autocomplete="off"><small>Доступно: ${w.connected ? bal : 'подключите кошелёк'}</small></label>
+      <div class="chips">${presets()}</div>
+      <label class="fld inline"><span>Проскальзывание</span><select id="slip">${[50, 100, 300, 500].map(b => `<option value="${b}" ${b === st.slippageBps ? 'selected' : ''}>${b / 100}%</option>`).join('')}</select></label>
+      <dl class="quote" id="quote"></dl>
+      <button type="button" class="btn big ${side}" id="go">${side === 'buy' ? 'Купить ' : 'Продать '}${esc(token.sym)}</button>
+      <div id="tstatus" class="tstatus" role="status" aria-live="polite"></div>
+      <p class="fine">${MB.config.MODE === 'demo' ? 'Демо-режим: сделка учебная, настоящие деньги не списываются.' : 'Сделка подписывается в вашем кошельке. Мемкоины очень рискованны.'}</p>`;
+    const amt = root.querySelector('#amt'); if (prev) amt.value = prev;
+    root.querySelectorAll('.seg button').forEach(b => b.onclick = () => { side = b.dataset.s; quote = null; status = null; panel(); });
+    root.querySelectorAll('#panel .chip').forEach(c => c.onclick = () => { amt.value = c.dataset.v ? c.dataset.v : String(+(held() * c.dataset.p / 100).toFixed(4)); status = null; showStatus(); requote(); });
+    amt.addEventListener('input', () => { status = null; showStatus(); requote(); });
+    root.querySelector('#slip').onchange = e => { MB.store.update(s => { s.slippageBps = +e.target.value; }, true); requote(); };
+    root.querySelector('#go').onclick = go; renderQuote(); showStatus(); if (prev) requote();
+  }
+  function showStatus() { const el = root && root.querySelector('#tstatus'); if (!el) return; el.className = 'tstatus' + (status ? ' ' + status.kind : ''); el.textContent = status ? status.text : ''; }
+  const say = (text, kind = 'ok') => { status = { text, kind }; showStatus(); MB.ui.toast(text, kind === 'err' ? 'err' : 'ok'); };
+  function renderQuote() {
+    const el = root.querySelector('#quote'); if (!el) return;
+    if (!quote) { el.innerHTML = '<div class="hint">Введите сумму, чтобы увидеть расчёт.</div>'; return; }
+    const outUnit = side === 'buy' ? esc(token.sym) : 'SOL', d = side === 'buy' ? 2 : 5;
+    el.innerHTML = `<div><dt>Вы получите</dt><dd><b>≈ ${num(quote.out, d)} ${outUnit}</b></dd></div><div><dt>Минимум с учётом проскальзывания</dt><dd>${num(quote.minOut, d)} ${outUnit}</dd></div>
+      <div><dt>Сумма сделки</dt><dd>${usd(quote.usd)}</dd></div><div><dt>Влияние на цену</dt><dd class="${quote.impactPct > 3 ? 'down' : ''}">${quote.impactPct.toFixed(2)}%</dd></div>
+      <div><dt>Комиссия Membuy (${MB.config.PLATFORM_FEE_BPS / 100}%)</dt><dd>${usd(quote.feeUsd)}</dd></div>`;
+  }
+  async function requote() {
+    const a = amount(), seq = ++qSeq;
+    if (!(a > 0)) { quote = null; renderQuote(); return null; }
+    try { const q = await MB.swap.quote({ side, token, amount: a, slippageBps: MB.store.get().slippageBps }); if (seq === qSeq && root) { quote = q; renderQuote(); } return q; }
+    catch (e) { if (seq === qSeq && root) { quote = null; root.querySelector('#quote').innerHTML = `<div class="hint down">${esc(e.message)}</div>`; } return null; }
+  }
+  /** Одна кнопка делает всё: подключает кошелёк, если нужно, считает сделку и исполняет её. */
+  async function go() {
+    if (busy) return; const a = amount();
+    if (!(a > 0)) { say('Введите сумму', 'err'); root.querySelector('#amt').focus(); return; }
+    busy = true; const btn = root.querySelector('#go'); btn.disabled = true; btn.textContent = side === 'buy' ? 'Покупаем…' : 'Продаём…';
+    try {
+      if (!MB.store.get().wallet.connected) await MB.wallet.connect();
+      const q = await MB.swap.quote({ side, token, amount: a, slippageBps: MB.store.get().slippageBps }); if (!q) throw new Error('Не удалось рассчитать сделку');
+      await MB.swap.execute(q); qSeq++; quote = null;
+      const msg = side === 'buy' ? `Куплено ${num(q.out, 2)} ${token.sym} за ${num(q.amountIn, 4)} SOL` : `Продано ${num(q.amountIn, 2)} ${token.sym} за ${num(q.out, 4)} SOL`;
+      busy = false; if (root) { panel(); mypos(); chart(); say(msg); }
+    } catch (e) { busy = false; if (root) { panel(true); say(e.message, 'err'); } }
+  }
+  function mypos() {
+    const el = root.querySelector('#mypos'), h = hold(); if (!el) return;
+    if (!h) { el.hidden = true; el.innerHTML = ''; return; }
+    const val = h.qty * token.price, known = h.costUsd > 0, pnl = val - h.costUsd, avg = h.costUsd / h.qty; el.hidden = false;
+    el.innerHTML = `<div class="mphead"><h2 class="h2">Ваша позиция</h2><button type="button" class="chip" id="sellall">Продать всё</button></div>
+      <dl class="mp"><div><dt>Монет</dt><dd>${num(h.qty, 2)}</dd></div><div><dt>Стоимость</dt><dd>${usd(val)}</dd></div>${known ? `<div><dt>Средняя цена входа</dt><dd>${price(avg)}</dd></div><div><dt>Результат</dt><dd class="${pnl >= 0 ? 'up' : 'down'}">${pnl >= 0 ? '+' : ''}${usd(pnl)} (${MB.util.pct(pnl / h.costUsd * 100)})</dd></div>` : ''}</dl>`;
+    el.querySelector('#sellall').onclick = () => { side = 'sell'; quote = null; status = null; panel(); root.querySelector('#amt').value = String(+held().toFixed(4)); requote(); root.querySelector('#panel').scrollIntoView({ block: 'center', behavior: 'smooth' }); };
+  }
+  async function chart() {
+    const type = MB.store.get().chartType, h = hold(), avg = h && h.costUsd > 0 ? h.costUsd / h.qty : 0;
+    const [s, cd] = await Promise.all([MB.data.series(token.id, tf).catch(() => []), type === 'candle' ? MB.data.candles(token.id, tf).catch(() => []) : Promise.resolve([])]);
+    const c = root && root.querySelector('#cv'); if (c) MB.chart.draw(c, s, { type, candles: cd, avg });
+  }
+  function head() {
+    root.querySelector('#px').innerHTML = `<b>${price(token.price)}</b>${MB.ui.chg(token.chg24)}`;
+    root.querySelector('#stats').innerHTML = [['Капитализация', usd(token.mc)], ['Объём за 24 ч', usd(token.vol24)], ['Ликвидность', usd(token.liquidityUsd)], ['Держатели', token.holders == null ? '—' : num(token.holders, 0)], ['Возраст', token.ageDays < 1 ? 'меньше дня' : Math.round(token.ageDays) + ' дн.']].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+  }
+  function favBtn() { const on = MB.store.get().fav.includes(token.id), b = root.querySelector('#fav'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.textContent = on ? '★ В избранном' : '☆ В избранное'; }
+  const onResize = () => chart();
+  return {
+    async mount(el, id) {
+      root = el; quote = null; status = null; busy = false; side = 'buy'; el.innerHTML = '<div class="empty"><p>Загружаем монету…</p></div>';
+      try { token = await MB.data.get(id); } catch (e) { token = null; }
+      if (!token) { el.innerHTML = MB.ui.empty('Монета не найдена', 'Возможно, ссылка устарела.', '<a class="btn ghost" href="#market">К списку монет</a>'); return; }
+      MB.store.update(s => { s.recent = [token.id, ...s.recent.filter(x => x !== token.id)].slice(0, 8); }, true);
+      const type = MB.store.get().chartType;
+      el.innerHTML = `<a class="back" href="#market">← Все монеты</a>
+        <div class="tgrid"><div class="tmain">
+          <header class="thead">${MB.ui.avatar(token, 56)}<div><h1>${esc(token.name)}</h1><small>${esc(token.sym)} · ${esc(MB.util.short(token.mint))}</small><button type="button" class="chip favb" id="fav"></button></div><div class="px" id="px"></div></header>
+          <div class="card chartc"><div class="ctools"><div class="chips tfs">${[['1h', '1 ч'], ['1d', '1 д'], ['1w', '7 д']].map(([k, n]) => `<button type="button" class="chip ${k === tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('')}</div>
+            <div class="chips ctype" role="group" aria-label="Вид графика"><button type="button" class="chip ${type === 'line' ? 'on' : ''}" data-ct="line" aria-pressed="${type === 'line'}">Линия</button><button type="button" class="chip ${type === 'candle' ? 'on' : ''}" data-ct="candle" aria-pressed="${type === 'candle'}">Свечи</button></div></div>
+            <canvas id="cv" role="img" aria-label="График цены ${esc(token.sym)}"></canvas></div>
+          <div class="card mypos" id="mypos" hidden></div>
+          <dl class="stats" id="stats"></dl>
+          ${token.desc ? `<div class="card about"><h2>О монете</h2><p>${esc(token.desc)}</p>${token.links && MB.ads.safe(token.links) ? `<p><a class="lnk" href="${esc(token.links)}" target="_blank" rel="noopener">Соцсеть монеты →</a></p>` : ''}</div>` : ''}
+        </div><aside class="card panel" id="panel"></aside></div>`;
+      el.querySelectorAll('.tfs .chip').forEach(c => c.onclick = () => { tf = c.dataset.tf; el.querySelectorAll('.tfs .chip').forEach(x => x.classList.toggle('on', x === c)); chart(); });
+      el.querySelectorAll('.ctype .chip').forEach(c => c.onclick = () => { MB.store.update(s => { s.chartType = c.dataset.ct; }, true); el.querySelectorAll('.ctype .chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); }); chart(); });
+      el.querySelector('#fav').onclick = () => { MB.store.update(s => { const i = s.fav.indexOf(token.id); if (i >= 0) s.fav.splice(i, 1); else s.fav.push(token.id); }, true); favBtn(); };
+      favBtn(); head(); panel(); mypos(); chart(); window.addEventListener('resize', onResize);
+    },
+    unmount() { window.removeEventListener('resize', onResize); root = null; },
+    async onTick() { if (!root || !token) return; const t = await MB.data.get(token.id).catch(() => null); if (!t || !root) return; token = t; head(); mypos(); chart(); if (quote && !busy) requote(); },
+    /** Состояние изменилось (например, подключили кошелёк в шапке): обновляем панель, не теряя введённую сумму. */
+    onState() { if (root && token && !busy && root.querySelector('#panel')) { panel(true); mypos(); } },
+  };
+})();
+
+/* Экран «Лента»: посты трейдеров, сделки, подписки, свой пост. */
+MB.views = MB.views || {};
+MB.views.feed = (() => {
+  const { esc, usd, num } = MB.util; let root, tab = 'all';
+  const TABS = [['all', 'Все'], ['following', 'Подписки'], ['top', 'Лучшие']];
+  const ago = ts => { const m = Math.max(0, Math.round((Date.now() - ts) / 6e4)); return m < 1 ? 'только что' : m < 60 ? m + ' мин назад' : m < 1440 ? Math.round(m / 60) + ' ч назад' : Math.round(m / 1440) + ' дн. назад'; };
+  const uava = (u, size = 44) => MB.ui.userAva(u.name, u.name === MB.social.me() ? 40 : u.hue, size);
+  function position(p) {
+    const st = MB.store.get(), t = MB.providers.demo.all().find(x => x.id === p.coin); if (!p.coin || !t) return '';
+    let pos = p.posUsd, pnl = p.pnlUsd;
+    if (p.mine) { const h = st.holdings[p.coin]; if (!h) return `<a class="pos" href="#t-${esc(p.coin)}">${MB.ui.avatar(t, 36)}<span class="nm"><b>${esc(t.sym)}</b><small>${esc(t.name)}</small></span><span class="hint">позиция закрыта</span></a>`; pos = h.qty * t.price; pnl = pos - h.costUsd; }
+    return `<a class="pos" href="#t-${esc(p.coin)}">${MB.ui.avatar(t, 36)}<span class="nm"><b>${esc(t.sym)}</b><small>${esc(t.name)}</small></span><span class="kv"><small>Позиция</small><b>${usd(pos)}</b></span><span class="kv"><small>Результат</small><b class="${pnl >= 0 ? 'up' : 'down'}">${pnl >= 0 ? '+' : ''}${usd(pnl)}</b></span></a>`;
+  }
+  function item(p) {
+    const st = MB.store.get(), u = MB.social.user(p.user), mine = p.user === MB.social.me(), fol = st.following.includes(p.user);
+    const head = `<div class="ph">${uava(u)}<div class="nm"><b>${esc(p.user)}</b><small>${ago(p.ts)}</small></div>${mine ? (p.mine ? `<button class="chip" data-del="${esc(p.id)}">Удалить</button>` : '') : `<button class="chip ${fol ? 'on' : ''}" data-follow="${esc(p.user)}">${fol ? 'Вы подписаны' : 'Подписаться'}</button>`}</div>`;
+    if (p.kind === 'trade') { const t = MB.providers.demo.all().find(x => x.id === p.coin); return `<article class="post">${head}<a class="pos" href="#t-${esc(p.coin)}"><span class="tag ${p.side}">${p.side === 'buy' ? 'Купил' : 'Продал'}</span><span class="nm"><b>${esc(t ? t.sym : p.coin)}</b><small>при капитализации ${usd(p.mc)}</small></span><span class="kv"><small>Сумма</small><b>${usd(p.usd)}</b></span></a></article>`; }
+    const liked = st.liked.includes(p.id);
+    return `<article class="post">${head}<p class="pt2">${esc(p.text)}</p>${position(p)}<div class="acts"><button class="act ${liked ? 'on' : ''}" data-like="${esc(p.id)}" aria-pressed="${liked}">♥ ${num(p.likes + (liked ? 1 : 0), 0)}</button><span class="act">Просмотры: ${num(p.views, 0)}</span></div></article>`;
+  }
+  function list() {
+    const el = root.querySelector('#flist'), items = MB.social.feed(tab); let n = 0;
+    el.innerHTML = items.length ? items.map((p, i) => item(p) + (i % 5 === 2 ? MB.ads.card(MB.ads.pick('feed', n++)) : '')).join('') : MB.ui.empty('Здесь пока пусто', tab === 'following' ? 'Подпишитесь на трейдеров во вкладке «Все» или в рейтинге.' : 'Постов пока нет.');
+  }
+  function composer() {
+    const st = MB.store.get(), box = root.querySelector('#composer');
+    if (!st.wallet.connected) { box.innerHTML = '<div class="hint">Подключите кошелёк, чтобы писать посты.</div>'; return; }
+    const prev = box.querySelector('#ptext') ? box.querySelector('#ptext').value : '', prevCoin = box.querySelector('#pcoin') ? box.querySelector('#pcoin').value : '';
+    box.innerHTML = `<label class="sr" for="ptext">Текст поста</label><textarea id="ptext" maxlength="280" rows="2" placeholder="Что думаете о рынке?"></textarea>
+      <div class="crow"><label class="sr" for="pcoin">Прикрепить монету</label><select id="pcoin"><option value="">Без монеты</option>${Object.entries(st.holdings).map(([id, h]) => `<option value="${esc(id)}">${esc(h.sym)} — моя позиция</option>`).join('')}</select><span class="cnt" id="pcnt">0/280</span><button class="btn accent" id="psend">Опубликовать</button></div>`;
+    const ta = box.querySelector('#ptext'); ta.value = prev; box.querySelector('#pcoin').value = prevCoin; const cnt = () => { box.querySelector('#pcnt').textContent = ta.value.length + '/280'; }; cnt(); ta.addEventListener('input', cnt);
+    box.querySelector('#psend').onclick = () => { const text = ta.value, coin = box.querySelector('#pcoin').value; if (!text.trim()) { MB.ui.toast('Напишите текст поста', 'err'); ta.focus(); return; } ta.value = ''; box.querySelector('#pcoin').value = '';
+      try { MB.social.publish(text, coin); MB.ui.toast('Пост опубликован'); } catch (e) { const t2 = root.querySelector('#ptext'); if (t2) { t2.value = text; t2.focus(); } MB.ui.toast(e.message, 'err'); } };
+  }
+  const onSocial = () => { if (root) list(); };
+  return {
+    mount(el) {
+      root = el;
+      el.innerHTML = `<h1 class="pt">Лента</h1><div class="chips tabsx" role="tablist">${TABS.map(([k, n]) => `<button class="chip ${k === tab ? 'on' : ''}" role="tab" aria-selected="${k === tab}" data-tab="${k}">${n}</button>`).join('')}</div>
+        <div class="card composer" id="composer"></div><div class="list" id="flist"></div>`;
+      el.querySelectorAll('[data-tab]').forEach(c => c.onclick = () => { tab = c.dataset.tab; el.querySelectorAll('[data-tab]').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-selected', x === c); }); list(); });
+      el.querySelector('#flist').addEventListener('click', e => {
+        const b = e.target.closest('button'); if (!b) return;
+        if (b.dataset.like) MB.social.like(b.dataset.like); else if (b.dataset.follow) MB.social.follow(b.dataset.follow); else if (b.dataset.del) MB.social.remove(b.dataset.del);
+      });
+      composer(); list(); MB.util.bus.on('social', onSocial);
+    },
+    unmount() { MB.util.bus.off('social', onSocial); root = null; },
+    onState() { if (root) { composer(); list(); } },
+  };
+})();
+
+/* Экран «Рейтинг»: трейдеры, отряды, награды. */
+MB.views = MB.views || {};
+MB.views.leaders = (() => {
+  const { esc, usd } = MB.util; let root, tab = 'traders', period = 'd';
+  const TABS = [['traders', 'Трейдеры'], ['squads', 'Отряды'], ['rewards', 'Награды']], PER = [['d', 'День'], ['w', 'Неделя'], ['m', 'Месяц']];
+  const money = v => `<b class="${v >= 0 ? 'up' : 'down'}">${v >= 0 ? '+' : ''}${usd(v)}</b>`;
+  async function myPnl() { const st = MB.store.get(); if (!st.wallet.connected) return 0; const sol = await MB.data.solUsd(); let eq = st.wallet.sol * sol; for (const [id, h] of Object.entries(st.holdings)) { const t = await MB.data.get(id); if (t) eq += h.qty * t.price; } return eq - MB.config.DEMO_START_SOL * sol; }
+  async function draw() {
+    if (!root) return; const box = root.querySelector('#lbody'), st = MB.store.get();
+    if (tab === 'traders') {
+      const rows = MB.social.leaders(period, await myPnl()); if (!root) return; const me = rows.find(r => r.me);
+      box.innerHTML = `<div class="chips">${PER.map(([k, n]) => `<button class="chip ${k === period ? 'on' : ''}" data-per="${k}">${n}</button>`).join('')}</div>
+        ${me ? `<div class="card mecard"><span>Ваше место: <b>#${me.rank}</b> из ${rows.length}</span>${money(me.pnl)}</div>` : '<div class="hint">Подключите кошелёк, чтобы попасть в рейтинг.</div>'}
+        <div class="list">${rows.map(r => `<div class="row lrow ${r.me ? 'me' : ''}"><span class="rk ${r.rank <= 3 ? 'top' : ''}">${r.rank}</span>${MB.ui.userAva(r.name, r.hue, 40)}<span class="nm"><b>${esc(r.name)}${r.me ? ' (вы)' : ''}</b>${r.me ? '' : `<button class="chip sm2 ${st.following.includes(r.name) ? 'on' : ''}" data-follow="${esc(r.name)}">${st.following.includes(r.name) ? 'Вы подписаны' : 'Подписаться'}</button>`}</span><span class="pr">${money(r.pnl)}</span></div>`).join('')}</div>`;
+    } else if (tab === 'squads') {
+      const rows = MB.social.squads();
+      box.innerHTML = `${st.squad ? `<div class="card mecard"><span>Ваш отряд: <b>${esc(st.squad)}</b></span><span class="hint">1 участник</span></div>` : `<div class="card"><b>Создайте свой отряд</b><p class="hint">Отряд — команда трейдеров с общим результатом.</p><div class="crow"><label class="sr" for="sq">Название отряда</label><input id="sq" class="inp" maxlength="20" placeholder="Название отряда"><button class="btn accent" id="sqgo">Создать отряд</button></div></div>`}
+        <div class="list">${rows.map((r, i) => `<div class="row lrow ${r.mine ? 'me' : ''}"><span class="rk ${i < 3 ? 'top' : ''}">${i + 1}</span>${MB.ui.avatar({ sym: MB.t(r.name).slice(0, 2).toUpperCase(), hue: (i * 67) % 360 }, 40)}<span class="nm"><b>${esc(r.name)}</b><small>Участников: ${r.members}</small></span><span class="pr">${money(r.pnl)}</span></div>`).join('')}</div>`;
+      const go = box.querySelector('#sqgo'); if (go) go.onclick = () => { try { MB.social.createSquad(box.querySelector('#sq').value); MB.ui.toast('Отряд создан'); } catch (e) { MB.ui.toast(e.message, 'err'); } };
+    } else {
+      box.innerHTML = `<div class="card"><b>Награды трейдерам — в планах</b><p class="hint">Идея: часть комиссии площадки раз в неделю делится между лучшими трейдерами. Сейчас призового фонда нет: он появится только после запуска торговли и сервера, который считает результаты.</p></div>
+        <dl class="stats"><div><dt>Призовой фонд сейчас</dt><dd>$0</dd></div><div><dt>Источник фонда</dt><dd>Доля комиссии</dd></div><div><dt>Выплаты</dt><dd>Раз в неделю</dd></div></dl>`;
+    }
+    box.querySelectorAll('[data-per]').forEach(c => c.onclick = () => { period = c.dataset.per; draw(); });
+    box.querySelectorAll('[data-follow]').forEach(c => c.onclick = () => MB.social.follow(c.dataset.follow));
+  }
+  return {
+    mount(el) { root = el; el.innerHTML = `<h1 class="pt">Рейтинг</h1><div class="chips tabsx" role="tablist">${TABS.map(([k, n]) => `<button class="chip ${k === tab ? 'on' : ''}" role="tab" aria-selected="${k === tab}" data-tab="${k}">${n}</button>`).join('')}</div><div id="lbody" class="stack"></div>`;
+      el.querySelectorAll('[data-tab]').forEach(c => c.onclick = () => { tab = c.dataset.tab; el.querySelectorAll('[data-tab]').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-selected', x === c); }); draw(); }); return draw(); },
+    unmount() { root = null; }, onState: draw,
+  };
+})();
+
+/* Экран «Профиль»: имя, подписки, стоимость портфеля с графиком, монеты и история сделок. */
+MB.views = MB.views || {};
+MB.views.profile = (() => {
+  const { esc, price, usd, num } = MB.util; let root, tab = 'open';
+  async function draw() {
+    if (!root) return; const st = MB.store.get();
+    if (!st.wallet.connected) { root.innerHTML = '<h1 class="pt">Профиль</h1>' + MB.ui.empty('Кошелёк не подключён', 'Подключите кошелёк, чтобы видеть свои монеты, сделки и результат.', '<button class="btn accent" id="cw">Подключить кошелёк</button>'); root.querySelector('#cw').onclick = () => MB.wallet.connect().catch(e => MB.ui.toast(e.message, 'err')); return; }
+    const solUsd = await MB.data.solUsd().catch(() => 0), rows = []; let total = st.wallet.sol * solUsd;
+    for (const [id, h] of Object.entries(st.holdings)) { const t = await MB.data.get(id).catch(() => null), val = t ? h.qty * t.price : 0; total += val; rows.push({ id, h, t, val, p: val - h.costUsd }); }
+    if (!root) return; const cost = rows.reduce((a, r) => a + (r.h.costUsd > 0 ? r.h.costUsd : 0), 0);
+    // Демо: результат от стартовых условных SOL. Живой режим: только по монетам, купленным в Membuy (у них известна цена входа).
+    const start = MB.config.LIVE ? total - rows.reduce((a, r) => a + (r.h.costUsd > 0 ? r.p : 0), 0) : MB.config.DEMO_START_SOL * solUsd, pnl = total - start, pct = MB.config.LIVE ? (cost ? pnl / cost * 100 : 0) : (start ? pnl / start * 100 : 0);
+    const open = rows.length ? rows.sort((a, b) => b.val - a.val).map(r => `<a class="row" href="#t-${esc(r.id)}">${MB.ui.avatar(r.t || { sym: r.h.sym, hue: 200 })}<span class="nm"><b>${esc(r.h.name)}</b><small>${num(r.h.qty, 2)} ${esc(r.h.sym)} · ${r.t ? price(r.t.price) : '—'}</small></span><span class="pr"><b>${usd(r.val)}</b>${r.h.costUsd > 0 ? `<span class="chg ${r.p >= 0 ? 'up' : 'down'}">${r.p >= 0 ? '+' : ''}${usd(r.p)}</span>` : ''}</span></a>`).join('') : MB.ui.empty('Монет пока нет', 'Купите первую монету на экране «Рынок».', '<a class="btn accent" href="#market">Открыть рынок</a>');
+    const hist = st.trades.length ? st.trades.map(t => `<div class="row"><span class="tag ${t.side}">${t.side === 'buy' ? 'Покупка' : 'Продажа'}</span><span class="nm"><b>${num(t.tokens, 2)} ${esc(t.sym)}</b><small>${new Date(t.ts).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} · по ${price(t.price)}</small></span><span class="pr"><b>${num(t.sol, 4)} SOL</b><small>${usd(t.usd)}</small></span></div>`).join('') : MB.ui.empty('Сделок пока нет', 'Здесь появятся ваши покупки и продажи.');
+    root.innerHTML = `<div class="prof"><div class="pava">${MB.ui.userAva(st.profile.name, 40, 84)}<label class="chip photob" for="pfile">${st.profile.avatar ? 'Сменить фото' : 'Загрузить фото'}</label><input id="pfile" type="file" accept="image/*" class="sr"></div><div class="nm"><h1>${esc(st.profile.name)}</h1><small>${esc(st.profile.bio || 'Без описания')} · ${esc(MB.util.short(st.wallet.address))}</small><small>Подписки: <b>${st.following.length}</b> · Постов: <b>${st.myPosts.length}</b>${st.squad ? ' · Отряд: <b>' + esc(st.squad) + '</b>' : ''}</small></div></div>
+      <div class="qgrid">${MB.config.LIVE ? '' : '<a class="btn ghost" href="#invite">Пригласить друзей</a><a class="btn ghost" href="#create">Создать монету</a><a class="btn ghost" href="#ads">Реклама</a>'}<a class="btn ghost" href="#prefs">Настройки</a></div>
+      <div class="card wcard"><small>Стоимость портфеля</small><b class="tot">${usd(total)}</b><div class="wline"><span>${num(st.wallet.sol, 4)} SOL свободно</span><span class="${pnl >= 0 ? 'up' : 'down'}">Результат: ${pnl >= 0 ? '+' : ''}${usd(pnl)} (${MB.util.pct(pct)})</span></div><canvas id="eq" role="img" aria-label="График стоимости портфеля"></canvas></div>
+      <div class="chips tabsx" role="tablist"><button class="chip ${tab === 'open' ? 'on' : ''}" role="tab" aria-selected="${tab === 'open'}" data-tab="open">Монеты</button><button class="chip ${tab === 'hist' ? 'on' : ''}" role="tab" aria-selected="${tab === 'hist'}" data-tab="hist">История</button></div>
+      <div class="list">${tab === 'open' ? open : hist}</div>`;
+    root.querySelectorAll('[data-tab]').forEach(c => c.onclick = () => { tab = c.dataset.tab; draw(); });
+    root.querySelector('#pfile').addEventListener('change', e => MB.util.squareImage(e.target.files[0], 128).then(url => { MB.store.update(s => { s.profile.avatar = url; }); MB.ui.toast('Фото профиля обновлено'); }, err => MB.ui.toast(err.message, 'err')));
+    const eq = st.equity.length > 1 ? st.equity : [start, total]; MB.chart.draw(root.querySelector('#eq'), eq);
+  }
+  return { mount(el) { root = el; return draw(); }, unmount() { root = null; }, onTick: draw, onState: draw };
+})();
+
+/* Экран «Создать монету» (демо): монета появляется только в этом браузере. */
+MB.views = MB.views || {};
+MB.views.create = (() => {
+  const { esc } = MB.util; let root, icon = '';
+  function pick(file) {
+    MB.util.squareImage(file, 96).then(url => { icon = url; if (root) root.querySelector('#prev').innerHTML = `<img class="ava" src="${icon}" alt="Картинка монеты" width="72" height="72" style="width:72px;height:72px">`; }, e => MB.ui.toast(e.message, 'err'));
+  }
+  function submit(e) {
+    e.preventDefault(); const f = root.querySelector('form'), name = f.cname.value.trim(), sym = f.csym.value.trim().toUpperCase(), desc = f.cdesc.value.trim(), link = f.clink.value.trim();
+    try {
+      if (!MB.store.get().wallet.connected) throw new Error('Сначала подключите кошелёк');
+      if (name.length < 2 || name.length > 32) throw new Error('Название: от 2 до 32 знаков');
+      if (!/^[A-Z0-9]{2,10}$/.test(sym)) throw new Error('Тикер: от 2 до 10 латинских букв или цифр');
+      if (MB.providers.demo.has(sym)) throw new Error('Монета с таким тикером уже есть');
+      if (link && !MB.ads.safe(link)) throw new Error('Ссылка должна начинаться с https://');
+      const c = { sym, name, desc, icon, links: link, seed: Date.now() % 100000, ts: Date.now() };
+      MB.store.update(s => { s.coins.push(c); }); MB.providers.demo.add(c); MB.store.note('Монета ' + sym + ' создана'); MB.ui.toast('Монета ' + sym + ' создана'); icon = ''; location.hash = 't-' + sym;
+    } catch (err) { MB.ui.toast(err.message, 'err'); }
+  }
+  return {
+    mount(el) {
+      root = el;
+      el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Создать монету</h1>
+        <div class="note">Демо: монета появится только в этом браузере, в блокчейне её не будет. Для настоящего выпуска нужен смарт-контракт с аудитом.</div>
+        <form class="card form" novalidate>
+          <div class="fld"><span>Картинка</span><div class="crow"><span id="prev" class="prev"></span><label class="btn ghost" for="cfile">Выбрать файл</label><input id="cfile" type="file" accept="image/*" class="sr"></div></div>
+          <label class="fld"><span>Название</span><input id="cname" name="cname" maxlength="32" placeholder="Например, Tilla" autocomplete="off"></label>
+          <label class="fld"><span>Тикер</span><input id="csym" name="csym" maxlength="10" placeholder="Например, TILLA" autocomplete="off"></label>
+          <label class="fld"><span>Описание (необязательно)</span><textarea id="cdesc" name="cdesc" maxlength="300" rows="3" placeholder="Коротко о монете"></textarea></label>
+          <label class="fld"><span>Ссылка на соцсеть (необязательно)</span><input id="clink" name="clink" placeholder="https://t.me/..." autocomplete="off"></label>
+          <button class="btn big accent" type="submit">Создать монету</button>
+          <p class="fine">Данные монеты нельзя изменить после создания.</p>
+        </form>`;
+      el.querySelector('#cfile').addEventListener('change', e => pick(e.target.files[0])); el.querySelector('form').addEventListener('submit', submit);
+    },
+    unmount() { root = null; },
+  };
+})();
+
+/* Экран «Реклама»: рекламный кабинет (демо). */
+MB.views = MB.views || {};
+MB.views.ads = (() => {
+  const { esc, usd, num } = MB.util; let root;
+  const val = id => root.querySelector('#' + id).value;
+  function preview() { const pl = val('apl'), days = Math.max(1, Math.min(30, Math.round(+val('adays') || 1))); root.querySelector('#aprice').textContent = usd(MB.ads.price(pl, days)); root.querySelector('#aprev').innerHTML = `<div class="row ad"><span class="adtag">Реклама</span><span class="nm"><b>${esc(val('atitle') || 'Заголовок объявления')}</b><small>${esc(val('atext') || 'Текст объявления')}</small></span><span class="pr"><b>→</b></span></div>`; }
+  function campaigns() {
+    const st = MB.store.get(), box = root.querySelector('#camps');
+    box.innerHTML = st.campaigns.length ? st.campaigns.map(c => { const s = st.adStats[c.id] || { views: 0, clicks: 0 }, left = Math.max(0, Math.ceil((c.until - Date.now()) / 864e5)); return `<div class="row camp"><span class="nm"><b>${esc(c.title)}</b><small>${MB.ads.PLACEMENTS[c.placement].name} · ${c.status === 'active' ? 'идёт, осталось ' + left + ' дн.' : 'на паузе'} · ${usd(c.total)}</small><small>Показы: ${num(s.views, 0)} · Переходы: ${num(s.clicks, 0)}</small></span><span class="crow"><button class="chip" data-tg="${esc(c.id)}">${c.status === 'active' ? 'Пауза' : 'Запустить'}</button><button class="chip" data-rm="${esc(c.id)}">Удалить</button></span></div>`; }).join('') : MB.ui.empty('Кампаний пока нет', 'Создайте первую кампанию в форме выше.');
+    root.querySelector('#income').textContent = usd(MB.ads.income());
+  }
+  return {
+    mount(el) {
+      root = el; const P = MB.ads.PLACEMENTS;
+      el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Реклама</h1>
+        <div class="note">Демо: оплата не списывается, объявление видно только в этом браузере. Для настоящей рекламы нужен сервер с приёмом оплаты и проверкой объявлений.</div>
+        <dl class="stats"><div><dt>${P.feed.name}</dt><dd>$${P.feed.day} в день</dd></div><div><dt>${P.market.name}</dt><dd>$${P.market.day} в день</dd></div><div><dt>Доход площадки (демо)</dt><dd id="income">$0</dd></div></dl>
+        <form class="card form" id="aform" novalidate><h2 class="h2">Новая кампания</h2>
+          <label class="fld"><span>Заголовок (до 40 знаков)</span><input id="atitle" maxlength="40" autocomplete="off"></label>
+          <label class="fld"><span>Текст (до 90 знаков)</span><input id="atext" maxlength="90" autocomplete="off"></label>
+          <label class="fld"><span>Ссылка</span><input id="alink" placeholder="https://..." autocomplete="off"></label>
+          <div class="two"><label class="fld"><span>Место показа</span><select id="apl">${Object.entries(P).map(([k, p]) => `<option value="${k}">${p.name}</option>`).join('')}</select></label><label class="fld"><span>Дней (1–30)</span><input id="adays" inputmode="numeric" value="3"></label></div>
+          <div class="fld"><span>Так объявление увидят пользователи</span><div id="aprev"></div></div>
+          <div class="quote"><div><dt>Стоимость кампании</dt><dd><b id="aprice">$0</b></dd></div></div>
+          <button class="btn big accent" type="submit">Запустить кампанию</button>
+          <p class="fine">Объявления помечаются словом «Реклама». Запрещены обещания дохода, обман и чужие товарные знаки.</p></form>
+        <h2 class="h2">Мои кампании</h2><div class="list" id="camps"></div>`;
+      ['atitle', 'atext', 'apl', 'adays'].forEach(id => el.querySelector('#' + id).addEventListener('input', preview));
+      el.querySelector('#aform').addEventListener('submit', e => { e.preventDefault(); try { MB.ads.create({ title: val('atitle'), text: val('atext'), link: val('alink'), placement: val('apl'), days: val('adays') }); MB.ui.toast('Кампания запущена'); ['atitle', 'atext', 'alink'].forEach(id => { el.querySelector('#' + id).value = ''; }); preview(); } catch (err) { MB.ui.toast(err.message, 'err'); } });
+      el.querySelector('#camps').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.tg) MB.ads.toggle(b.dataset.tg); if (b.dataset.rm) MB.ads.remove(b.dataset.rm); });
+      preview(); campaigns();
+    },
+    unmount() { root = null; }, onState() { if (root) campaigns(); },
+  };
+})();
+
+/* Экраны: приглашения, настройки, поиск, уведомления. */
+MB.views = MB.views || {};
+(() => {
+  const { esc, price, usd } = MB.util;
+  MB.views.invite = (() => {
+    let root;
+    return {
+      mount(el) {
+        root = el; const st = MB.store.get(), code = st.profile.name.replace(/[^a-z0-9_]/gi, '').toUpperCase().slice(0, 12) || 'MEMBUY', link = location.origin + location.pathname + '?ref=' + code;
+        el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Пригласить друзей</h1>
+          <div class="note">Демо: ссылка и код работают как образец. Начисления появятся после запуска сервера, который считает сделки приглашённых.</div>
+          <div class="card stack"><div class="fld"><span>Ваш код</span><b class="code">${esc(code)}</b></div>
+            <div class="fld"><span>Ваша ссылка</span><input id="rlink" class="inp" readonly value="${esc(link)}"></div><button class="btn accent" id="rcopy">Скопировать ссылку</button></div>
+          <dl class="stats"><div><dt>Приглашено</dt><dd>0</dd></div><div><dt>Заработано</dt><dd>$0</dd></div><div><dt>Ваша доля</dt><dd>20% комиссии</dd></div></dl>
+          <div class="card"><h2 class="h2">Как это будет работать</h2><ol class="ol"><li>Друг открывает Membuy по вашей ссылке и подключает кошелёк.</li><li>С каждой его сделки площадка берёт комиссию ${MB.config.PLATFORM_FEE_BPS / 100}%.</li><li>20% этой комиссии начисляется вам.</li></ol></div>`;
+        el.querySelector('#rcopy').onclick = () => { const inp = el.querySelector('#rlink'); const fb = () => { inp.focus(); inp.select(); MB.ui.toast('Ссылка выделена — скопируйте её'); }; if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(inp.value).then(() => MB.ui.toast('Ссылка скопирована'), fb); else fb(); };
+      }, unmount() { root = null; },
+    };
+  })();
+  MB.views.prefs = (() => {
+    let root;
+    function draw() {
+      const st = MB.store.get();
+      root.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Настройки</h1>
+        <form class="card form" id="pform" novalidate><h2 class="h2">Профиль</h2><div class="fld"><span>Фото профиля</span><div class="crow">${MB.ui.userAva(st.profile.name, 40, 64)}<label class="btn ghost" for="pfile2">${st.profile.avatar ? 'Сменить фото' : 'Загрузить фото'}</label><input id="pfile2" type="file" accept="image/*" class="sr">${st.profile.avatar ? '<button type="button" class="btn ghost" id="pdel">Удалить фото</button>' : ''}</div></div><label class="fld"><span>Имя (латиница, цифры, _)</span><input id="pname" maxlength="20" value="${esc(st.profile.name)}" autocomplete="off"></label><label class="fld"><span>О себе</span><input id="pbio" maxlength="60" value="${esc(st.profile.bio)}" autocomplete="off"></label><button class="btn accent" type="submit">Сохранить</button></form>
+        <div class="card form"><h2 class="h2">Язык</h2><div class="langs chips" role="group" aria-label="Язык">${MB.i18n.LANGS.map(([k, n]) => `<button type="button" class="chip ${k === MB.i18n.lang ? 'on' : ''}" data-lang="${k}" aria-pressed="${k === MB.i18n.lang}">${n}</button>`).join('')}</div></div>
+        <div class="card form"><h2 class="h2">Сделки</h2><label class="fld inline"><span>Проскальзывание по умолчанию</span><select id="pslip">${[50, 100, 300, 500].map(b => `<option value="${b}" ${b === st.slippageBps ? 'selected' : ''}>${b / 100}%</option>`).join('')}</select></label>
+          <label class="fld inline"><span>Уведомления о сделках</span><input type="checkbox" id="pnot" ${st.notify ? 'checked' : ''} style="width:22px;height:22px"></label></div>
+        <div class="card form"><h2 class="h2">Режим</h2><p class="hint">${MB.config.MODE === 'demo' ? 'Демо: учебные монеты и сделки.' : 'Живой режим: настоящие сделки.'}</p>${MB.config.MODE === 'demo' ? '<button class="btn ghost" id="preset">Сбросить демо-счёт</button><div id="pconf" hidden class="crow"><span class="hint">Удалить все демо-данные?</span><button class="btn sell" id="pyes">Да, сбросить</button><button class="btn ghost" id="pno">Отмена</button></div>' : ''}</div>`;
+      root.querySelector('#pform').addEventListener('submit', e => { e.preventDefault(); const n = root.querySelector('#pname').value.trim(); if (!/^[A-Za-z0-9_]{3,20}$/.test(n)) { MB.ui.toast('Имя: 3–20 латинских букв, цифр или _', 'err'); return; } const bio = root.querySelector('#pbio').value.trim(); MB.store.update(s => { const old = s.profile.name; s.profile = { name: n, bio, avatar: s.profile.avatar || '' }; s.myPosts.forEach(p => { if (p.user === old) p.user = n; }); }); MB.ui.toast('Профиль сохранён'); });
+      root.querySelector('#pfile2').addEventListener('change', e => MB.util.squareImage(e.target.files[0], 128).then(url => { MB.store.update(s => { s.profile.avatar = url; }); MB.ui.toast('Фото профиля обновлено'); draw(); }, err => MB.ui.toast(err.message, 'err')));
+      const pd = root.querySelector('#pdel'); if (pd) pd.onclick = () => { MB.store.update(s => { s.profile.avatar = ''; }); MB.ui.toast('Фото удалено'); draw(); };
+      root.querySelector('#pslip').onchange = e => MB.store.update(s => { s.slippageBps = +e.target.value; }, true);
+      root.querySelector('#pnot').onchange = e => MB.store.update(s => { s.notify = e.target.checked; }, true);
+      const rs = root.querySelector('#preset'); if (rs) { rs.onclick = () => { root.querySelector('#pconf').hidden = false; rs.hidden = true; }; root.querySelector('#pno').onclick = draw; root.querySelector('#pyes').onclick = () => { MB.store.reset(); MB.ui.toast('Демо-счёт сброшен'); location.hash = 'market'; }; }
+    }
+    return { mount(el) { root = el; draw(); }, unmount() { root = null; } };
+  })();
+  MB.views.search = (() => {
+    let root, q = '';
+    const row = t => `<a class="row" href="#t-${esc(t.id)}">${MB.ui.avatar(t)}<span class="nm"><b>${esc(t.name)}</b><small>${esc(t.sym)} · кап. ${usd(t.mc)}</small></span><span class="pr"><b>${price(t.price)}</b>${MB.ui.chg(t.chg24)}</span></a>`;
+    async function fill() {
+      const box = root.querySelector('#sres'), st = MB.store.get();
+      if (!q.trim()) { const rec = []; for (const id of st.recent) { const t = await MB.data.get(id).catch(() => null); if (t) rec.push(t); } if (!root) return;
+        box.innerHTML = `<div class="shead"><h2 class="h2">Просмотренные недавно</h2>${rec.length ? '<button class="chip" id="sclr">Очистить</button>' : ''}</div><div class="list">${rec.length ? rec.map(row).join('') : MB.ui.empty('Пока пусто', 'Здесь появятся монеты, которые вы открывали.')}</div>`;
+        const c = box.querySelector('#sclr'); if (c) c.onclick = () => { MB.store.update(s => { s.recent = []; }, true); fill(); }; return; }
+      const items = await MB.data.list('trend', q).catch(() => []); if (!root) return; box.innerHTML = `<div class="list">${items.length ? items.map(row).join('') : MB.ui.empty('Ничего не найдено', 'Попробуйте другое название или тикер.')}</div>`;
+    }
+    return { mount(el) { root = el; q = ''; el.innerHTML = `<h1 class="pt">Поиск</h1><label class="search"><span class="sr">Поиск монеты</span><input id="sq2" type="search" placeholder="Название или тикер" autocomplete="off"></label><div id="sres" class="stack" style="margin-top:14px"></div>`; const i = el.querySelector('#sq2'); i.addEventListener('input', () => { q = i.value; fill(); }); i.focus(); return fill(); }, unmount() { root = null; } };
+  })();
+  MB.views.notes = { mount(el) { const st = MB.store.get(); MB.store.update(s => { s.unread = 0; }); el.innerHTML = `<h1 class="pt">Уведомления</h1><div class="list">${st.notes.length ? st.notes.map(n => `<div class="row"><span class="nm"><b>${esc(n.text)}</b><small>${new Date(n.ts).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</small></span></div>`).join('') : MB.ui.empty('Уведомлений нет', 'Здесь появятся сообщения о сделках и кампаниях.')}</div>`; } };
+})();
+
+/* Точка входа: выбор поставщика данных, маршруты, шапка. Маршруты — простые якоря: #market, #portfolio, #history, #t-<id>. */
+(() => {
+  const C = MB.config; MB.data = MB.providers[C.MODE === 'live' ? 'live' : 'demo'];
+  const main = document.getElementById('view'); let cur = null;
+  const routes = { market: MB.views.market, feed: MB.views.feed, leaders: MB.views.leaders, profile: MB.views.profile, create: MB.views.create, ads: MB.views.ads, invite: MB.views.invite, prefs: MB.views.prefs, search: MB.views.search, notes: MB.views.notes };
+  const SUB = { create: 'profile', ads: 'profile', invite: 'profile', prefs: 'profile', notes: 'profile', search: 'market' };
+  function header() {
+    const st0 = MB.store.get(); document.getElementById('bell').classList.toggle('has', st0.unread > 0); document.getElementById('bell').setAttribute('aria-label', 'Уведомления' + (st0.unread ? ': новых ' + st0.unread : ''));
+    document.getElementById('walletSlot').innerHTML = MB.ui.walletBtn();
+    document.getElementById('walletBtn').onclick = async () => {
+      try { if (MB.store.get().wallet.connected) { await MB.wallet.disconnect(); MB.ui.toast('Кошелёк отключён'); } else { await MB.wallet.connect(); MB.ui.toast('Кошелёк подключён'); } }
+      catch (e) { MB.ui.toast(e.message, 'err'); }
+    };
+  }
+  async function route() {
+    let h = decodeURIComponent(location.hash.slice(1)) || 'market'; if (C.LIVE && C.DEMO_ONLY.includes(h)) h = 'market';
+    if (cur && cur.unmount) cur.unmount();
+    document.querySelectorAll('[data-nav]').forEach(a => { const on = a.dataset.nav === (h.startsWith('t-') ? 'market' : (SUB[h] || h)); a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    if (h.startsWith('t-')) { cur = MB.views.token; await cur.mount(main, h.slice(2)); } else { cur = routes[h] || routes.market; await cur.mount(main); }
+    window.scrollTo(0, 0);
+  }
+  let tn = 0;
+  /** Раз в несколько тиков записывает стоимость портфеля для графика в профиле. */
+  async function equity() { const st = MB.store.get(); if (!st.wallet.connected || ++tn % 4) return; const sol = await MB.data.solUsd().catch(() => 0); let eq = st.wallet.sol * sol; for (const [id, h] of Object.entries(st.holdings)) { const t = await MB.data.get(id).catch(() => null); if (t) eq += h.qty * t.price; } MB.store.update(s => { s.equity.push(eq); s.equity = s.equity.slice(-120); }, true); }
+  MB.util.bus.on('tick', () => { equity(); if (cur && cur.onTick) cur.onTick(); });
+  document.addEventListener('click', e => { const a = e.target.closest('[data-ad]'); if (a) MB.ads.click(a.dataset.ad); });
+  MB.util.bus.on('refresh', () => cur && cur.onTick && cur.onTick());
+  MB.util.bus.on('state', () => { header(); if (cur && cur.onState) cur.onState(); });
+  window.addEventListener('hashchange', route);
+  document.getElementById('demoBar').hidden = C.MODE !== 'demo';
+  if (C.LIVE) { document.body.classList.add('live'); document.querySelectorAll('[data-nav]').forEach(a => { if (C.DEMO_ONLY.includes(a.dataset.nav)) a.hidden = true; }); }
+  function langs() { document.querySelectorAll('.langs').forEach(box => { box.innerHTML = MB.i18n.LANGS.map(([k, n]) => `<button type="button" class="chip ${k === MB.i18n.lang ? 'on' : ''}" data-lang="${k}" aria-pressed="${k === MB.i18n.lang}">${n}</button>`).join(''); }); }
+  document.addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (b) MB.i18n.set(b.dataset.lang); });
+  MB.util.bus.on('lang', () => { header(); langs(); route(); });
+  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route();
+})();
+
+</script>

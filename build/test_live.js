@@ -34,6 +34,7 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   await p.click('[data-f=trend]'); await p.waitForTimeout(300);
   ok('предупреждение «Осторожно» и его скрытие', await p.locator('#caution').count() === 1 && (await p.click('#cx'), await p.locator('#caution').count()) === 0);
   await p.goto(URL + '#feed'); await p.waitForTimeout(400); ok('прямая ссылка на ленту ведёт на рынок', await p.locator('#list').count() === 1);
+  await p.goto(URL + '#invite'); await p.waitForTimeout(300); ok('приглашение: ссылка на сайт в живом режиме, без выдуманных наград', (await p.inputValue('#rlink')).endsWith('?mode=live') && !(await p.textContent('#view')).includes('20%'));
   await p.goto(URL + '#t-' + MINT); await p.waitForTimeout(700); ok('страница монеты и график', (await p.textContent('.thead')).includes('Alpha Coin'));
   ok('монета: покупки/продажи за 24 ч и где торгуется', (await p.textContent('#stats')).includes('Покупок за 24 ч') && (await p.textContent('#stats')).includes('pump.fun'));
   ok('соцсети монеты: только https-ссылки', await p.locator('#socl a').count() === 1 && (await p.getAttribute('#socl a', 'href')) === 'https://x.com/alpha');
@@ -50,7 +51,7 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   await p.goto(URL + '#profile'); await p.waitForTimeout(700); await p.click('[data-tab=closed]'); await p.waitForTimeout(300);
   ok('вкладка «Закрыто»: проданная монета с результатом', (await p.textContent('#view')).includes('Alpha Coin') && (await p.textContent('#view')).includes('продано на'));
   await p.goto(URL + '#deposit'); await p.waitForTimeout(600); ok('экран «Депозит»: адрес и инструкция', (await p.textContent('.dep .addr')).includes('WalletAAA') && (await p.textContent('#view')).includes('сети Solana'));
-  await p.goto(URL + '#profile'); await p.waitForTimeout(700); ok('профиль без демо-кнопок', await p.locator('.qgrid:not(.dq) a').count() === 3 && !(await p.locator('.qgrid a[href="#invite"]').count()) && (await p.locator('.qgrid a[href="#create"]').count()) === 1);
+  await p.goto(URL + '#profile'); await p.waitForTimeout(700); ok('профиль без демо-кнопок', await p.locator('.qgrid:not(.dq) a').count() === 4 && (await p.locator('.qgrid a[href="#invite"]').count()) === 1 && (await p.locator('.qgrid a[href="#create"]').count()) === 1);
   ok('после перезагрузки кошелёк подключился сам', await p.evaluate(() => MB.store.get().wallet.connected));
   ok('в профиле адрес для пополнения', (await p.textContent('.dep .addr')).includes('WalletAAA'));
   await p.goto(URL + '#market'); await p.waitForTimeout(700); await p.click('#walletBtn'); await p.waitForTimeout(500);

@@ -4,8 +4,21 @@ MB.views = MB.views || {};
   const { esc, price, usd } = MB.util;
   MB.views.invite = (() => {
     let root;
+    /** Живой режим: ссылка для друзей и кнопка «Поделиться». Наград пока нет — для них нужен учёт сделок на сервере. */
+    function live(el) {
+      root = el; const link = location.origin + location.pathname + '?mode=live';
+      const text = 'Membuy — buy and sell Solana memecoins in two taps. Live charts, real trades, pump.fun launches. Your funds stay in your wallet.';
+      el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Пригласить друзей</h1>
+        <div class="card stack"><div class="fld"><span>Ссылка на Membuy</span><input id="rlink" class="inp" readonly value="${esc(link)}"></div>
+          <div class="qgrid"><button class="btn accent" id="rshare">Поделиться</button><button class="btn ghost" id="rcopy">Скопировать ссылку</button></div></div>
+        <div class="note">Награды за приглашения пока не начисляются: для честного учёта сделок друзей нужен сервер. Мы сообщим, когда это заработает.</div>`;
+      const copy = () => { const inp = el.querySelector('#rlink'); if (navigator.clipboard) navigator.clipboard.writeText(link).then(() => MB.ui.toast('Ссылка скопирована'), () => { inp.select(); }); else inp.select(); };
+      el.querySelector('#rcopy').onclick = copy;
+      el.querySelector('#rshare').onclick = () => navigator.share ? navigator.share({ title: 'Membuy', text, url: link }).catch(() => {}) : copy();
+    }
     return {
       mount(el) {
+        if (MB.config.LIVE) return live(el);
         root = el; const st = MB.store.get(), code = st.profile.name.replace(/[^a-z0-9_]/gi, '').toUpperCase().slice(0, 12) || 'MEMBUY', link = location.origin + location.pathname + '?ref=' + code;
         el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Пригласить друзей</h1>
           <div class="note">Демо: ссылка и код работают как образец. Начисления появятся после запуска сервера, который считает сделки приглашённых.</div>

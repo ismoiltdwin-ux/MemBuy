@@ -25,4 +25,4 @@ MB.config = {
 try { const m = new URLSearchParams(location.search).get('mode'); if (m === 'live' || m === 'demo') MB.config.MODE = m; } catch (e) { /* нет location */ }
 MB.config.LIVE = MB.config.MODE === 'live';
 // Разделы, которые работают только с выдуманными данными, в живом режиме скрыты
-MB.config.DEMO_ONLY = ['feed', 'leaders', 'invite'];
+MB.config.DEMO_ONLY = ['feed', 'leaders'];

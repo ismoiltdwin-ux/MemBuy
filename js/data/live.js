@@ -21,7 +21,17 @@ MB.providers.live = (() => {
   const byMints = async mints => { const out = []; for (let i = 0; i < mints.length; i += 30) { const d = await j(C.DEX_API + '/latest/dex/tokens/' + mints.slice(i, i + 30).join(',')); out.push(...group(d.pairs)); } return out; };
   /** Новые монеты: последние профили токенов на DexScreener. */
   async function fresh() { const prof = await j(C.DEX_API + '/token-profiles/latest/v1'); return byMints([...new Set((prof || []).filter(x => x.chainId === 'solana').map(x => x.tokenAddress))].slice(0, 30)); }
-  let poolCache = null, poolTs = 0;
+  let poolCache = null, poolTs = 0; const tradeCache = new Map();
+  /** Сделки из GeckoTerminal (до 300, новые первыми); запоминаются на 10 с, чтобы вкладка «Сделки» и свечи 15 с не делали лишних запросов. */
+  async function rawTrades(self, id) {
+    const hit = tradeCache.get(id); if (hit && Date.now() - hit.at < 10000) return hit.list;
+    const t = cache.get(id) || await self.get(id); if (!t || !t.pool) return [];
+    const d = await j(`${C.GECKO_API}/networks/solana/pools/${t.pool}/trades`);
+    const list = ((d && d.data) || []).map(x => x.attributes || {}).filter(a => !a.is_anomalous).map(a => { const sell = a.kind === 'sell';
+      return { ts: Date.parse(a.block_timestamp) / 1000 || 0, side: sell ? 'sell' : 'buy', usd: +a.volume_in_usd || 0, tokens: +(sell ? a.from_token_amount : a.to_token_amount) || 0,
+        price: +(sell ? a.price_from_in_usd : a.price_to_in_usd) || 0, who: String(a.tx_from_address || ''), tx: String(a.tx_hash || '') }; });
+    tradeCache.set(id, { at: Date.now(), list }); return list;
+  }
   /** Общий набор монет (в тренде + новые) для фильтров «Скоро на бирже» и «На бирже». */
   async function pool() { if (poolCache && Date.now() - poolTs < 15000) return poolCache; const [a, b] = await Promise.all([trending().catch(() => []), fresh().catch(() => [])]); const m = new Map(); [...a, ...b].forEach(t => m.set(t.id, t)); poolCache = [...m.values()]; poolTs = Date.now(); return poolCache; }
   const best = pairs => (pairs || []).filter(p => p.chainId === 'solana').sort((a, b) => ((b.liquidity && b.liquidity.usd) || 0) - ((a.liquidity && a.liquidity.usd) || 0))[0];
@@ -53,17 +63,16 @@ MB.providers.live = (() => {
     /** Свечи GeckoTerminal (до 300 штук, старые → новые). tf: 15s, 1m, 5m, 15m, 1h, 4h, 1d. */
     async candles(id, tf) {
       const t = cache.get(id) || await this.get(id); if (!t || !t.pool) return [];
+      // Секундные свечи у GeckoTerminal платные — собираем 15-секундные сами из последних 300 сделок (≈ последние минуты торгов).
+      if (tf === '15s') { const tr = (await rawTrades(this, id)).filter(x => x.price > 0).sort((a, b) => a.ts - b.ts), out = [];
+        for (const x of tr) { const b = Math.floor(x.ts / 15) * 15, c = out[out.length - 1]; if (c && c.t === b) { c.h = Math.max(c.h, x.price); c.l = Math.min(c.l, x.price); c.c = x.price; } else out.push({ t: b, o: c ? c.c : x.price, h: Math.max(x.price, c ? c.c : x.price), l: Math.min(x.price, c ? c.c : x.price), c: x.price }); }
+        return out; }
       const [unit, agg] = TF[tf] || TF['5m'];
       const d = await j(`${C.GECKO_API}/networks/solana/pools/${t.pool}/ohlcv/${unit}?aggregate=${agg}&limit=300`);
       return ((d.data && d.data.attributes && d.data.attributes.ohlcv_list) || []).map(c => ({ t: c[0], o: +c[1], h: +c[2], l: +c[3], c: +c[4] })).sort((x, y) => x.t - y.t);
     },
-    /** Последние сделки по монете (GeckoTerminal): покупка/продажа, сумма в $, кошелёк, время. */
-    async trades(id) {
-      const t = cache.get(id) || await this.get(id); if (!t || !t.pool) return [];
-      const d = await j(`${C.GECKO_API}/networks/solana/pools/${t.pool}/trades`);
-      return ((d && d.data) || []).map(x => x.attributes || {}).map(a => ({ ts: Date.parse(a.block_timestamp) / 1000 || 0, side: a.kind === 'sell' ? 'sell' : 'buy', usd: +a.volume_in_usd || 0,
-        tokens: +(a.kind === 'sell' ? a.from_token_amount : a.to_token_amount) || 0, who: String(a.tx_from_address || ''), tx: String(a.tx_hash || '') })).slice(0, 50);
-    },
+    /** Последние сделки по монете (GeckoTerminal): покупка/продажа, сумма в $, цена, кошелёк, время. */
+    async trades(id) { return (await rawTrades(this, id)).slice(0, 50); },
     /** Крупнейшие держатели (узел Solana): до 20 счетов и их доля от всех монет. Первым обычно стоит пул ликвидности или кривая pump.fun. */
     async holders(id) {
       const t = cache.get(id) || await this.get(id); if (!t) return [];

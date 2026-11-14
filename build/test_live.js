@@ -37,7 +37,7 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   await p.click('[data-act=holders]'); await p.waitForTimeout(500); ok('вкладка «Держатели»: доли 60% и 5%', (await p.textContent('#actb')).includes('60.00%') && (await p.textContent('#actb')).includes('5.00%'));
   await p.click('[data-cu=mc]'); await p.waitForTimeout(300); ok('график в капитализации', await p.evaluate(() => { const m = document.getElementById('cv')._mb; return m && m.hi > 1000; })); await p.click('[data-cu=price]');
   await p.click('[data-ct=candle]'); await p.waitForTimeout(400);
-  for (const [tf, q] of [['15s', 'ohlcv/second?aggregate=15'], ['1m', 'ohlcv/minute?aggregate=1'], ['4h', 'ohlcv/hour?aggregate=4'], ['1d', 'ohlcv/day?aggregate=1']]) { await p.click(`[data-tf="${tf}"]`); await p.waitForTimeout(250); ok('таймфрейм ' + tf + ' запрашивает ' + q, calls.some(u => String(u).includes(q))); }
+  for (const [tf, q] of [['15s', '/trades'], ['1m', 'ohlcv/minute?aggregate=1'], ['4h', 'ohlcv/hour?aggregate=4'], ['1d', 'ohlcv/day?aggregate=1']]) { await p.click(`[data-tf="${tf}"]`); await p.waitForTimeout(250); ok('таймфрейм ' + tf + ' запрашивает ' + q, calls.some(u => String(u).includes(q))); }
   ok('свечи по времени: старые слева, новые справа', await p.evaluate(() => { const m = document.getElementById('cv')._mb; return m && m.N === 24; }));
   await p.fill('#amt', '0.5'); await p.waitForTimeout(500); ok('котировка Jupiter: 37 500 монет за 0.5 SOL', /37[\s,.]?500/.test(await p.textContent('#quote')));
   await p.click('#go'); await p.waitForTimeout(900); ok('покупка: кошелёк подключён, сделка подписана', await p.evaluate(() => MB.store.get().wallet.connected && window.__signed === 1) && (await p.textContent('#tstatus')).includes('Куплено'));

@@ -10,9 +10,22 @@ MB.providers.live = (() => {
     price: +p.priceUsd || 0, mc: p.marketCap || p.fdv || 0, supply: (p.marketCap || p.fdv || 0) / (+p.priceUsd || 1), vol24: (p.volume && p.volume.h24) || 0,
     chg24: (p.priceChange && p.priceChange.h24) || 0, ageDays: p.pairCreatedAt ? (Date.now() - p.pairCreatedAt) / 864e5 : 0, holders: null,
     liquidityUsd: (p.liquidity && p.liquidity.usd) || 0, hue: parseInt(p.baseToken.address.slice(0, 3), 36) % 360, series: [], icon: p.info && p.info.imageUrl,
+    // Подробности для строки и страницы монеты (как в pump.fun): изменения за 5 мин / 1 ч / 6 ч, сделки за сутки, площадка.
+    chg5m: (p.priceChange && p.priceChange.m5) || 0, chg1h: (p.priceChange && p.priceChange.h1) || 0, chg6h: (p.priceChange && p.priceChange.h6) || 0,
+    buys24: (p.txns && p.txns.h24 && p.txns.h24.buys) || 0, sells24: (p.txns && p.txns.h24 && p.txns.h24.sells) || 0, vol1h: (p.volume && p.volume.h1) || 0,
+    dex: p.dexId || '', pump: /pump$/.test(p.baseToken.address),
+    socials: [...((p.info && p.info.websites) || []).map(w => ({ type: 'website', url: w.url })), ...((p.info && p.info.socials) || []).map(s => ({ type: s.type, url: s.url }))].filter(l => l && typeof l.url === 'string' && /^https:\/\//.test(l.url)).slice(0, 4),
   });
+  const group = pairs => { const by = {}; (pairs || []).filter(p => p.chainId === 'solana').forEach(p => { (by[p.baseToken.address] = by[p.baseToken.address] || []).push(p); }); return Object.values(by).map(best).filter(Boolean).map(fromPair); };
+  /** Пары для списка монет (до 30 за запрос — ограничение DexScreener). */
+  const byMints = async mints => { const out = []; for (let i = 0; i < mints.length; i += 30) { const d = await j(C.DEX_API + '/latest/dex/tokens/' + mints.slice(i, i + 30).join(',')); out.push(...group(d.pairs)); } return out; };
+  /** Новые монеты: последние профили токенов на DexScreener. */
+  async function fresh() { const prof = await j(C.DEX_API + '/token-profiles/latest/v1'); return byMints([...new Set((prof || []).filter(x => x.chainId === 'solana').map(x => x.tokenAddress))].slice(0, 30)); }
+  let poolCache = null, poolTs = 0;
+  /** Общий набор монет (в тренде + новые) для фильтров «Скоро на бирже» и «На бирже». */
+  async function pool() { if (poolCache && Date.now() - poolTs < 15000) return poolCache; const [a, b] = await Promise.all([trending().catch(() => []), fresh().catch(() => [])]); const m = new Map(); [...a, ...b].forEach(t => m.set(t.id, t)); poolCache = [...m.values()]; poolTs = Date.now(); return poolCache; }
   const best = pairs => (pairs || []).filter(p => p.chainId === 'solana').sort((a, b) => ((b.liquidity && b.liquidity.usd) || 0) - ((a.liquidity && a.liquidity.usd) || 0))[0];
-  const sorters = { trend: (a, b) => b.vol24 - a.vol24, fresh: (a, b) => a.ageDays - b.ageDays, gain: (a, b) => b.chg24 - a.chg24, vol: (a, b) => b.vol24 - a.vol24 };
+  const sorters = { trend: (a, b) => b.vol24 - a.vol24, fresh: (a, b) => a.ageDays - b.ageDays, soon: (a, b) => b.mc - a.mc, graduated: (a, b) => b.vol24 - a.vol24, gain: (a, b) => b.chg24 - a.chg24, vol: (a, b) => b.vol24 - a.vol24 };
   async function trending() {
     const boosts = await j(C.DEX_API + '/token-boosts/top/v1');
     const mints = [...new Set(boosts.filter(b => b.chainId === 'solana').map(b => b.tokenAddress))].slice(0, 30);
@@ -26,10 +39,16 @@ MB.providers.live = (() => {
     async list(filter = 'trend', q = '') {
       let out;
       if (q.trim()) { const d = await j(C.DEX_API + '/latest/dex/search?q=' + encodeURIComponent(q.trim())); const by = {}; (d.pairs || []).filter(p => p.chainId === 'solana').forEach(p => { (by[p.baseToken.address] = by[p.baseToken.address] || []).push(p); }); out = Object.values(by).map(best).map(fromPair); }
+      else if (filter === 'fresh') out = await fresh();
+      // pump.fun: монета сначала торгуется на «кривой» pump.fun (площадка pumpfun), а набрав капитализацию — выходит на биржу (PumpSwap / Raydium).
+      else if (filter === 'soon') out = (await pool()).filter(t => t.dex === 'pumpfun');
+      else if (filter === 'graduated') out = (await pool()).filter(t => t.pump && t.dex !== 'pumpfun');
       else out = await trending();
       out.forEach(t => cache.set(t.id, t)); if (filter === 'fav') { const fav = MB.store.get().fav; out = out.filter(t => fav.includes(t.id)); }
       return out.sort(sorters[filter] || sorters.trend);
     },
+    /** Обновить сразу несколько монет одним запросом (для строк списка). */
+    async many(ids) { const ts = await byMints(ids); ts.forEach(t => cache.set(t.id, t)); return ts; },
     async get(id) { const d = await j(C.DEX_API + '/latest/dex/tokens/' + id); const p = best(d.pairs); if (!p) return cache.get(id) || null; const t = fromPair(p); cache.set(id, t); return t; },
     /** Свечи GeckoTerminal (до 300 штук, старые → новые). tf: 15s, 1m, 5m, 15m, 1h, 4h, 1d. */
     async candles(id, tf) {

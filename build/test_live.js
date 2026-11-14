@@ -3,7 +3,7 @@
 const { chromium } = require('playwright'); const path = require('path');
 const URL = 'file://' + path.join(__dirname, '..', 'index.html') + '?mode=live';
 const OWNER = 'OwnerAAA111111111111111111111111111111111111', chain = []; const SOL = 'So11111111111111111111111111111111111111112', MINT = 'MintAAA1111111111111111111111111111111111111';
-const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Pool' + sym, baseToken: { address: addr, symbol: sym, name }, priceUsd: String(price), marketCap: 2e6, volume: { h24: 5e4 }, priceChange: { h24: 12 }, liquidity: { usd: 8e4 }, pairCreatedAt: Date.now() - 864e5 });
+const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Pool' + sym, baseToken: { address: addr, symbol: sym, name }, priceUsd: String(price), marketCap: 2e6, volume: { h24: 5e4 }, priceChange: { m5: 1.5, h1: -2, h6: 4, h24: 12 }, txns: { h24: { buys: 120, sells: 80 } }, dexId: addr === MINT ? 'pumpfun' : 'raydium', info: { imageUrl: '', socials: [{ type: 'twitter', url: 'https://x.com/alpha' }, { type: 'telegram', url: 'javascript:alert(1)' }] }, liquidity: { usd: 8e4 }, pairCreatedAt: Date.now() - 864e5 });
 (async () => {
   const b = await chromium.launch(), p = await b.newPage({ viewport: { width: 390, height: 844 } }), errs = [], res = [], calls = []; const ok = (n, c) => res.push((c ? 'PASS ' : 'FAIL ') + n);
   p.on('pageerror', e => errs.push(e.message));
@@ -14,7 +14,7 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
     SystemProgram: { transfer: o => ({ type: 'transfer', from: String(o.fromPubkey), to: String(o.toPubkey), lamports: o.lamports }) },
     TransactionInstruction: class { constructor(o) { this.type = 'memo'; this.memo = new TextDecoder().decode(o.data); } } }; });
   const json = (route, body) => route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) });
-  await p.route('https://api.dexscreener.com/**', r => { const u = r.request().url(); calls.push(u); if (u.includes('token-boosts')) return json(r, [{ chainId: 'solana', tokenAddress: MINT }]); if (u.includes(SOL)) return json(r, { pairs: [pair(SOL, 'SOL', 'Solana', 150)] }); return json(r, { pairs: [pair(MINT, 'AAA', 'Alpha Coin', 0.002)] }); });
+  await p.route('https://api.dexscreener.com/**', r => { const u = r.request().url(); calls.push(u); if (u.includes('token-boosts') || u.includes('token-profiles')) return json(r, [{ chainId: 'solana', tokenAddress: MINT }]); if (u.includes(SOL)) return json(r, { pairs: [pair(SOL, 'SOL', 'Solana', 150)] }); return json(r, { pairs: [pair(MINT, 'AAA', 'Alpha Coin', 0.002)] }); });
   await p.route('https://api.geckoterminal.com/**', r => (calls.push(r.request().url()), json(r, { data: { attributes: { ohlcv_list: Array.from({ length: 24 }, (_, i) => [1e9 - i * 3600, 0.002, 0.0022, 0.0019, 0.002 + i * 1e-5, 100]) } } })));
   await p.route(u => /solana\.com|helius-rpc\.com/.test(String(u)), r => { const body = JSON.parse(r.request().postData()), m = body.method; calls.push(m);
     if (m === 'getLatestBlockhash') return json(r, { jsonrpc: '2.0', id: 1, result: { value: { blockhash: 'BH1' } } });
@@ -25,8 +25,14 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   ok('демо-плашка скрыта', await p.evaluate(() => document.getElementById('demoBar').hidden && MB.config.MODE === 'live'));
   ok('разделы с выдуманными данными скрыты', await p.evaluate(() => [...document.querySelectorAll('[data-nav=feed],[data-nav=leaders]')].every(a => a.hidden)));
   ok('список монет из DexScreener', await p.locator('#list a.row[data-id]').count() === 1 && (await p.textContent('#list')).includes('Alpha Coin'));
+  ok('строка: сделки, МК, изменения за 5 мин / 1 ч / 6 ч, значок pump.fun', await p.evaluate(() => { const t = document.querySelector('#list a.row[data-id]').textContent; return t.includes('Сделок: 200') && t.includes('МК') && t.includes('5 мин') && t.includes('pump.fun'); }));
+  for (const [f, n] of [['fresh', 1], ['soon', 1], ['graduated', 0]]) { await p.click(`[data-f=${f}]`); await p.waitForTimeout(400); ok('фильтр ' + f + ': монет ' + n, await p.locator('#list a.row[data-id]').count() === n); }
+  await p.click('[data-f=trend]'); await p.waitForTimeout(300);
+  ok('предупреждение «Осторожно» и его скрытие', await p.locator('#caution').count() === 1 && (await p.click('#cx'), await p.locator('#caution').count()) === 0);
   await p.goto(URL + '#feed'); await p.waitForTimeout(400); ok('прямая ссылка на ленту ведёт на рынок', await p.locator('#list').count() === 1);
   await p.goto(URL + '#t-' + MINT); await p.waitForTimeout(700); ok('страница монеты и график', (await p.textContent('.thead')).includes('Alpha Coin'));
+  ok('монета: покупки/продажи за 24 ч и где торгуется', (await p.textContent('#stats')).includes('Покупок за 24 ч') && (await p.textContent('#stats')).includes('pump.fun'));
+  ok('соцсети монеты: только https-ссылки', await p.locator('#socl a').count() === 1 && (await p.getAttribute('#socl a', 'href')) === 'https://x.com/alpha');
   await p.click('[data-ct=candle]'); await p.waitForTimeout(400);
   for (const [tf, q] of [['15s', 'ohlcv/second?aggregate=15'], ['1m', 'ohlcv/minute?aggregate=1'], ['4h', 'ohlcv/hour?aggregate=4'], ['1d', 'ohlcv/day?aggregate=1']]) { await p.click(`[data-tf="${tf}"]`); await p.waitForTimeout(250); ok('таймфрейм ' + tf + ' запрашивает ' + q, calls.some(u => String(u).includes(q))); }
   ok('свечи по времени: старые слева, новые справа', await p.evaluate(() => { const m = document.getElementById('cv')._mb; return m && m.N === 24; }));
@@ -34,7 +40,10 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   await p.click('#go'); await p.waitForTimeout(900); ok('покупка: кошелёк подключён, сделка подписана', await p.evaluate(() => MB.store.get().wallet.connected && window.__signed === 1) && (await p.textContent('#tstatus')).includes('Куплено'));
   await p.evaluate(() => MB.wallet.refresh()); await p.waitForTimeout(400); ok('баланс SOL и монет прочитан из сети', await p.evaluate(m => MB.store.get().wallet.sol === 2 && MB.store.get().holdings[m] && MB.store.get().holdings[m].qty === 37500, MINT));
   await p.click('#sellall'); await p.waitForTimeout(500); await p.click('#go'); await p.waitForTimeout(900); ok('продажа всей позиции подписана', await p.evaluate(() => window.__signed === 2));
-  await p.goto(URL + '#profile'); await p.waitForTimeout(700); ok('профиль без демо-кнопок', await p.locator('.qgrid a').count() === 2 && !(await p.locator('.qgrid a[href="#create"]').count()));
+  await p.goto(URL + '#profile'); await p.waitForTimeout(700); await p.click('[data-tab=closed]'); await p.waitForTimeout(300);
+  ok('вкладка «Закрыто»: проданная монета с результатом', (await p.textContent('#view')).includes('Alpha Coin') && (await p.textContent('#view')).includes('продано на'));
+  await p.goto(URL + '#deposit'); await p.waitForTimeout(600); ok('экран «Депозит»: адрес и инструкция', (await p.textContent('.dep .addr')).includes('WalletAAA') && (await p.textContent('#view')).includes('сети Solana'));
+  await p.goto(URL + '#profile'); await p.waitForTimeout(700); ok('профиль без демо-кнопок', await p.locator('.qgrid:not(.dq) a').count() === 2 && !(await p.locator('.qgrid a[href="#create"]').count()));
   ok('после перезагрузки кошелёк подключился сам', await p.evaluate(() => MB.store.get().wallet.connected));
   ok('в профиле адрес для пополнения', (await p.textContent('.dep .addr')).includes('WalletAAA'));
   await p.goto(URL + '#market'); await p.waitForTimeout(700); await p.click('#walletBtn'); await p.waitForTimeout(500);

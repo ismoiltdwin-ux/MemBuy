@@ -2,8 +2,8 @@
 (() => {
   const C = MB.config; MB.data = MB.providers[C.MODE === 'live' ? 'live' : 'demo'];
   const main = document.getElementById('view'); let cur = null;
-  const routes = { market: MB.views.market, feed: MB.views.feed, leaders: MB.views.leaders, profile: MB.views.profile, create: MB.views.create, ads: MB.views.ads, invite: MB.views.invite, prefs: MB.views.prefs, search: MB.views.search, notes: MB.views.notes, help: MB.views.help, terms: MB.views.terms, privacy: MB.views.privacy };
-  const SUB = { create: 'profile', ads: 'profile', invite: 'profile', prefs: 'profile', notes: 'profile', search: 'market', help: 'profile', terms: 'profile', privacy: 'profile' };
+  const routes = { market: MB.views.market, feed: MB.views.feed, leaders: MB.views.leaders, profile: MB.views.profile, create: MB.views.create, ads: MB.views.ads, invite: MB.views.invite, prefs: MB.views.prefs, search: MB.views.search, notes: MB.views.notes, help: MB.views.help, deposit: MB.views.deposit, terms: MB.views.terms, privacy: MB.views.privacy };
+  const SUB = { create: 'profile', ads: 'profile', invite: 'profile', prefs: 'profile', notes: 'profile', search: 'market', help: 'profile', deposit: 'profile', terms: 'profile', privacy: 'profile' };
   function header() {
     const st0 = MB.store.get(); document.getElementById('bell').classList.toggle('has', st0.unread > 0); document.getElementById('bell').setAttribute('aria-label', 'Уведомления' + (st0.unread ? ': новых ' + st0.unread : ''));
     document.getElementById('walletSlot').innerHTML = MB.ui.walletBtn();

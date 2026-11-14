@@ -36,6 +36,21 @@ MB.views = MB.views || {};
     },
   };
 
+  /** Пополнение: адрес кошелька и пошаговая инструкция. */
+  MB.views.deposit = {
+    mount(el) {
+      const st = MB.store.get(), { esc } = MB.util;
+      if (!st.wallet.connected) { el.innerHTML = `${back}<h1 class="pt">Депозит</h1>` + MB.ui.empty('Кошелёк не подключён', 'Подключите кошелёк, чтобы увидеть адрес для пополнения.', '<button class="btn accent" id="dcw">Подключить кошелёк</button>'); el.querySelector('#dcw').onclick = () => MB.wallet.connect().then(() => MB.views.deposit.mount(el), e => MB.ui.toast(e.message, 'err')); return; }
+      if (!C.LIVE) { el.innerHTML = `${back}<h1 class="pt">Депозит</h1><div class="note">В демо пополнять не нужно: на учебном кошельке ${C.DEMO_START_SOL} условных SOL.</div>`; return; }
+      el.innerHTML = `${back}<h1 class="pt">Депозит</h1>
+        <div class="card dep"><h2 class="h2">Ваш адрес в сети Solana</h2><code class="addr">${esc(st.wallet.address)}</code><div class="qgrid"><button class="btn accent" id="dcopy">Скопировать адрес</button><button class="btn ghost" id="dref">Обновить баланс</button></div></div>
+        <div class="note">Отправляйте только SOL и только в сети Solana. Монеты из другой сети (например, BEP20 или ERC20) на этот адрес пропадут.</div>
+        <div class="card"><h2 class="h2">Как пополнить с биржи</h2><ol class="ol"><li>Купите SOL на бирже (Bybit, Binance и др.).</li><li>Откройте «Вывод», выберите монету SOL и сеть Solana.</li><li>Вставьте адрес выше и подтвердите вывод.</li><li>Через 1–2 минуты нажмите «Обновить баланс».</li></ol></div>`;
+      el.querySelector('#dcopy').onclick = () => navigator.clipboard.writeText(st.wallet.address).then(() => MB.ui.toast('Адрес скопирован'), () => MB.ui.toast('Не удалось скопировать — выделите адрес вручную', 'err'));
+      el.querySelector('#dref').onclick = () => MB.wallet.refresh().then(() => MB.ui.toast('Баланс обновлён'), e => MB.ui.toast(e.message, 'err'));
+    },
+  };
+
   /** Знакомство при первом входе: три шага, показывается один раз для каждого режима. */
   const KEY = 'membuy-onb-' + C.MODE;
   const STEPS = () => C.LIVE ? [

@@ -200,6 +200,18 @@ footer .langs{margin-bottom:12px}
 .faq details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
 .faq summary{cursor:pointer;font-weight:700}
 .faq p{color:var(--muted);margin-top:8px}
+.mrow .nm small{white-space:normal;overflow:visible}
+.mrow .st{color:var(--muted);font-size:12.5px}
+.chs{display:flex;gap:6px;flex-wrap:nowrap;margin-top:2px;white-space:nowrap}
+.chs i{font-style:normal;font-size:11.5px;font-weight:700}.chs em{font-style:normal;color:var(--muted);font-weight:600}
+.dexb{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:6px;background:var(--surface2);color:var(--muted);margin-left:4px}
+.dexb.pf{background:#3ddc9722;color:var(--up)}
+.caution{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:start}
+.caution b{grid-column:1}.caution span{grid-column:1;font-size:13px}
+.caution .x{grid-row:1/3;grid-column:2;background:none;border:0;color:inherit;font-size:22px;line-height:1;cursor:pointer;padding:2px 6px}
+.dep .dq{margin:6px 0 10px}
+.socl{margin-top:-4px}
+@media(max-width:860px){.socl{order:5}}
 </style>
 <div class="demo" id="demoBar" hidden>Демо-режим: монеты и сделки учебные, настоящие деньги не используются</div>
 <div class="offline" id="offlineBar" hidden>Нет соединения. Показываем последние данные.</div>
@@ -386,6 +398,39 @@ MB.i18n = (() => {
     'Профиль, сделки, фото и настройки хранятся только в вашем браузере. У Membuy нет своего сервера, и мы их не получаем.': ["Your profile, trades, photo and settings are stored only in your browser. Membuy has no server of its own and does not receive them.", "Профил, савдоҳо, акс ва танзимот танҳо дар браузери шумо нигоҳ дошта мешаванд. Membuy сервери худро надорад ва онҳоро намегирад."],
     'В режиме с настоящими деньгами сайт обращается к DexScreener и GeckoTerminal (цены и графики), Jupiter (расчёт и подготовка сделки) и узлу сети Solana (балансы). Им передаются ваш IP-адрес, а Jupiter и узлу Solana — ещё и адрес кошелька, без него нельзя посчитать сделку и баланс.': ["In real-money mode the site calls DexScreener and GeckoTerminal (prices and charts), Jupiter (quotes and trade preparation) and a Solana network node (balances). They receive your IP address, and Jupiter and the Solana node also receive your wallet address — trades and balances cannot be calculated without it.", "Дар реҷаи пули воқеӣ сайт ба DexScreener ва GeckoTerminal (нархҳо ва графикҳо), Jupiter (ҳисоб ва омодасозии савдо) ва гиреҳи шабакаи Solana (балансҳо) муроҷиат мекунад. Ба онҳо IP-суроғаи шумо, ба Jupiter ва гиреҳи Solana инчунин суроғаи ҳамён фиристода мешавад — бе он савдо ва балансро ҳисоб кардан мумкин нест."],
     'Сделки и рекламные объявления записываются в блокчейн Solana и видны всем.': ["Trades and ads are recorded on the Solana blockchain and are visible to everyone.", "Савдоҳо ва эълонҳои рекламавӣ дар блокчейни Solana сабт мешаванд ва ба ҳама намоёнанд."],
+    "Скоро на бирже": ["Soon", "Ба наздикӣ дар биржа"],
+    "На бирже": ["Graduated", "Дар биржа"],
+    "Осторожно": ["Proceed with caution", "Эҳтиёт шавед"],
+    "Новые монеты очень волатильны. Выпустить монету может кто угодно, в том числе мошенники.": ["New coins are highly volatile. Anyone can launch a coin, including bad actors.", "Тангаҳои нав хеле ноустуворанд. Тангаро ҳар кас, аз ҷумла қаллобон, бароварда метавонад."],
+    "Скрыть предупреждение": ["Hide warning", "Пинҳон кардани огоҳӣ"],
+    "биржа": ["DEX", "биржа"],
+    "5 мин": ["5m", "5 дақ"],
+    "6 ч": ["6h", "6 с"],
+    "Изменение за 5 мин": ["5m change", "Тағйир дар 5 дақ"],
+    "Изменение за 1 ч": ["1h change", "Тағйир дар 1 с"],
+    "Изменение за 6 ч": ["6h change", "Тағйир дар 6 с"],
+    "Покупок за 24 ч": ["Buys (24h)", "Харидҳо дар 24 с"],
+    "Продаж за 24 ч": ["Sells (24h)", "Фурӯшҳо дар 24 с"],
+    "Где торгуется": ["Trading venue", "Дар куҷо савдо мешавад"],
+    "pump.fun (кривая)": ["pump.fun (bonding curve)", "pump.fun (каҷхат)"],
+    "Биржа (вышла с pump.fun)": ["DEX (graduated from pump.fun)", "Биржа (аз pump.fun баромад)"],
+    "Сайт": ["Website", "Сайт"],
+    "Купите свой первый токен сегодня": ["Buy your first token today", "Тангаи аввалини худро имрӯз харед"],
+    "Все монеты": ["All coins", "Ҳамаи тангаҳо"],
+    "Открыто": ["Open", "Кушода"],
+    "Закрыто": ["Closed", "Баста"],
+    "Закрытых позиций нет": ["No closed positions", "Мавқеъҳои басташуда нест"],
+    "Здесь появятся монеты, которые вы купили и полностью продали.": ["Coins you bought and fully sold will appear here.", "Тангаҳое, ки харидед ва пурра фурӯхтед, дар ин ҷо пайдо мешаванд."],
+    "Депозит": ["Deposit", "Пур кардан"],
+    "Получить": ["Receive", "Гирифтан"],
+    "Подключите кошелёк, чтобы увидеть адрес для пополнения.": ["Connect your wallet to see your deposit address.", "Барои дидани суроғаи пур кардан ҳамёнро пайваст кунед."],
+    "Ваш адрес в сети Solana": ["Your Solana address", "Суроғаи шумо дар шабакаи Solana"],
+    "Отправляйте только SOL и только в сети Solana. Монеты из другой сети (например, BEP20 или ERC20) на этот адрес пропадут.": ["Send only SOL and only on the Solana network. Coins sent from another network (e.g. BEP20 or ERC20) to this address will be lost.", "Танҳо SOL ва танҳо дар шабакаи Solana фиристед. Тангаҳо аз шабакаи дигар (масалан, BEP20 ё ERC20) ба ин суроға гум мешаванд."],
+    "Как пополнить с биржи": ["How to deposit from an exchange", "Чӣ тавр аз биржа пур кардан"],
+    "Купите SOL на бирже (Bybit, Binance и др.).": ["Buy SOL on an exchange (Bybit, Binance, etc.).", "Дар биржа (Bybit, Binance ва ғ.) SOL харед."],
+    "Откройте «Вывод», выберите монету SOL и сеть Solana.": ["Open “Withdraw”, choose the SOL coin and the Solana network.", "«Баровардан»-ро кушоед, тангаи SOL ва шабакаи Solana-ро интихоб кунед."],
+    "Вставьте адрес выше и подтвердите вывод.": ["Paste the address above and confirm the withdrawal.", "Суроғаи болоро гузоред ва баровардани пулро тасдиқ кунед."],
+    "Через 1–2 минуты нажмите «Обновить баланс».": ["After 1–2 minutes tap “Refresh balance”.", "Пас аз 1–2 дақиқа «Навсозии баланс»-ро пахш кунед."],
     'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
     'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
     'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
@@ -417,6 +462,8 @@ MB.i18n = (() => {
   // Шаблоны: [регулярное выражение, English, Тоҷикӣ]
   const R = [
     [/^(.+) SOL · (\d+) дн\. · (.+)$/, '$1 SOL · $2 days · $3', '$1 SOL · $2 рӯз · $3'], [/^до (\d.+)$/, 'until $1', 'то $1'],
+    [/^Куплено на (.+) · продано на (.+)$/, 'Bought for $1 · sold for $2', 'Харида шуд ба $1 · фурӯхта шуд ба $2'], [/^МК (.+)$/, 'MC $1', 'КБ $1'], [/^Об\. (.+)$/, 'Vol $1', 'Ҳаҷм $1'], [/^Сделок: (.+)$/, 'Txns: $1', 'Савдоҳо: $1'],
+    [/^(\d+) мин$/, '$1m', '$1 дақ'], [/^(\d+) ч$/, '$1h', '$1 с'], [/^В демо пополнять не нужно: на учебном кошельке (\d+) условных SOL\.$/, 'No deposit needed in the demo: the practice wallet holds $1 play SOL.', 'Дар демо пур кардан лозим нест: дар ҳамёни омӯзишӣ $1 SOL-и шартӣ ҳаст.'],
     [/^Куплено (.+) за (.+)$/, 'Bought $1 for $2', 'Харида шуд: $1 ба $2'], [/^Продано (.+) за (.+)$/, 'Sold $1 for $2', 'Фурӯхта шуд: $1 ба $2'],
     [/^Куплено (.+)$/, 'Bought $1', 'Харида шуд: $1'], [/^Продано (.+)$/, 'Sold $1', 'Фурӯхта шуд: $1'],
     [/^Купить (.+)$/, 'Buy $1', 'Харидани $1'], [/^Продать (.+)$/, 'Sell $1', 'Фурӯхтани $1'],
@@ -562,18 +609,22 @@ MB.providers.demo = (() => {
   const build = c => { const price = 0.000004, n = 168, rr = MB.util.rng(c.seed), series = []; for (let i = 0; i < n; i++) series.push(price * (0.97 + rr() * 0.06)); series[n - 1] = price;
     return { id: c.sym, sym: c.sym, name: c.name, desc: c.desc, mint: 'DEMO' + c.sym, price, mc: 4000, supply: 1e9, vol24: 600, chg24: 0, ageDays: (Date.now() - c.ts) / 864e5, holders: 1, liquidityUsd: 2400, hue: c.seed % 360, series, icon: c.icon, mine: true, links: c.links }; };
   MB.store.get().coins.forEach(c => tokens.push(build(c)));
+  /** Подробности как в pump.fun: изменения за 5 мин / 1 ч / 6 ч, сделки за сутки, площадка (до $1 млн — «кривая» pump.fun, дальше — биржа). */
+  const enrich = t => { const s = t.series, n = s.length, ch = k => (t.price / s[Math.max(0, n - 1 - k)] - 1) * 100; t.chg5m = ch(1); t.chg1h = ch(2); t.chg6h = ch(6);
+    const tx = Math.round(t.vol24 / 85); t.buys24 = Math.round(tx * 0.56); t.sells24 = tx - t.buys24; t.dex = t.mc < 1e6 ? 'pumpfun' : 'pumpswap'; t.pump = true; t.socials = t.socials || []; return t; };
+  tokens.forEach(enrich);
   const r = MB.util.rng(42); let timer = null;
   const tick = () => {
     tokens.forEach(t => {
       const step = (r() - 0.49) * 0.018; t.price = Math.max(t.price * 0.2, t.price * (1 + step));
-      t.series.push(t.price); t.series.shift(); t.mc = t.price * t.supply; t.chg24 = (t.price / t.series[t.series.length - 25] - 1) * 100;
+      t.series.push(t.price); t.series.shift(); t.mc = t.price * t.supply; t.chg24 = (t.price / t.series[t.series.length - 25] - 1) * 100; enrich(t);
     });
     MB.util.bus.emit('tick');
   };
-  const sorters = { fav: (a, b) => b.vol24 - a.vol24, trend: (a, b) => b.vol24 / b.mc - a.vol24 / a.mc, fresh: (a, b) => a.ageDays - b.ageDays, gain: (a, b) => b.chg24 - a.chg24, vol: (a, b) => b.vol24 - a.vol24 };
+  const sorters = { fav: (a, b) => b.vol24 - a.vol24, trend: (a, b) => b.vol24 / b.mc - a.vol24 / a.mc, fresh: (a, b) => a.ageDays - b.ageDays, soon: (a, b) => b.mc - a.mc, graduated: (a, b) => b.vol24 - a.vol24, gain: (a, b) => b.chg24 - a.chg24, vol: (a, b) => b.vol24 - a.vol24 };
   return {
     start() { if (!timer) timer = setInterval(tick, 2500); },
-    async list(filter = 'trend', q = '') { const s = q.trim().toLowerCase(), fav = MB.store.get().fav; return tokens.filter(t => filter !== 'fav' || fav.includes(t.id)).filter(t => !s || t.sym.toLowerCase().includes(s) || t.name.toLowerCase().includes(s)).sort(sorters[filter] || sorters.trend); },
+    async list(filter = 'trend', q = '') { const s = q.trim().toLowerCase(), fav = MB.store.get().fav; return tokens.filter(t => filter !== 'fav' || fav.includes(t.id)).filter(t => filter !== 'soon' || t.dex === 'pumpfun').filter(t => filter !== 'graduated' || t.dex !== 'pumpfun').filter(t => !s || t.sym.toLowerCase().includes(s) || t.name.toLowerCase().includes(s)).sort(sorters[filter] || sorters.trend); },
     async get(id) { return tokens.find(t => t.id === id) || null; },
     /** Учебные свечи для любого таймфрейма: детерминированное случайное блуждание, которое заканчивается текущей ценой. */
     async candles(id, tf) {
@@ -586,7 +637,7 @@ MB.providers.demo = (() => {
     async series(id, tf) { const t = tokens.find(x => x.id === id); if (!t) return []; return tf ? (await this.candles(id, tf)).map(c => c.c) : t.series; },
     solUsd: async () => MB.config.SOL_USD_DEMO,
     has: sym => tokens.some(t => t.sym.toLowerCase() === sym.toLowerCase()),
-    add(c) { const t = build(c); tokens.push(t); return t; },
+    add(c) { const t = enrich(build(c)); tokens.push(t); return t; },
     all: () => tokens,
   };
 })();
@@ -603,9 +654,22 @@ MB.providers.live = (() => {
     price: +p.priceUsd || 0, mc: p.marketCap || p.fdv || 0, supply: (p.marketCap || p.fdv || 0) / (+p.priceUsd || 1), vol24: (p.volume && p.volume.h24) || 0,
     chg24: (p.priceChange && p.priceChange.h24) || 0, ageDays: p.pairCreatedAt ? (Date.now() - p.pairCreatedAt) / 864e5 : 0, holders: null,
     liquidityUsd: (p.liquidity && p.liquidity.usd) || 0, hue: parseInt(p.baseToken.address.slice(0, 3), 36) % 360, series: [], icon: p.info && p.info.imageUrl,
+    // Подробности для строки и страницы монеты (как в pump.fun): изменения за 5 мин / 1 ч / 6 ч, сделки за сутки, площадка.
+    chg5m: (p.priceChange && p.priceChange.m5) || 0, chg1h: (p.priceChange && p.priceChange.h1) || 0, chg6h: (p.priceChange && p.priceChange.h6) || 0,
+    buys24: (p.txns && p.txns.h24 && p.txns.h24.buys) || 0, sells24: (p.txns && p.txns.h24 && p.txns.h24.sells) || 0, vol1h: (p.volume && p.volume.h1) || 0,
+    dex: p.dexId || '', pump: /pump$/.test(p.baseToken.address),
+    socials: [...((p.info && p.info.websites) || []).map(w => ({ type: 'website', url: w.url })), ...((p.info && p.info.socials) || []).map(s => ({ type: s.type, url: s.url }))].filter(l => l && typeof l.url === 'string' && /^https:\/\//.test(l.url)).slice(0, 4),
   });
+  const group = pairs => { const by = {}; (pairs || []).filter(p => p.chainId === 'solana').forEach(p => { (by[p.baseToken.address] = by[p.baseToken.address] || []).push(p); }); return Object.values(by).map(best).filter(Boolean).map(fromPair); };
+  /** Пары для списка монет (до 30 за запрос — ограничение DexScreener). */
+  const byMints = async mints => { const out = []; for (let i = 0; i < mints.length; i += 30) { const d = await j(C.DEX_API + '/latest/dex/tokens/' + mints.slice(i, i + 30).join(',')); out.push(...group(d.pairs)); } return out; };
+  /** Новые монеты: последние профили токенов на DexScreener. */
+  async function fresh() { const prof = await j(C.DEX_API + '/token-profiles/latest/v1'); return byMints([...new Set((prof || []).filter(x => x.chainId === 'solana').map(x => x.tokenAddress))].slice(0, 30)); }
+  let poolCache = null, poolTs = 0;
+  /** Общий набор монет (в тренде + новые) для фильтров «Скоро на бирже» и «На бирже». */
+  async function pool() { if (poolCache && Date.now() - poolTs < 15000) return poolCache; const [a, b] = await Promise.all([trending().catch(() => []), fresh().catch(() => [])]); const m = new Map(); [...a, ...b].forEach(t => m.set(t.id, t)); poolCache = [...m.values()]; poolTs = Date.now(); return poolCache; }
   const best = pairs => (pairs || []).filter(p => p.chainId === 'solana').sort((a, b) => ((b.liquidity && b.liquidity.usd) || 0) - ((a.liquidity && a.liquidity.usd) || 0))[0];
-  const sorters = { trend: (a, b) => b.vol24 - a.vol24, fresh: (a, b) => a.ageDays - b.ageDays, gain: (a, b) => b.chg24 - a.chg24, vol: (a, b) => b.vol24 - a.vol24 };
+  const sorters = { trend: (a, b) => b.vol24 - a.vol24, fresh: (a, b) => a.ageDays - b.ageDays, soon: (a, b) => b.mc - a.mc, graduated: (a, b) => b.vol24 - a.vol24, gain: (a, b) => b.chg24 - a.chg24, vol: (a, b) => b.vol24 - a.vol24 };
   async function trending() {
     const boosts = await j(C.DEX_API + '/token-boosts/top/v1');
     const mints = [...new Set(boosts.filter(b => b.chainId === 'solana').map(b => b.tokenAddress))].slice(0, 30);
@@ -619,10 +683,16 @@ MB.providers.live = (() => {
     async list(filter = 'trend', q = '') {
       let out;
       if (q.trim()) { const d = await j(C.DEX_API + '/latest/dex/search?q=' + encodeURIComponent(q.trim())); const by = {}; (d.pairs || []).filter(p => p.chainId === 'solana').forEach(p => { (by[p.baseToken.address] = by[p.baseToken.address] || []).push(p); }); out = Object.values(by).map(best).map(fromPair); }
+      else if (filter === 'fresh') out = await fresh();
+      // pump.fun: монета сначала торгуется на «кривой» pump.fun (площадка pumpfun), а набрав капитализацию — выходит на биржу (PumpSwap / Raydium).
+      else if (filter === 'soon') out = (await pool()).filter(t => t.dex === 'pumpfun');
+      else if (filter === 'graduated') out = (await pool()).filter(t => t.pump && t.dex !== 'pumpfun');
       else out = await trending();
       out.forEach(t => cache.set(t.id, t)); if (filter === 'fav') { const fav = MB.store.get().fav; out = out.filter(t => fav.includes(t.id)); }
       return out.sort(sorters[filter] || sorters.trend);
     },
+    /** Обновить сразу несколько монет одним запросом (для строк списка). */
+    async many(ids) { const ts = await byMints(ids); ts.forEach(t => cache.set(t.id, t)); return ts; },
     async get(id) { const d = await j(C.DEX_API + '/latest/dex/tokens/' + id); const p = best(d.pairs); if (!p) return cache.get(id) || null; const t = fromPair(p); cache.set(id, t); return t; },
     /** Свечи GeckoTerminal (до 300 штук, старые → новые). tf: 15s, 1m, 5m, 15m, 1h, 4h, 1d. */
     async candles(id, tf) {
@@ -997,10 +1067,19 @@ MB.ui = MB.ui || {};
 MB.views = MB.views || {};
 MB.views.market = (() => {
   const { esc, price, usd } = MB.util; let filter = 'trend', q = '', root;
-  const FILTERS = [['trend', 'В тренде'], ['fresh', 'Новые'], ['gain', 'Растут'], ['vol', 'По объёму'], ['fav', '★ Избранное']];
-  const row = t => `<a class="row" data-id="${esc(t.id)}" href="#t-${esc(t.id)}">
-      ${MB.ui.avatar(t)}<span class="nm"><b>${esc(t.name)}</b><small>${esc(t.sym)} · кап. ${usd(t.mc)}</small></span>
+  const FILTERS = [['trend', 'В тренде'], ['fresh', 'Новые'], ['soon', 'Скоро на бирже'], ['graduated', 'На бирже'], ['gain', 'Растут'], ['vol', 'По объёму'], ['fav', '★ Избранное']];
+  const CKEY = 'membuy-caution-hidden';
+  const age = d => d < 1 / 24 ? Math.max(1, Math.round(d * 1440)) + ' мин' : d < 1 ? Math.round(d * 24) + ' ч' : Math.round(d) + ' дн.';
+  const pc = (label, v) => `<i class="${v >= 0 ? 'up' : 'down'}"><em>${label}</em> ${MB.util.pct(v || 0)}</i>`;
+  /** Цифры строки: капитализация, объём, сделки и изменения цены — как в pump.fun. */
+  const stats = t => `<small class="st"><span>МК ${usd(t.mc)}</span> · <span>Об. ${usd(t.vol24)}</span>${t.buys24 != null ? ` · <span>Сделок: ${MB.util.num((t.buys24 || 0) + (t.sells24 || 0), 0)}</span>` : ''}</small>
+      <span class="chs">${pc('5 мин', t.chg5m)}${pc('1 ч', t.chg1h)}${pc('6 ч', t.chg6h)}</span>`;
+  const badge = t => t.dex === 'pumpfun' ? '<span class="dexb pf">pump.fun</span>' : t.pump ? '<span class="dexb">биржа</span>' : '';
+  const row = t => `<a class="row mrow" data-id="${esc(t.id)}" href="#t-${esc(t.id)}">
+      ${MB.ui.avatar(t)}<span class="nm"><b>${esc(t.name)}</b><small>${esc(t.sym)} · <span>${age(t.ageDays)}</span> ${badge(t)}</small><span class="sx">${stats(t)}</span></span>
       ${MB.chart.spark(t.series, t.chg24 >= 0)}<span class="pr"><b class="p">${price(t.price)}</b><span class="c">${MB.ui.chg(t.chg24)}</span></span></a>`;
+  const caution = () => { try { if (localStorage.getItem(CKEY)) return ''; } catch (e) { /* нет хранилища */ }
+    return `<div class="note caution" id="caution"><b>Осторожно</b><span>Новые монеты очень волатильны. Выпустить монету может кто угодно, в том числе мошенники.</span><button class="x" id="cx" aria-label="Скрыть предупреждение">×</button></div>`; };
   async function fill() {
     const list = root.querySelector('#list');
     try { const items = await MB.data.list(filter, q); list.innerHTML = items.length ? items.map((t, i) => row(t) + (i === Math.min(3, items.length - 1) && !q.trim() ? MB.ads.card(MB.ads.pick('market', 0)) : '')).join('') : (filter === 'fav' && !q.trim() ? MB.ui.empty('В избранном пусто', 'Откройте монету и нажмите «В избранное».') : MB.ui.empty('Ничего не найдено', 'Попробуйте другое название или тикер.')); }
@@ -1012,13 +1091,19 @@ MB.views.market = (() => {
       el.innerHTML = `<section class="hero"><h1>Мемкоины Solana <span>в одном месте</span></h1><p>Находите монеты, смотрите графики и меняйте SOL на монету за пару касаний. Ключи остаются в вашем кошельке.</p></section>
         <div class="tools"><label class="search"><span class="sr">Поиск монеты</span><input id="q" type="search" placeholder="Название или тикер" autocomplete="off" value="${esc(q)}"></label>
         <div class="chips" role="tablist" aria-label="Сортировка">${FILTERS.map(([k, n]) => `<button class="chip ${k === filter ? 'on' : ''}" role="tab" aria-selected="${k === filter}" data-f="${k}">${n}</button>`).join('')}</div></div>
-        <div class="list" id="list" aria-live="off"></div>`;
+        ${caution()}<div class="list" id="list" aria-live="off"></div>`;
+      const cx = el.querySelector('#cx'); if (cx) cx.onclick = () => { try { localStorage.setItem(CKEY, '1'); } catch (e) { /* нет хранилища */ } el.querySelector('#caution').remove(); };
       el.querySelector('#q').addEventListener('input', e => { q = e.target.value; fill(); });
-      el.querySelectorAll('.chip').forEach(c => c.onclick = () => { filter = c.dataset.f; el.querySelectorAll('.chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-selected', x === c); }); fill(); });
+      el.querySelectorAll('.chip[data-f]').forEach(c => c.onclick = () => { filter = c.dataset.f; el.querySelectorAll('.chip[data-f]').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-selected', x === c); }); fill(); });
       await fill();
     },
     /** На тике меняем только цифры в готовых строках: список не перерисовывается, поэтому нажатия не теряются. */
-    async onTick() { if (!root) return; for (const a of root.querySelectorAll('#list a.row[data-id]')) { const t = await MB.data.get(a.dataset.id).catch(() => null); if (!t || !root) continue; a.querySelector('.p').textContent = price(t.price); a.querySelector('.c').innerHTML = MB.ui.chg(t.chg24); } },
+    async onTick() {
+      if (!root) return; const rows = [...root.querySelectorAll('#list a.row[data-id]')], ids = rows.map(a => a.dataset.id); if (!ids.length) return;
+      const list = MB.data.many ? await MB.data.many(ids).catch(() => []) : await Promise.all(ids.map(id => MB.data.get(id).catch(() => null)));
+      const by = {}; list.filter(Boolean).forEach(t => { by[t.id] = t; }); if (!root) return;
+      for (const a of rows) { const t = by[a.dataset.id]; if (!t) continue; a.querySelector('.p').textContent = price(t.price); a.querySelector('.c').innerHTML = MB.ui.chg(t.chg24); a.querySelector('.sx').innerHTML = stats(t); }
+    },
     unmount() { root = null; },
   };
 })();
@@ -1099,7 +1184,12 @@ MB.views.token = (() => {
   }
   function head() {
     root.querySelector('#px').innerHTML = `<b>${price(token.price)}</b>${MB.ui.chg(token.chg24)}`;
-    root.querySelector('#stats').innerHTML = [['Капитализация', usd(token.mc)], ['Объём за 24 ч', usd(token.vol24)], ['Ликвидность', usd(token.liquidityUsd)], ['Держатели', token.holders == null ? '—' : num(token.holders, 0)], ['Возраст', token.ageDays < 1 ? 'меньше дня' : Math.round(token.ageDays) + ' дн.']].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+    root.querySelector('#stats').innerHTML = [['Капитализация', usd(token.mc)], ['Объём за 24 ч', usd(token.vol24)], ['Ликвидность', usd(token.liquidityUsd)], ['Держатели', token.holders == null ? '—' : num(token.holders, 0)], ['Возраст', token.ageDays < 1 ? 'меньше дня' : Math.round(token.ageDays) + ' дн.'],
+      ...(token.chg5m != null ? [['Изменение за 5 мин', MB.ui.chg(token.chg5m)], ['Изменение за 1 ч', MB.ui.chg(token.chg1h)], ['Изменение за 6 ч', MB.ui.chg(token.chg6h)]] : []),
+      ...(token.buys24 != null ? [['Покупок за 24 ч', `<span class="up">${num(token.buys24, 0)}</span>`], ['Продаж за 24 ч', `<span class="down">${num(token.sells24, 0)}</span>`]] : []),
+      ...(token.dex ? [['Где торгуется', token.dex === 'pumpfun' ? 'pump.fun (кривая)' : token.pump ? 'Биржа (вышла с pump.fun)' : esc(token.dex)]] : [])].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+    const sl = root.querySelector('#socl'), links = (token.socials || []).filter(l => MB.ads.safe(l.url));
+    if (sl) { sl.hidden = !links.length; sl.innerHTML = links.map(l => `<a class="chip" href="${esc(l.url)}" target="_blank" rel="noopener nofollow">${esc({ website: 'Сайт', twitter: 'X', telegram: 'Telegram', discord: 'Discord' }[l.type] || l.type)}</a>`).join(''); }
   }
   function favBtn() { const on = MB.store.get().fav.includes(token.id), b = root.querySelector('#fav'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.textContent = on ? '★ В избранном' : '☆ В избранное'; }
   const onResize = () => redraw();
@@ -1117,7 +1207,7 @@ MB.views.token = (() => {
             <div class="chips ctype" role="group" aria-label="Вид графика"><button type="button" class="chip ${type === 'line' ? 'on' : ''}" data-ct="line" aria-pressed="${type === 'line'}">Линия</button><button type="button" class="chip ${type === 'candle' ? 'on' : ''}" data-ct="candle" aria-pressed="${type === 'candle'}">Свечи</button></div></div>
             <canvas id="cv" role="img" aria-label="График цены ${esc(token.sym)}"></canvas><div class="chint"><small>Двигайте график пальцем · два пальца — масштаб · двойное касание — сброс</small><button type="button" class="chip" id="creset" hidden>⟲ Сброс</button></div></div>
           <div class="card mypos" id="mypos" hidden></div>
-          <dl class="stats" id="stats"></dl>
+          <dl class="stats" id="stats"></dl><div class="chips socl" id="socl" hidden></div>
           ${token.desc ? `<div class="card about"><h2>О монете</h2><p>${esc(token.desc)}</p>${token.links && MB.ads.safe(token.links) ? `<p><a class="lnk" href="${esc(token.links)}" target="_blank" rel="noopener">Соцсеть монеты →</a></p>` : ''}</div>` : ''}
         </div><aside class="card panel" id="panel"></aside></div>`;
       el.querySelectorAll('.tfs .chip').forEach(c => c.onclick = () => { tf = c.dataset.tf; el.querySelectorAll('.tfs .chip').forEach(x => x.classList.toggle('on', x === c)); Object.assign(view, MB.chart.view()); el.querySelector('#creset').hidden = true; cdata = null; chart(); });
@@ -1234,14 +1324,21 @@ MB.views.profile = (() => {
     if (!root) return; const cost = rows.reduce((a, r) => a + (r.h.costUsd > 0 ? r.h.costUsd : 0), 0);
     // Демо: результат от стартовых условных SOL. Живой режим: только по монетам, купленным в Membuy (у них известна цена входа).
     const start = MB.config.LIVE ? total - rows.reduce((a, r) => a + (r.h.costUsd > 0 ? r.p : 0), 0) : MB.config.DEMO_START_SOL * solUsd, pnl = total - start, pct = MB.config.LIVE ? (cost ? pnl / cost * 100 : 0) : (start ? pnl / start * 100 : 0);
-    const open = rows.length ? rows.sort((a, b) => b.val - a.val).map(r => `<a class="row" href="#t-${esc(r.id)}">${MB.ui.avatar(r.t || { sym: r.h.sym, hue: 200 })}<span class="nm"><b>${esc(r.h.name)}</b><small>${num(r.h.qty, 2)} ${esc(r.h.sym)} · ${r.t ? price(r.t.price) : '—'}</small></span><span class="pr"><b>${usd(r.val)}</b>${r.h.costUsd > 0 ? `<span class="chg ${r.p >= 0 ? 'up' : 'down'}">${r.p >= 0 ? '+' : ''}${usd(r.p)}</span>` : ''}</span></a>`).join('') : MB.ui.empty('Монет пока нет', 'Купите первую монету на экране «Рынок».', '<a class="btn accent" href="#market">Открыть рынок</a>');
+    // Пустой портфель — как в pump.fun: «Купите свой первый токен сегодня» и три монеты в тренде.
+    let firstBuy = MB.ui.empty('Монет пока нет', 'Купите первую монету на экране «Рынок».', '<a class="btn accent" href="#market">Открыть рынок</a>');
+    if (!rows.length) { const top = (await MB.data.list('trend', '').catch(() => [])).slice(0, 3); if (!root) return;
+      if (top.length) firstBuy = `<h2 class="h2">Купите свой первый токен сегодня</h2>${top.map(t => `<a class="row" href="#t-${esc(t.id)}">${MB.ui.avatar(t)}<span class="nm"><b>${esc(t.name)}</b><small>${esc(t.sym)}</small></span><span class="pr"><b>${usd(t.mc)}</b>${MB.ui.chg(t.chg24)}</span></a>`).join('')}<a class="btn ghost" href="#market">Все монеты</a>`; }
+    // Закрытые позиции: монеты, которые куплены и полностью проданы. Результат = продажи − покупки.
+    const closedMap = {}; [...st.trades].reverse().forEach(t => { if (st.holdings[t.id]) return; const c = closedMap[t.id] = closedMap[t.id] || { sym: t.sym, name: t.name, buy: 0, sell: 0, ts: 0 }; if (t.side === 'buy') c.buy += t.usd; else c.sell += t.usd; c.ts = t.ts; });
+    const closed = Object.entries(closedMap).filter(([, c]) => c.sell > 0).sort((a, b) => b[1].ts - a[1].ts).map(([id, c]) => { const p = c.sell - c.buy; return `<a class="row" href="#t-${esc(id)}">${MB.ui.avatar({ sym: c.sym, hue: 200 })}<span class="nm"><b>${esc(c.name)}</b><small>Куплено на ${usd(c.buy)} · продано на ${usd(c.sell)}</small></span><span class="pr"><b class="${p >= 0 ? 'up' : 'down'}">${p >= 0 ? '+' : ''}${usd(p)}</b></span></a>`; }).join('') || MB.ui.empty('Закрытых позиций нет', 'Здесь появятся монеты, которые вы купили и полностью продали.');
+    const open = rows.length ? rows.sort((a, b) => b.val - a.val).map(r => `<a class="row" href="#t-${esc(r.id)}">${MB.ui.avatar(r.t || { sym: r.h.sym, hue: 200 })}<span class="nm"><b>${esc(r.h.name)}</b><small>${num(r.h.qty, 2)} ${esc(r.h.sym)} · ${r.t ? price(r.t.price) : '—'}</small></span><span class="pr"><b>${usd(r.val)}</b>${r.h.costUsd > 0 ? `<span class="chg ${r.p >= 0 ? 'up' : 'down'}">${r.p >= 0 ? '+' : ''}${usd(r.p)}</span>` : ''}</span></a>`).join('') : firstBuy;
     const hist = st.trades.length ? st.trades.map(t => `<div class="row"><span class="tag ${t.side}">${t.side === 'buy' ? 'Покупка' : 'Продажа'}</span><span class="nm"><b>${num(t.tokens, 2)} ${esc(t.sym)}</b><small>${new Date(t.ts).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} · по ${price(t.price)}</small></span><span class="pr"><b>${num(t.sol, 4)} SOL</b><small>${usd(t.usd)}</small></span></div>`).join('') : MB.ui.empty('Сделок пока нет', 'Здесь появятся ваши покупки и продажи.');
     root.innerHTML = `<div class="prof"><div class="pava">${MB.ui.userAva(st.profile.name, 40, 84)}<label class="chip photob" for="pfile">${st.profile.avatar ? 'Сменить фото' : 'Загрузить фото'}</label><input id="pfile" type="file" accept="image/*" class="sr"></div><div class="nm"><h1>${esc(st.profile.name)}</h1><small>${esc(st.profile.bio || 'Без описания')} · ${esc(MB.util.short(st.wallet.address))}</small><small>Подписки: <b>${st.following.length}</b> · Постов: <b>${st.myPosts.length}</b>${st.squad ? ' · Отряд: <b>' + esc(st.squad) + '</b>' : ''}</small></div></div>
       <div class="qgrid">${MB.config.LIVE ? '<a class="btn ghost" href="#ads">Реклама</a>' : '<a class="btn ghost" href="#invite">Пригласить друзей</a><a class="btn ghost" href="#create">Создать монету</a><a class="btn ghost" href="#ads">Реклама</a>'}<a class="btn ghost" href="#prefs">Настройки</a></div>
       <div class="card wcard"><small>Стоимость портфеля</small><b class="tot">${usd(total)}</b><div class="wline"><span>${num(st.wallet.sol, 4)} SOL свободно</span><span class="${pnl >= 0 ? 'up' : 'down'}">Результат: ${pnl >= 0 ? '+' : ''}${usd(pnl)} (${MB.util.pct(pct)})</span></div><canvas id="eq" role="img" aria-label="График стоимости портфеля"></canvas></div>
-      <div class="card dep"><h2 class="h2">Кошелёк</h2>${MB.config.LIVE ? `<p class="mut">Чтобы пополнить, отправьте SOL на этот адрес в сети Solana — с биржи или из другого кошелька.</p><code class="addr">${esc(st.wallet.address)}</code>` : ''}<div class="qgrid">${MB.config.LIVE ? '<button class="btn accent" id="wcopy">Скопировать адрес</button><button class="btn ghost" id="wref">Обновить баланс</button>' : ''}<button class="btn ghost" id="wdis">Отключить кошелёк</button></div></div>
-            <div class="chips tabsx" role="tablist"><button class="chip ${tab === 'open' ? 'on' : ''}" role="tab" aria-selected="${tab === 'open'}" data-tab="open">Монеты</button><button class="chip ${tab === 'hist' ? 'on' : ''}" role="tab" aria-selected="${tab === 'hist'}" data-tab="hist">История</button></div>
-      <div class="list">${tab === 'open' ? open : hist}</div>`;
+      <div class="card dep"><h2 class="h2">Кошелёк</h2><div class="qgrid dq"><a class="btn accent" href="#deposit">Депозит</a><a class="btn ghost" href="#deposit">Получить</a></div>${MB.config.LIVE ? `<p class="mut">Чтобы пополнить, отправьте SOL на этот адрес в сети Solana — с биржи или из другого кошелька.</p><code class="addr">${esc(st.wallet.address)}</code>` : ''}<div class="qgrid">${MB.config.LIVE ? '<button class="btn accent" id="wcopy">Скопировать адрес</button><button class="btn ghost" id="wref">Обновить баланс</button>' : ''}<button class="btn ghost" id="wdis">Отключить кошелёк</button></div></div>
+            <div class="chips tabsx" role="tablist"><button class="chip ${tab === 'open' ? 'on' : ''}" role="tab" aria-selected="${tab === 'open'}" data-tab="open">Открыто</button><button class="chip ${tab === 'closed' ? 'on' : ''}" role="tab" aria-selected="${tab === 'closed'}" data-tab="closed">Закрыто</button><button class="chip ${tab === 'hist' ? 'on' : ''}" role="tab" aria-selected="${tab === 'hist'}" data-tab="hist">История</button></div>
+      <div class="list">${tab === 'open' ? open : tab === 'closed' ? closed : hist}</div>`;
     const wc = root.querySelector('#wcopy'); if (wc) wc.onclick = () => navigator.clipboard.writeText(st.wallet.address).then(() => MB.ui.toast('Адрес скопирован'), () => MB.ui.toast('Не удалось скопировать — выделите адрес вручную', 'err'));
     const wr = root.querySelector('#wref'); if (wr) wr.onclick = () => MB.wallet.refresh().then(() => MB.ui.toast('Баланс обновлён'), e => MB.ui.toast(e.message, 'err'));
     root.querySelector('#wdis').onclick = () => { if (confirm(MB.t('Отключить кошелёк?'))) MB.wallet.disconnect().then(() => MB.ui.toast('Кошелёк отключён')); };
@@ -1462,6 +1559,21 @@ MB.views = MB.views || {};
     },
   };
 
+  /** Пополнение: адрес кошелька и пошаговая инструкция. */
+  MB.views.deposit = {
+    mount(el) {
+      const st = MB.store.get(), { esc } = MB.util;
+      if (!st.wallet.connected) { el.innerHTML = `${back}<h1 class="pt">Депозит</h1>` + MB.ui.empty('Кошелёк не подключён', 'Подключите кошелёк, чтобы увидеть адрес для пополнения.', '<button class="btn accent" id="dcw">Подключить кошелёк</button>'); el.querySelector('#dcw').onclick = () => MB.wallet.connect().then(() => MB.views.deposit.mount(el), e => MB.ui.toast(e.message, 'err')); return; }
+      if (!C.LIVE) { el.innerHTML = `${back}<h1 class="pt">Депозит</h1><div class="note">В демо пополнять не нужно: на учебном кошельке ${C.DEMO_START_SOL} условных SOL.</div>`; return; }
+      el.innerHTML = `${back}<h1 class="pt">Депозит</h1>
+        <div class="card dep"><h2 class="h2">Ваш адрес в сети Solana</h2><code class="addr">${esc(st.wallet.address)}</code><div class="qgrid"><button class="btn accent" id="dcopy">Скопировать адрес</button><button class="btn ghost" id="dref">Обновить баланс</button></div></div>
+        <div class="note">Отправляйте только SOL и только в сети Solana. Монеты из другой сети (например, BEP20 или ERC20) на этот адрес пропадут.</div>
+        <div class="card"><h2 class="h2">Как пополнить с биржи</h2><ol class="ol"><li>Купите SOL на бирже (Bybit, Binance и др.).</li><li>Откройте «Вывод», выберите монету SOL и сеть Solana.</li><li>Вставьте адрес выше и подтвердите вывод.</li><li>Через 1–2 минуты нажмите «Обновить баланс».</li></ol></div>`;
+      el.querySelector('#dcopy').onclick = () => navigator.clipboard.writeText(st.wallet.address).then(() => MB.ui.toast('Адрес скопирован'), () => MB.ui.toast('Не удалось скопировать — выделите адрес вручную', 'err'));
+      el.querySelector('#dref').onclick = () => MB.wallet.refresh().then(() => MB.ui.toast('Баланс обновлён'), e => MB.ui.toast(e.message, 'err'));
+    },
+  };
+
   /** Знакомство при первом входе: три шага, показывается один раз для каждого режима. */
   const KEY = 'membuy-onb-' + C.MODE;
   const STEPS = () => C.LIVE ? [
@@ -1496,8 +1608,8 @@ MB.views = MB.views || {};
 (() => {
   const C = MB.config; MB.data = MB.providers[C.MODE === 'live' ? 'live' : 'demo'];
   const main = document.getElementById('view'); let cur = null;
-  const routes = { market: MB.views.market, feed: MB.views.feed, leaders: MB.views.leaders, profile: MB.views.profile, create: MB.views.create, ads: MB.views.ads, invite: MB.views.invite, prefs: MB.views.prefs, search: MB.views.search, notes: MB.views.notes, help: MB.views.help, terms: MB.views.terms, privacy: MB.views.privacy };
-  const SUB = { create: 'profile', ads: 'profile', invite: 'profile', prefs: 'profile', notes: 'profile', search: 'market', help: 'profile', terms: 'profile', privacy: 'profile' };
+  const routes = { market: MB.views.market, feed: MB.views.feed, leaders: MB.views.leaders, profile: MB.views.profile, create: MB.views.create, ads: MB.views.ads, invite: MB.views.invite, prefs: MB.views.prefs, search: MB.views.search, notes: MB.views.notes, help: MB.views.help, deposit: MB.views.deposit, terms: MB.views.terms, privacy: MB.views.privacy };
+  const SUB = { create: 'profile', ads: 'profile', invite: 'profile', prefs: 'profile', notes: 'profile', search: 'market', help: 'profile', deposit: 'profile', terms: 'profile', privacy: 'profile' };
   function header() {
     const st0 = MB.store.get(); document.getElementById('bell').classList.toggle('has', st0.unread > 0); document.getElementById('bell').setAttribute('aria-label', 'Уведомления' + (st0.unread ? ': новых ' + st0.unread : ''));
     document.getElementById('walletSlot').innerHTML = MB.ui.walletBtn();

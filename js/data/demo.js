@@ -26,18 +26,22 @@ MB.providers.demo = (() => {
   const build = c => { const price = 0.000004, n = 168, rr = MB.util.rng(c.seed), series = []; for (let i = 0; i < n; i++) series.push(price * (0.97 + rr() * 0.06)); series[n - 1] = price;
     return { id: c.sym, sym: c.sym, name: c.name, desc: c.desc, mint: 'DEMO' + c.sym, price, mc: 4000, supply: 1e9, vol24: 600, chg24: 0, ageDays: (Date.now() - c.ts) / 864e5, holders: 1, liquidityUsd: 2400, hue: c.seed % 360, series, icon: c.icon, mine: true, links: c.links }; };
   MB.store.get().coins.forEach(c => tokens.push(build(c)));
+  /** Подробности как в pump.fun: изменения за 5 мин / 1 ч / 6 ч, сделки за сутки, площадка (до $1 млн — «кривая» pump.fun, дальше — биржа). */
+  const enrich = t => { const s = t.series, n = s.length, ch = k => (t.price / s[Math.max(0, n - 1 - k)] - 1) * 100; t.chg5m = ch(1); t.chg1h = ch(2); t.chg6h = ch(6);
+    const tx = Math.round(t.vol24 / 85); t.buys24 = Math.round(tx * 0.56); t.sells24 = tx - t.buys24; t.dex = t.mc < 1e6 ? 'pumpfun' : 'pumpswap'; t.pump = true; t.socials = t.socials || []; return t; };
+  tokens.forEach(enrich);
   const r = MB.util.rng(42); let timer = null;
   const tick = () => {
     tokens.forEach(t => {
       const step = (r() - 0.49) * 0.018; t.price = Math.max(t.price * 0.2, t.price * (1 + step));
-      t.series.push(t.price); t.series.shift(); t.mc = t.price * t.supply; t.chg24 = (t.price / t.series[t.series.length - 25] - 1) * 100;
+      t.series.push(t.price); t.series.shift(); t.mc = t.price * t.supply; t.chg24 = (t.price / t.series[t.series.length - 25] - 1) * 100; enrich(t);
     });
     MB.util.bus.emit('tick');
   };
-  const sorters = { fav: (a, b) => b.vol24 - a.vol24, trend: (a, b) => b.vol24 / b.mc - a.vol24 / a.mc, fresh: (a, b) => a.ageDays - b.ageDays, gain: (a, b) => b.chg24 - a.chg24, vol: (a, b) => b.vol24 - a.vol24 };
+  const sorters = { fav: (a, b) => b.vol24 - a.vol24, trend: (a, b) => b.vol24 / b.mc - a.vol24 / a.mc, fresh: (a, b) => a.ageDays - b.ageDays, soon: (a, b) => b.mc - a.mc, graduated: (a, b) => b.vol24 - a.vol24, gain: (a, b) => b.chg24 - a.chg24, vol: (a, b) => b.vol24 - a.vol24 };
   return {
     start() { if (!timer) timer = setInterval(tick, 2500); },
-    async list(filter = 'trend', q = '') { const s = q.trim().toLowerCase(), fav = MB.store.get().fav; return tokens.filter(t => filter !== 'fav' || fav.includes(t.id)).filter(t => !s || t.sym.toLowerCase().includes(s) || t.name.toLowerCase().includes(s)).sort(sorters[filter] || sorters.trend); },
+    async list(filter = 'trend', q = '') { const s = q.trim().toLowerCase(), fav = MB.store.get().fav; return tokens.filter(t => filter !== 'fav' || fav.includes(t.id)).filter(t => filter !== 'soon' || t.dex === 'pumpfun').filter(t => filter !== 'graduated' || t.dex !== 'pumpfun').filter(t => !s || t.sym.toLowerCase().includes(s) || t.name.toLowerCase().includes(s)).sort(sorters[filter] || sorters.trend); },
     async get(id) { return tokens.find(t => t.id === id) || null; },
     /** Учебные свечи для любого таймфрейма: детерминированное случайное блуждание, которое заканчивается текущей ценой. */
     async candles(id, tf) {
@@ -50,7 +54,7 @@ MB.providers.demo = (() => {
     async series(id, tf) { const t = tokens.find(x => x.id === id); if (!t) return []; return tf ? (await this.candles(id, tf)).map(c => c.c) : t.series; },
     solUsd: async () => MB.config.SOL_USD_DEMO,
     has: sym => tokens.some(t => t.sym.toLowerCase() === sym.toLowerCase()),
-    add(c) { const t = build(c); tokens.push(t); return t; },
+    add(c) { const t = enrich(build(c)); tokens.push(t); return t; },
     all: () => tokens,
   };
 })();

@@ -195,3 +195,15 @@ footer .langs{margin-bottom:12px}
 .faq details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
 .faq summary{cursor:pointer;font-weight:700}
 .faq p{color:var(--muted);margin-top:8px}
+.mrow .nm small{white-space:normal;overflow:visible}
+.mrow .st{color:var(--muted);font-size:12.5px}
+.chs{display:flex;gap:6px;flex-wrap:nowrap;margin-top:2px;white-space:nowrap}
+.chs i{font-style:normal;font-size:11.5px;font-weight:700}.chs em{font-style:normal;color:var(--muted);font-weight:600}
+.dexb{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:6px;background:var(--surface2);color:var(--muted);margin-left:4px}
+.dexb.pf{background:#3ddc9722;color:var(--up)}
+.caution{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:start}
+.caution b{grid-column:1}.caution span{grid-column:1;font-size:13px}
+.caution .x{grid-row:1/3;grid-column:2;background:none;border:0;color:inherit;font-size:22px;line-height:1;cursor:pointer;padding:2px 6px}
+.dep .dq{margin:6px 0 10px}
+.socl{margin-top:-4px}
+@media(max-width:860px){.socl{order:5}}

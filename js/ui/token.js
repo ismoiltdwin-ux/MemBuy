@@ -74,7 +74,12 @@ MB.views.token = (() => {
   }
   function head() {
     root.querySelector('#px').innerHTML = `<b>${price(token.price)}</b>${MB.ui.chg(token.chg24)}`;
-    root.querySelector('#stats').innerHTML = [['Капитализация', usd(token.mc)], ['Объём за 24 ч', usd(token.vol24)], ['Ликвидность', usd(token.liquidityUsd)], ['Держатели', token.holders == null ? '—' : num(token.holders, 0)], ['Возраст', token.ageDays < 1 ? 'меньше дня' : Math.round(token.ageDays) + ' дн.']].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+    root.querySelector('#stats').innerHTML = [['Капитализация', usd(token.mc)], ['Объём за 24 ч', usd(token.vol24)], ['Ликвидность', usd(token.liquidityUsd)], ['Держатели', token.holders == null ? '—' : num(token.holders, 0)], ['Возраст', token.ageDays < 1 ? 'меньше дня' : Math.round(token.ageDays) + ' дн.'],
+      ...(token.chg5m != null ? [['Изменение за 5 мин', MB.ui.chg(token.chg5m)], ['Изменение за 1 ч', MB.ui.chg(token.chg1h)], ['Изменение за 6 ч', MB.ui.chg(token.chg6h)]] : []),
+      ...(token.buys24 != null ? [['Покупок за 24 ч', `<span class="up">${num(token.buys24, 0)}</span>`], ['Продаж за 24 ч', `<span class="down">${num(token.sells24, 0)}</span>`]] : []),
+      ...(token.dex ? [['Где торгуется', token.dex === 'pumpfun' ? 'pump.fun (кривая)' : token.pump ? 'Биржа (вышла с pump.fun)' : esc(token.dex)]] : [])].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+    const sl = root.querySelector('#socl'), links = (token.socials || []).filter(l => MB.ads.safe(l.url));
+    if (sl) { sl.hidden = !links.length; sl.innerHTML = links.map(l => `<a class="chip" href="${esc(l.url)}" target="_blank" rel="noopener nofollow">${esc({ website: 'Сайт', twitter: 'X', telegram: 'Telegram', discord: 'Discord' }[l.type] || l.type)}</a>`).join(''); }
   }
   function favBtn() { const on = MB.store.get().fav.includes(token.id), b = root.querySelector('#fav'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.textContent = on ? '★ В избранном' : '☆ В избранное'; }
   const onResize = () => redraw();
@@ -92,7 +97,7 @@ MB.views.token = (() => {
             <div class="chips ctype" role="group" aria-label="Вид графика"><button type="button" class="chip ${type === 'line' ? 'on' : ''}" data-ct="line" aria-pressed="${type === 'line'}">Линия</button><button type="button" class="chip ${type === 'candle' ? 'on' : ''}" data-ct="candle" aria-pressed="${type === 'candle'}">Свечи</button></div></div>
             <canvas id="cv" role="img" aria-label="График цены ${esc(token.sym)}"></canvas><div class="chint"><small>Двигайте график пальцем · два пальца — масштаб · двойное касание — сброс</small><button type="button" class="chip" id="creset" hidden>⟲ Сброс</button></div></div>
           <div class="card mypos" id="mypos" hidden></div>
-          <dl class="stats" id="stats"></dl>
+          <dl class="stats" id="stats"></dl><div class="chips socl" id="socl" hidden></div>
           ${token.desc ? `<div class="card about"><h2>О монете</h2><p>${esc(token.desc)}</p>${token.links && MB.ads.safe(token.links) ? `<p><a class="lnk" href="${esc(token.links)}" target="_blank" rel="noopener">Соцсеть монеты →</a></p>` : ''}</div>` : ''}
         </div><aside class="card panel" id="panel"></aside></div>`;
       el.querySelectorAll('.tfs .chip').forEach(c => c.onclick = () => { tf = c.dataset.tf; el.querySelectorAll('.tfs .chip').forEach(x => x.classList.toggle('on', x === c)); Object.assign(view, MB.chart.view()); el.querySelector('#creset').hidden = true; cdata = null; chart(); });

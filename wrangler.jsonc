@@ -1,0 +1,9 @@
+// Настройки Cloudflare Worker «membuy-upload» (сервер-посредник для картинок монет).
+// Cloudflare берёт код отсюда при подключении репозитория: Worker → Settings → Build → Connect.
+// Секрет PINATA_JWT задаётся только в Cloudflare (Settings → Variables and Secrets), в репозиторий его не кладём.
+{
+  "name": "membuy-upload",
+  "main": "worker/upload-worker.js",
+  "compatibility_date": "2025-01-01",
+  "vars": { "ALLOWED_ORIGIN": "https://ismoiltdwin-ux.github.io" }
+}

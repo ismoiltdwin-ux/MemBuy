@@ -13,6 +13,8 @@ MB.config = {
   DEX_API: 'https://api.dexscreener.com',
   GECKO_API: 'https://api.geckoterminal.com/api/v2',
   WEB3_CDN: 'https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js',
+  ADS_WALLET: '',               // live: адрес вашего кошелька Phantom — сюда приходит оплата рекламы, с него вы одобряете объявления (пусто = площадка выключена)
+  ADS_SOL_PER_DAY: 0.05,        // live: цена рекламы в SOL за один день показа
   SOL_MINT: 'So11111111111111111111111111111111111111112',
 };
 
@@ -20,4 +22,4 @@ MB.config = {
 try { const m = new URLSearchParams(location.search).get('mode'); if (m === 'live' || m === 'demo') MB.config.MODE = m; } catch (e) { /* нет location */ }
 MB.config.LIVE = MB.config.MODE === 'live';
 // Разделы, которые работают только с выдуманными данными, в живом режиме скрыты
-MB.config.DEMO_ONLY = ['feed', 'leaders', 'create', 'ads', 'invite'];
+MB.config.DEMO_ONLY = ['feed', 'leaders', 'create', 'invite'];

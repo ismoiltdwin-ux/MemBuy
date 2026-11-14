@@ -5,6 +5,8 @@ MB.wallet = (() => {
   const provider = () => (window.phantom && window.phantom.solana) || (window.solana && window.solana.isPhantom ? window.solana : null);
   return {
     rpc, provider,
+    /** Загружает библиотеку @solana/web3.js (нужна только для подписи сделок). */
+    web3: () => window.solanaWeb3 ? Promise.resolve() : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = C.WEB3_CDN; s.onload = ok; s.onerror = () => bad(new Error('Не удалось загрузить библиотеку Solana')); document.head.appendChild(s); }),
     async connect() {
       if (C.MODE === 'demo') { const st = S.get(); S.set({ wallet: { connected: true, address: 'Demo' + 'MB7xQ2kLp9aVn3TzR4', sol: st.wallet.sol || C.DEMO_START_SOL } }); return; }
       const p = provider(); if (!p) throw new Error('Кошелёк Phantom не найден. Установите Phantom и откройте сайт в его браузере.');

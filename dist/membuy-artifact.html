@@ -217,6 +217,8 @@ MB.config = {
   DEX_API: 'https://api.dexscreener.com',
   GECKO_API: 'https://api.geckoterminal.com/api/v2',
   WEB3_CDN: 'https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js',
+  ADS_WALLET: '',               // live: адрес вашего кошелька Phantom — сюда приходит оплата рекламы, с него вы одобряете объявления (пусто = площадка выключена)
+  ADS_SOL_PER_DAY: 0.05,        // live: цена рекламы в SOL за один день показа
   SOL_MINT: 'So11111111111111111111111111111111111111112',
 };
 
@@ -224,7 +226,7 @@ MB.config = {
 try { const m = new URLSearchParams(location.search).get('mode'); if (m === 'live' || m === 'demo') MB.config.MODE = m; } catch (e) { /* нет location */ }
 MB.config.LIVE = MB.config.MODE === 'live';
 // Разделы, которые работают только с выдуманными данными, в живом режиме скрыты
-MB.config.DEMO_ONLY = ['feed', 'leaders', 'create', 'ads', 'invite'];
+MB.config.DEMO_ONLY = ['feed', 'leaders', 'create', 'invite'];
 
 /* Языки интерфейса. Экраны пишутся на русском, а этот модуль переводит готовый текст страницы.
    Порядок поиска перевода: точное совпадение (D) → шаблоны с подстановкой (R) → замена фрагментов (F).
@@ -308,6 +310,20 @@ MB.i18n = (() => {
     'Объявления помечаются словом «Реклама». Запрещены обещания дохода, обман и чужие товарные знаки.': ['Ads are labelled “Ad”. Promises of income, deception and other people’s trademarks are not allowed.', 'Эълонҳо бо калимаи «Реклама» қайд мешаванд. Ваъдаи даромад, фиреб ва тамғаҳои молии бегона манъ аст.'],
     'Мои кампании': ['My campaigns', 'Маъракаҳои ман'], 'Кампаний пока нет': ['No campaigns yet', 'Ҳоло маърака нест'], 'Создайте первую кампанию в форме выше.': ['Create your first campaign in the form above.', 'Маъракаи аввалро дар шакли боло созед.'], 'Пауза': ['Pause', 'Таваққуф'], 'Запустить': ['Resume', 'Оғоз'], 'Кампания запущена': ['Campaign started', 'Маърака оғоз шуд'],
     'Заголовок: от 3 до 40 знаков': ['Headline: 3 to 40 characters', 'Сарлавҳа: аз 3 то 40 аломат'], 'Текст: от 5 до 90 знаков': ['Text: 5 to 90 characters', 'Матн: аз 5 то 90 аломат'], 'Выберите место показа': ['Choose a placement', 'Ҷойи намоишро интихоб кунед'], 'Срок: от 1 до 30 дней': ['Duration: 1 to 30 days', 'Мӯҳлат: аз 1 то 30 рӯз'],
+    'Новое объявление': ['New ad', 'Эълони нав'], 'К оплате': ['To pay', 'Барои пардохт'], 'Цена за день': ['Price per day', 'Нарх барои як рӯз'], 'Оплатить и отправить на проверку': ['Pay and send for review', 'Пардохт ва фиристодан барои санҷиш'],
+    'Оплата в SOL уходит напрямую владельцу Membuy. Объявление начинает показываться всем после проверки, срок считается с момента одобрения. Если объявление отклонят, владелец возвращает оплату.': ['Payment in SOL goes directly to the Membuy owner. The ad is shown to everyone after review; the period starts when it is approved. If the ad is rejected, the owner refunds the payment.', 'Пардохт бо SOL мустақиман ба соҳиби Membuy меравад. Эълон пас аз санҷиш ба ҳама намоиш дода мешавад, мӯҳлат аз лаҳзаи тасдиқ ҳисоб мешавад. Агар эълон рад шавад, соҳиб пулро бармегардонад.'],
+    'Текст объявления записывается в блокчейн Solana вместе с оплатой и виден всем. Запрещены обещания дохода, обман, чужие товарные знаки и ссылки на сбор ключей или «удвоение» монет.': ['The ad text is written to the Solana blockchain together with the payment and is visible to everyone. Promises of income, deception, other people’s trademarks and links that collect keys or “double” coins are prohibited.', 'Матни эълон ҳамроҳи пардохт дар блокчейни Solana сабт мешавад ва ба ҳама намоён аст. Ваъдаи даромад, фиреб, тамғаҳои молии бегона ва пайвандҳо барои ҷамъ кардани калидҳо ё «дучанд кардани» тангаҳо манъ аст.'],
+    'На проверке': ['Under review', 'Дар санҷиш'], 'Показывается': ['Showing', 'Намоиш дода мешавад'], 'Срок закончился': ['Ended', 'Мӯҳлат тамом шуд'], 'Отклонено': ['Rejected', 'Рад шуд'], 'Оплаты не хватает': ['Underpaid', 'Пардохт кофӣ нест'],
+    'Одобрить': ['Approve', 'Тасдиқ'], 'Отклонить': ['Reject', 'Рад кардан'], 'Модерация (вы владелец площадки)': ['Moderation (you own the platform)', 'Модератсия (шумо соҳиби платформа ҳастед)'],
+    'Получено за рекламу:': ['Received for ads:', 'Барои реклама гирифта шуд:'], '. Отклонённым рекламодателям верните оплату вручную из Phantom.': ['. Refund rejected advertisers manually from Phantom.', '. Ба рекламадиҳандагони радшуда пулро дастӣ аз Phantom баргардонед.'],
+    'Новых объявлений нет': ['No new ads', 'Эълони нав нест'], 'Здесь появятся оплаченные объявления, которые ждут проверки.': ['Paid ads waiting for review will appear here.', 'Эълонҳои пардохтшуда, ки санҷишро интизоранд, дар ин ҷо пайдо мешаванд.'],
+    'Все объявления': ['All ads', 'Ҳамаи эълонҳо'], 'Пока пусто': ['Nothing yet', 'Ҳоло холӣ'], 'Мои объявления': ['My ads', 'Эълонҳои ман'], 'Объявлений пока нет': ['No ads yet', 'Ҳоло эълон нест'],
+    'Оплаченные объявления появятся здесь.': ['Your paid ads will appear here.', 'Эълонҳои пардохтшуда дар ин ҷо пайдо мешаванд.'], 'Подключите кошелёк, чтобы видеть свои объявления.': ['Connect your wallet to see your ads.', 'Барои дидани эълонҳоятон ҳамёнро пайваст кунед.'],
+    'Не удалось загрузить объявления': ['Could not load ads', 'Эълонҳо бор нашуданд'], 'Рекламная площадка ещё не настроена': ['The ad platform is not set up yet', 'Платформаи реклама ҳоло танзим нашудааст'],
+    'Владелец сайта должен указать свой кошелёк для оплаты рекламы.': ['The site owner needs to set a wallet for ad payments.', 'Соҳиби сайт бояд ҳамёнашро барои пардохти реклама нишон диҳад.'],
+    'Оплачено. Объявление отправлено на проверку': ['Paid. The ad has been sent for review', 'Пардохт шуд. Эълон барои санҷиш фиристода шуд'], 'Объявление одобрено': ['Ad approved', 'Эълон тасдиқ шуд'], 'Объявление отклонено': ['Ad rejected', 'Эълон рад шуд'],
+    'Ссылка должна начинаться с https:// (до 120 знаков)': ['The link must start with https:// (up to 120 characters)', 'Пайванд бояд бо https:// оғоз шавад (то 120 аломат)'], 'Одобрять может только владелец площадки': ['Only the platform owner can approve', 'Танҳо соҳиби платформа тасдиқ карда метавонад'],
+    'Рекламная площадка ещё не настроена': ['The ad platform is not set up yet', 'Платформаи реклама ҳоло танзим нашудааст'], 'Заголовок': ['Headline', 'Сарлавҳа'],
     'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
     'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
     'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
@@ -338,6 +354,7 @@ MB.i18n = (() => {
   };
   // Шаблоны: [регулярное выражение, English, Тоҷикӣ]
   const R = [
+    [/^(.+) SOL · (\d+) дн\. · (.+)$/, '$1 SOL · $2 days · $3', '$1 SOL · $2 рӯз · $3'], [/^до (\d.+)$/, 'until $1', 'то $1'],
     [/^Куплено (.+) за (.+)$/, 'Bought $1 for $2', 'Харида шуд: $1 ба $2'], [/^Продано (.+) за (.+)$/, 'Sold $1 for $2', 'Фурӯхта шуд: $1 ба $2'],
     [/^Куплено (.+)$/, 'Bought $1', 'Харида шуд: $1'], [/^Продано (.+)$/, 'Sold $1', 'Фурӯхта шуд: $1'],
     [/^Купить (.+)$/, 'Buy $1', 'Харидани $1'], [/^Продать (.+)$/, 'Sell $1', 'Фурӯхтани $1'],
@@ -366,7 +383,7 @@ MB.i18n = (() => {
     if (!hit && !/^[\d\s$+−.,%≈#()·:-]*(тыс\.|млн|млрд|ҳаз\.)?$/.test(core) && !/^[А-ЯЁ]{1,2}$/.test(core)) misses.add(core);
     return m[1] + out + m[3];
   }
-  const ATTRS = ['placeholder', 'title', 'aria-label', 'alt'], UGC = '.pt2, .ad .nm, .about p, .thead h1, .prof h1, .camp .nm b';
+  const ATTRS = ['placeholder', 'title', 'aria-label', 'alt'], UGC = '.pt2, .ad .nm, .about p, .thead h1, .prof h1, .camp .nm b, .ugc';
   function node(n) {
     if (n.nodeType === 3) {
       if (n.__out !== n.nodeValue) n.__src = n.nodeValue;   // текст изменило приложение — запоминаем исходник
@@ -596,8 +613,7 @@ MB.social = (() => {
   };
 })();
 
-/* Реклама (демо). Кампании хранятся в браузере, оплата не списывается.
-   Для настоящей рекламы нужен сервер: приём оплаты, модерация объявлений, общий показ всем посетителям. */
+/* Реклама. Демо: кампании хранятся в браузере, оплата не списывается. Живой режим: объявления из блокчейна — см. adchain.js. */
 MB.ads = (() => {
   const S = MB.store;
   const PLACEMENTS = { feed: { name: 'В ленте', day: 5 }, market: { name: 'В списке монет', day: 8 } };
@@ -610,7 +626,12 @@ MB.ads = (() => {
   return {
     PLACEMENTS, safe,
     /** Объявление для места показа; n — порядковый номер слота (для чередования). */
-    pick(pl, n = 0) { const pool = MB.config.LIVE ? house.filter(a => !a.link.startsWith('#')) : [...active(pl), ...house]; return pool[n % pool.length]; },
+    pick(pl, n = 0) {
+      if (!MB.config.LIVE) { const pool = [...active(pl), ...house]; return pool[n % pool.length]; }
+      // Живой режим: оплаченные и одобренные объявления из блокчейна, затем свои; меняются раз в минуту.
+      const paid = MB.adchain.active().map(a => ({ id: a.id, title: a.title, text: a.text, link: a.link })), own = house.filter(a => !a.link.startsWith('#') || (a.link === '#ads' && MB.adchain.enabled()));
+      const pool = paid.length ? paid : own; return pool[(n + Math.floor(Date.now() / 60000)) % pool.length];
+    },
     card(ad) {
       const { esc } = MB.util; S.update(s => { const a = s.adStats[ad.id] = s.adStats[ad.id] || { views: 0, clicks: 0 }; a.views++; }, true);
       const inner = `<span class="adtag">Реклама</span><span class="nm"><b>${esc(ad.title)}</b><small>${esc(ad.text)}</small></span>`;
@@ -643,6 +664,8 @@ MB.wallet = (() => {
   const provider = () => (window.phantom && window.phantom.solana) || (window.solana && window.solana.isPhantom ? window.solana : null);
   return {
     rpc, provider,
+    /** Загружает библиотеку @solana/web3.js (нужна только для подписи сделок). */
+    web3: () => window.solanaWeb3 ? Promise.resolve() : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = C.WEB3_CDN; s.onload = ok; s.onerror = () => bad(new Error('Не удалось загрузить библиотеку Solana')); document.head.appendChild(s); }),
     async connect() {
       if (C.MODE === 'demo') { const st = S.get(); S.set({ wallet: { connected: true, address: 'Demo' + 'MB7xQ2kLp9aVn3TzR4', sol: st.wallet.sol || C.DEMO_START_SOL } }); return; }
       const p = provider(); if (!p) throw new Error('Кошелёк Phantom не найден. Установите Phantom и откройте сайт в его браузере.');
@@ -673,6 +696,92 @@ MB.wallet = (() => {
   };
 })();
 
+/* Настоящая реклама без сервера (живой режим). Всё хранится в блокчейне Solana:
+   1. Рекламодатель одной транзакцией платит SOL на кошелёк площадки (config.ADS_WALLET) и пишет в заметку (Memo) текст объявления: MB1|{json}.
+   2. Владелец площадки со своего кошелька одобряет (MBOK|подпись) или отклоняет (MBNO|подпись) объявление — это тоже заметка в блокчейне.
+   3. Любой посетитель читает историю кошелька площадки и показывает одобренные объявления, у которых не кончился оплаченный срок.
+   Каждая запись проверяется по самой транзакции: сумма и получатель перевода, подпись владельца на одобрении. */
+MB.adchain = (() => {
+  const C = MB.config, MEMO = 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr', CKEY = 'membuy-adchain-v1';
+  let cache = {}; try { cache = JSON.parse(localStorage.getItem(CKEY) || '{}'); } catch (e) { cache = {}; }
+  const save = () => { try { localStorage.setItem(CKEY, JSON.stringify(cache)); } catch (e) { /* нет хранилища */ } };
+  let ads = [], loadedAt = 0, loading = null;
+  const enabled = () => C.LIVE && !!C.ADS_WALLET;
+  const priceSol = days => Math.round(days * C.ADS_SOL_PER_DAY * 1e9) / 1e9;
+  const memos = s => String(s || '').split('; ').map(m => m.replace(/^\[\d+\]\s*/, ''));
+
+  function validate({ title, text, link, days }) {
+    title = String(title).trim(); text = String(text).trim(); link = String(link).trim(); days = Math.round(+days);
+    if (title.length < 3 || title.length > 40) throw new Error('Заголовок: от 3 до 40 знаков');
+    if (text.length < 5 || text.length > 90) throw new Error('Текст: от 5 до 90 знаков');
+    if (!MB.ads.safe(link) || link.length > 120) throw new Error('Ссылка должна начинаться с https:// (до 120 знаков)');
+    if (!(days >= 1 && days <= 30)) throw new Error('Срок: от 1 до 30 дней');
+    return { title, text, link, days };
+  }
+
+  /** Отправляет транзакцию с переводом (если lamports > 0) и заметкой. Подписывает Phantom. */
+  async function send(memo, lamports) {
+    const st = MB.store.get(); if (!st.wallet.connected) throw new Error('Сначала подключите кошелёк');
+    await MB.wallet.web3(); const W = window.solanaWeb3, from = new W.PublicKey(st.wallet.address);
+    const { blockhash } = await MB.wallet.rpc('getLatestBlockhash', [{ commitment: 'confirmed' }]).then(r => r.value);
+    const tx = new W.Transaction({ feePayer: from, recentBlockhash: blockhash });
+    if (lamports > 0) tx.add(W.SystemProgram.transfer({ fromPubkey: from, toPubkey: new W.PublicKey(C.ADS_WALLET), lamports }));
+    tx.add(new W.TransactionInstruction({ programId: new W.PublicKey(MEMO), keys: [{ pubkey: from, isSigner: true, isWritable: false }], data: new TextEncoder().encode(memo) }));
+    const res = await MB.wallet.provider().signAndSendTransaction(tx); loadedAt = 0; return res.signature;
+  }
+
+  /** Проверяет транзакцию в сети и запоминает результат (подтверждённая транзакция не меняется). */
+  async function verify(sig, kind) {
+    if (cache[sig]) return cache[sig];
+    const tx = await MB.wallet.rpc('getTransaction', [sig, { encoding: 'jsonParsed', maxSupportedTransactionVersion: 0, commitment: 'confirmed' }]);
+    if (!tx || !tx.meta || tx.meta.err) return null;
+    const keys = tx.transaction.message.accountKeys.map(k => ({ key: typeof k === 'string' ? k : k.pubkey, signer: typeof k === 'string' ? false : !!k.signer }));
+    const ins = tx.transaction.message.instructions, memo = ins.map(i => i.parsed).find(p => typeof p === 'string' && /^MB(1|OK|NO)\|/.test(p)) || '';
+    let out = null;
+    if (kind === 'ad' && memo.startsWith('MB1|')) {
+      const pay = ins.find(i => i.program === 'system' && i.parsed && i.parsed.type === 'transfer' && i.parsed.info.destination === C.ADS_WALLET);
+      let ad = null; try { ad = JSON.parse(memo.slice(4)); } catch (e) { ad = null; }
+      if (pay && ad) { const v = (() => { try { return validate({ title: ad.t, text: ad.x, link: ad.l, days: ad.d }); } catch (e) { return null; } })();
+        if (v) out = Object.assign(v, { kind: 'ad', sig, payer: pay.parsed.info.source, lamports: pay.parsed.info.lamports, ts: tx.blockTime }); }
+    } else if ((kind === 'ok' || kind === 'no') && keys.some(k => k.signer && k.key === C.ADS_WALLET)) {
+      out = { kind, target: memo.slice(5), ts: tx.blockTime };
+    }
+    cache[sig] = out || { kind: 'bad' }; save(); return cache[sig];
+  }
+
+  /** Читает историю кошелька площадки (последние 1000 транзакций) и собирает объявления со статусами. */
+  async function load(force) {
+    if (!enabled()) return [];
+    if (!force && Date.now() - loadedAt < 60000) return ads;
+    if (loading) return loading;
+    loading = (async () => {
+      const list = await MB.wallet.rpc('getSignaturesForAddress', [C.ADS_WALLET, { limit: 1000, commitment: 'confirmed' }]);
+      const found = [];
+      for (const s of list || []) { if (s.err) continue; for (const m of memos(s.memo)) { const k = m.startsWith('MB1|') ? 'ad' : m.startsWith('MBOK|') ? 'ok' : m.startsWith('MBNO|') ? 'no' : null; if (k) { found.push([s.signature, k]); break; } } }
+      const recs = []; for (const [sig, k] of found) { const r = await verify(sig, k).catch(() => null); if (r && r.kind !== 'bad') recs.push(r); }
+      const decide = {}; recs.filter(r => r.kind !== 'ad').sort((a, b) => a.ts - b.ts).forEach(r => { decide[r.target] = r; });
+      const now = Date.now() / 1000;
+      ads = recs.filter(r => r.kind === 'ad').map(a => { const d = decide[a.sig], paidDays = Math.min(a.days, Math.floor(a.lamports / 1e9 / C.ADS_SOL_PER_DAY + 1e-6));
+        const status = !d ? 'pending' : d.kind === 'no' ? 'rejected' : paidDays < 1 ? 'underpaid' : d.ts + paidDays * 86400 > now ? 'active' : 'ended';
+        return Object.assign({}, a, { id: 'ch-' + a.sig.slice(0, 12), status, until: d && d.kind === 'ok' ? (d.ts + paidDays * 86400) * 1000 : 0, paidDays }); })
+        .sort((x, y) => y.ts - x.ts);
+      loadedAt = Date.now(); return ads;
+    })().finally(() => { loading = null; });
+    return loading;
+  }
+
+  return {
+    enabled, priceSol, validate, load,
+    active: () => ads.filter(a => a.status === 'active'),
+    /** Рекламодатель: оплатить и отправить объявление на проверку. */
+    async buy(form) { if (!enabled()) throw new Error('Рекламная площадка ещё не настроена'); const v = validate(form); const memo = 'MB1|' + JSON.stringify({ t: v.title, x: v.text, l: v.link, d: v.days });
+      return send(memo, Math.round(priceSol(v.days) * 1e9)); },
+    /** Владелец: одобрить или отклонить объявление (запись в блокчейне с его подписью). */
+    async decide(sig, ok) { if (MB.store.get().wallet.address !== C.ADS_WALLET) throw new Error('Одобрять может только владелец площадки'); return send((ok ? 'MBOK|' : 'MBNO|') + sig, 0); },
+    isOwner: () => enabled() && MB.store.get().wallet.connected && MB.store.get().wallet.address === C.ADS_WALLET,
+  };
+})();
+
 /* Обмен. quote() считает, сколько получит пользователь; execute() исполняет сделку.
    Демо: простая модель цены с влиянием на цену. Live: Jupiter (не проверено в боевом режиме). */
 MB.swap = (() => {
@@ -697,7 +806,6 @@ MB.swap = (() => {
   }
   const decCache = {};
   async function decimals(mint) { if (decCache[mint] != null) return decCache[mint]; const res = await MB.wallet.rpc('getTokenSupply', [mint]); return (decCache[mint] = res.value.decimals); }
-  const loadWeb3 = () => window.solanaWeb3 ? Promise.resolve() : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = C.WEB3_CDN; s.onload = ok; s.onerror = () => bad(new Error('Не удалось загрузить библиотеку Solana')); document.head.appendChild(s); });
   async function execute(q) {
     const st = S.get(); if (!st.wallet.connected) throw new Error('Сначала подключите кошелёк');
     const sol = q.side === 'buy' ? q.amountIn : q.out, tokens = q.side === 'buy' ? q.out : q.amountIn;
@@ -706,7 +814,7 @@ MB.swap = (() => {
     if (C.MODE === 'demo') {
       const h = st.holdings[q.token.id]; if (q.side === 'sell' && (!h || h.qty + 1e-9 < q.amountIn)) throw new Error('Недостаточно монет');
     } else {
-      await loadWeb3();
+      await MB.wallet.web3();
       const body = { quoteResponse: q.raw, userPublicKey: st.wallet.address, dynamicComputeUnitLimit: true }; if (C.FEE_ACCOUNT) body.feeAccount = C.FEE_ACCOUNT;
       const r = await fetch(`${C.JUP_API}/swap`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       if (!r.ok) throw new Error('Не удалось подготовить сделку');
@@ -826,7 +934,7 @@ MB.views.market = (() => {
       ${MB.chart.spark(t.series, t.chg24 >= 0)}<span class="pr"><b class="p">${price(t.price)}</b><span class="c">${MB.ui.chg(t.chg24)}</span></span></a>`;
   async function fill() {
     const list = root.querySelector('#list');
-    try { const items = await MB.data.list(filter, q); list.innerHTML = items.length ? items.map((t, i) => row(t) + (i === 3 && !q.trim() ? MB.ads.card(MB.ads.pick('market', 0)) : '')).join('') : (filter === 'fav' && !q.trim() ? MB.ui.empty('В избранном пусто', 'Откройте монету и нажмите «В избранное».') : MB.ui.empty('Ничего не найдено', 'Попробуйте другое название или тикер.')); }
+    try { const items = await MB.data.list(filter, q); list.innerHTML = items.length ? items.map((t, i) => row(t) + (i === Math.min(3, items.length - 1) && !q.trim() ? MB.ads.card(MB.ads.pick('market', 0)) : '')).join('') : (filter === 'fav' && !q.trim() ? MB.ui.empty('В избранном пусто', 'Откройте монету и нажмите «В избранное».') : MB.ui.empty('Ничего не найдено', 'Попробуйте другое название или тикер.')); }
     catch (e) { list.innerHTML = MB.ui.empty('Не удалось загрузить монеты', esc(e.message), '<button class="btn ghost" id="retry">Повторить</button>'); const b = list.querySelector('#retry'); if (b) b.onclick = fill; }
   }
   return {
@@ -1057,7 +1165,7 @@ MB.views.profile = (() => {
     const open = rows.length ? rows.sort((a, b) => b.val - a.val).map(r => `<a class="row" href="#t-${esc(r.id)}">${MB.ui.avatar(r.t || { sym: r.h.sym, hue: 200 })}<span class="nm"><b>${esc(r.h.name)}</b><small>${num(r.h.qty, 2)} ${esc(r.h.sym)} · ${r.t ? price(r.t.price) : '—'}</small></span><span class="pr"><b>${usd(r.val)}</b>${r.h.costUsd > 0 ? `<span class="chg ${r.p >= 0 ? 'up' : 'down'}">${r.p >= 0 ? '+' : ''}${usd(r.p)}</span>` : ''}</span></a>`).join('') : MB.ui.empty('Монет пока нет', 'Купите первую монету на экране «Рынок».', '<a class="btn accent" href="#market">Открыть рынок</a>');
     const hist = st.trades.length ? st.trades.map(t => `<div class="row"><span class="tag ${t.side}">${t.side === 'buy' ? 'Покупка' : 'Продажа'}</span><span class="nm"><b>${num(t.tokens, 2)} ${esc(t.sym)}</b><small>${new Date(t.ts).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} · по ${price(t.price)}</small></span><span class="pr"><b>${num(t.sol, 4)} SOL</b><small>${usd(t.usd)}</small></span></div>`).join('') : MB.ui.empty('Сделок пока нет', 'Здесь появятся ваши покупки и продажи.');
     root.innerHTML = `<div class="prof"><div class="pava">${MB.ui.userAva(st.profile.name, 40, 84)}<label class="chip photob" for="pfile">${st.profile.avatar ? 'Сменить фото' : 'Загрузить фото'}</label><input id="pfile" type="file" accept="image/*" class="sr"></div><div class="nm"><h1>${esc(st.profile.name)}</h1><small>${esc(st.profile.bio || 'Без описания')} · ${esc(MB.util.short(st.wallet.address))}</small><small>Подписки: <b>${st.following.length}</b> · Постов: <b>${st.myPosts.length}</b>${st.squad ? ' · Отряд: <b>' + esc(st.squad) + '</b>' : ''}</small></div></div>
-      <div class="qgrid">${MB.config.LIVE ? '' : '<a class="btn ghost" href="#invite">Пригласить друзей</a><a class="btn ghost" href="#create">Создать монету</a><a class="btn ghost" href="#ads">Реклама</a>'}<a class="btn ghost" href="#prefs">Настройки</a></div>
+      <div class="qgrid">${MB.config.LIVE ? '<a class="btn ghost" href="#ads">Реклама</a>' : '<a class="btn ghost" href="#invite">Пригласить друзей</a><a class="btn ghost" href="#create">Создать монету</a><a class="btn ghost" href="#ads">Реклама</a>'}<a class="btn ghost" href="#prefs">Настройки</a></div>
       <div class="card wcard"><small>Стоимость портфеля</small><b class="tot">${usd(total)}</b><div class="wline"><span>${num(st.wallet.sol, 4)} SOL свободно</span><span class="${pnl >= 0 ? 'up' : 'down'}">Результат: ${pnl >= 0 ? '+' : ''}${usd(pnl)} (${MB.util.pct(pct)})</span></div><canvas id="eq" role="img" aria-label="График стоимости портфеля"></canvas></div>
       <div class="card dep"><h2 class="h2">Кошелёк</h2>${MB.config.LIVE ? `<p class="mut">Чтобы пополнить, отправьте SOL на этот адрес в сети Solana — с биржи или из другого кошелька.</p><code class="addr">${esc(st.wallet.address)}</code>` : ''}<div class="qgrid">${MB.config.LIVE ? '<button class="btn accent" id="wcopy">Скопировать адрес</button><button class="btn ghost" id="wref">Обновить баланс</button>' : ''}<button class="btn ghost" id="wdis">Отключить кошелёк</button></div></div>
             <div class="chips tabsx" role="tablist"><button class="chip ${tab === 'open' ? 'on' : ''}" role="tab" aria-selected="${tab === 'open'}" data-tab="open">Монеты</button><button class="chip ${tab === 'hist' ? 'on' : ''}" role="tab" aria-selected="${tab === 'hist'}" data-tab="hist">История</button></div>
@@ -1122,9 +1230,53 @@ MB.views.ads = (() => {
     box.innerHTML = st.campaigns.length ? st.campaigns.map(c => { const s = st.adStats[c.id] || { views: 0, clicks: 0 }, left = Math.max(0, Math.ceil((c.until - Date.now()) / 864e5)); return `<div class="row camp"><span class="nm"><b>${esc(c.title)}</b><small>${MB.ads.PLACEMENTS[c.placement].name} · ${c.status === 'active' ? 'идёт, осталось ' + left + ' дн.' : 'на паузе'} · ${usd(c.total)}</small><small>Показы: ${num(s.views, 0)} · Переходы: ${num(s.clicks, 0)}</small></span><span class="crow"><button class="chip" data-tg="${esc(c.id)}">${c.status === 'active' ? 'Пауза' : 'Запустить'}</button><button class="chip" data-rm="${esc(c.id)}">Удалить</button></span></div>`; }).join('') : MB.ui.empty('Кампаний пока нет', 'Создайте первую кампанию в форме выше.');
     root.querySelector('#income').textContent = usd(MB.ads.income());
   }
+  /* ---------- Живой режим: оплата SOL на кошелёк площадки, объявления и модерация в блокчейне ---------- */
+  const ST = { pending: 'На проверке', active: 'Показывается', ended: 'Срок закончился', rejected: 'Отклонено', underpaid: 'Оплаты не хватает' };
+  async function livePrice() { const d = Math.max(1, Math.min(30, Math.round(+val('adays') || 1))), sol = MB.adchain.priceSol(d), su = await MB.data.solUsd().catch(() => 0); if (!root) return;
+    root.querySelector('#aprice').textContent = num(sol, 3) + ' SOL' + (su ? ' ≈ ' + usd(sol * su) : '');
+    root.querySelector('#aprev').innerHTML = `<div class="row ad"><span class="adtag">Реклама</span><span class="nm"><b>${esc(val('atitle') || 'Заголовок')}</b><small>${esc(val('atext') || 'Текст объявления')}</small></span></div>`; }
+  const adRow = (a, owner) => `<div class="row camp"><span class="nm"><b>${esc(a.title)}</b><small class="ugc">${esc(a.text)}</small><small class="ugc">${esc(a.link)}</small><small>${num(a.lamports / 1e9, 3)} SOL · ${a.days} дн. · ${new Date(a.ts * 1000).toLocaleDateString(MB.i18n.locale())}</small></span>
+    <span class="pr"><span class="tag ${a.status === 'active' ? 'buy' : a.status === 'rejected' ? 'sell' : ''}">${ST[a.status]}</span>${a.status === 'active' ? `<small>до ${new Date(a.until).toLocaleDateString(MB.i18n.locale())}</small>` : ''}
+    ${owner && a.status === 'pending' ? `<button class="btn accent" data-ok="${esc(a.sig)}">Одобрить</button><button class="btn ghost" data-no="${esc(a.sig)}">Отклонить</button>` : ''}</span></div>`;
+  async function liveLists(force) {
+    const box = root && root.querySelector('#camps'); if (!box) return; const st = MB.store.get(), owner = MB.adchain.isOwner();
+    let all; try { all = await MB.adchain.load(force); } catch (e) { box.innerHTML = MB.ui.empty('Не удалось загрузить объявления', e.message); return; } if (!root) return;
+    const mine = all.filter(a => st.wallet.connected && a.payer === st.wallet.address);
+    box.innerHTML = !st.wallet.connected ? MB.ui.empty('Кошелёк не подключён', 'Подключите кошелёк, чтобы видеть свои объявления.') : mine.length ? mine.map(a => adRow(a, false)).join('') : MB.ui.empty('Объявлений пока нет', 'Оплаченные объявления появятся здесь.');
+    const mod = root.querySelector('#mod'); mod.hidden = !owner;
+    if (owner) { const pend = all.filter(a => a.status === 'pending'), income = all.filter(a => a.status !== 'rejected').reduce((t, a) => t + a.lamports, 0) / 1e9;
+      mod.innerHTML = `<h2 class="h2">Модерация (вы владелец площадки)</h2><p class="fine">Получено за рекламу: <b>${num(income, 3)} SOL</b>. Отклонённым рекламодателям верните оплату вручную из Phantom.</p>
+        <div class="list">${pend.length ? pend.map(a => adRow(a, true)).join('') : MB.ui.empty('Новых объявлений нет', 'Здесь появятся оплаченные объявления, которые ждут проверки.')}</div>
+        <h2 class="h2">Все объявления</h2><div class="list">${all.filter(a => a.status !== 'pending').map(a => adRow(a, false)).join('') || MB.ui.empty('Пока пусто', '')}</div>`; }
+  }
+  function liveMount(el) {
+    if (!MB.adchain.enabled()) { el.innerHTML = '<a class="back" href="#profile">← Профиль</a><h1 class="pt">Реклама</h1>' + MB.ui.empty('Рекламная площадка ещё не настроена', 'Владелец сайта должен указать свой кошелёк для оплаты рекламы.'); return; }
+    el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Реклама</h1>
+      <div class="note">Оплата в SOL уходит напрямую владельцу Membuy. Объявление начинает показываться всем после проверки, срок считается с момента одобрения. Если объявление отклонят, владелец возвращает оплату.</div>
+      <dl class="stats"><div><dt>Место показа</dt><dd>В списке монет</dd></div><div><dt>Цена за день</dt><dd>${num(MB.config.ADS_SOL_PER_DAY, 3)} SOL</dd></div></dl>
+      <form class="card form" id="aform" novalidate><h2 class="h2">Новое объявление</h2>
+        <label class="fld"><span>Заголовок (до 40 знаков)</span><input id="atitle" maxlength="40" autocomplete="off"></label>
+        <label class="fld"><span>Текст (до 90 знаков)</span><input id="atext" maxlength="90" autocomplete="off"></label>
+        <label class="fld"><span>Ссылка</span><input id="alink" maxlength="120" placeholder="https://..." autocomplete="off"></label>
+        <label class="fld"><span>Дней (1–30)</span><input id="adays" inputmode="numeric" value="3" autocomplete="off"></label>
+        <div class="fld"><span>Так объявление увидят пользователи</span><div id="aprev"></div></div>
+        <div class="quote"><div><dt>К оплате</dt><dd><b id="aprice">—</b></dd></div></div>
+        <button class="btn big accent" type="submit" id="apay">Оплатить и отправить на проверку</button>
+        <p class="fine">Текст объявления записывается в блокчейн Solana вместе с оплатой и виден всем. Запрещены обещания дохода, обман, чужие товарные знаки и ссылки на сбор ключей или «удвоение» монет.</p></form>
+      <div class="card" id="mod" hidden></div>
+      <h2 class="h2">Мои объявления</h2><div class="list" id="camps"></div>`;
+    ['atitle', 'atext', 'adays'].forEach(id => el.querySelector('#' + id).addEventListener('input', livePrice));
+    el.querySelector('#aform').addEventListener('submit', async e => { e.preventDefault(); const b = el.querySelector('#apay'); if (b.disabled) return;
+      try { if (!MB.store.get().wallet.connected) await MB.wallet.connect(); b.disabled = true; await MB.adchain.buy({ title: val('atitle'), text: val('atext'), link: val('alink'), days: val('adays') });
+        MB.ui.toast('Оплачено. Объявление отправлено на проверку'); ['atitle', 'atext', 'alink'].forEach(id => { el.querySelector('#' + id).value = ''; }); livePrice(); setTimeout(() => liveLists(true), 4000); }
+      catch (err) { MB.ui.toast(err.message, 'err'); } finally { if (root) b.disabled = false; } });
+    el.addEventListener('click', async e => { const b = e.target.closest('[data-ok],[data-no]'); if (!b || b.disabled) return; b.disabled = true;
+      try { await MB.adchain.decide(b.dataset.ok || b.dataset.no, !!b.dataset.ok); MB.ui.toast(b.dataset.ok ? 'Объявление одобрено' : 'Объявление отклонено'); setTimeout(() => liveLists(true), 4000); } catch (err) { MB.ui.toast(err.message, 'err'); b.disabled = false; } });
+    livePrice(); liveLists();
+  }
   return {
     mount(el) {
-      root = el; const P = MB.ads.PLACEMENTS;
+      root = el; if (MB.config.LIVE) return liveMount(el); const P = MB.ads.PLACEMENTS;
       el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Реклама</h1>
         <div class="note">Демо: оплата не списывается, объявление видно только в этом браузере. Для настоящей рекламы нужен сервер с приёмом оплаты и проверкой объявлений.</div>
         <dl class="stats"><div><dt>${P.feed.name}</dt><dd>$${P.feed.day} в день</dd></div><div><dt>${P.market.name}</dt><dd>$${P.market.day} в день</dd></div><div><dt>Доход площадки (демо)</dt><dd id="income">$0</dd></div></dl>
@@ -1143,7 +1295,7 @@ MB.views.ads = (() => {
       el.querySelector('#camps').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.tg) MB.ads.toggle(b.dataset.tg); if (b.dataset.rm) MB.ads.remove(b.dataset.rm); });
       preview(); campaigns();
     },
-    unmount() { root = null; }, onState() { if (root) campaigns(); },
+    unmount() { root = null; }, onState() { if (root) (MB.config.LIVE ? liveLists() : campaigns()); },
   };
 })();
 
@@ -1235,7 +1387,7 @@ MB.views = MB.views || {};
   function langs() { document.querySelectorAll('.langs').forEach(box => { box.innerHTML = MB.i18n.LANGS.map(([k, n]) => `<button type="button" class="chip ${k === MB.i18n.lang ? 'on' : ''}" data-lang="${k}" aria-pressed="${k === MB.i18n.lang}">${n}</button>`).join(''); }); }
   document.addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (b) MB.i18n.set(b.dataset.lang); });
   MB.util.bus.on('lang', () => { header(); langs(); route(); });
-  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route(); MB.wallet.restore().catch(() => {});
+  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route(); MB.wallet.restore().catch(() => {}); if (C.LIVE) MB.adchain.load().then(a => a.length && MB.util.bus.emit('refresh'), () => {});
 })();
 
 </script>

@@ -1,5 +1,4 @@
-/* Реклама (демо). Кампании хранятся в браузере, оплата не списывается.
-   Для настоящей рекламы нужен сервер: приём оплаты, модерация объявлений, общий показ всем посетителям. */
+/* Реклама. Демо: кампании хранятся в браузере, оплата не списывается. Живой режим: объявления из блокчейна — см. adchain.js. */
 MB.ads = (() => {
   const S = MB.store;
   const PLACEMENTS = { feed: { name: 'В ленте', day: 5 }, market: { name: 'В списке монет', day: 8 } };
@@ -12,7 +11,12 @@ MB.ads = (() => {
   return {
     PLACEMENTS, safe,
     /** Объявление для места показа; n — порядковый номер слота (для чередования). */
-    pick(pl, n = 0) { const pool = MB.config.LIVE ? house.filter(a => !a.link.startsWith('#')) : [...active(pl), ...house]; return pool[n % pool.length]; },
+    pick(pl, n = 0) {
+      if (!MB.config.LIVE) { const pool = [...active(pl), ...house]; return pool[n % pool.length]; }
+      // Живой режим: оплаченные и одобренные объявления из блокчейна, затем свои; меняются раз в минуту.
+      const paid = MB.adchain.active().map(a => ({ id: a.id, title: a.title, text: a.text, link: a.link })), own = house.filter(a => !a.link.startsWith('#') || (a.link === '#ads' && MB.adchain.enabled()));
+      const pool = paid.length ? paid : own; return pool[(n + Math.floor(Date.now() / 60000)) % pool.length];
+    },
     card(ad) {
       const { esc } = MB.util; S.update(s => { const a = s.adStats[ad.id] = s.adStats[ad.id] || { views: 0, clicks: 0 }; a.views++; }, true);
       const inner = `<span class="adtag">Реклама</span><span class="nm"><b>${esc(ad.title)}</b><small>${esc(ad.text)}</small></span>`;

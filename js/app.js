@@ -33,5 +33,5 @@
   function langs() { document.querySelectorAll('.langs').forEach(box => { box.innerHTML = MB.i18n.LANGS.map(([k, n]) => `<button type="button" class="chip ${k === MB.i18n.lang ? 'on' : ''}" data-lang="${k}" aria-pressed="${k === MB.i18n.lang}">${n}</button>`).join(''); }); }
   document.addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (b) MB.i18n.set(b.dataset.lang); });
   MB.util.bus.on('lang', () => { header(); langs(); route(); });
-  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route(); MB.wallet.restore().catch(() => {});
+  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route(); MB.wallet.restore().catch(() => {}); if (C.LIVE) MB.adchain.load().then(a => a.length && MB.util.bus.emit('refresh'), () => {});
 })();

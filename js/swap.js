@@ -22,7 +22,6 @@ MB.swap = (() => {
   }
   const decCache = {};
   async function decimals(mint) { if (decCache[mint] != null) return decCache[mint]; const res = await MB.wallet.rpc('getTokenSupply', [mint]); return (decCache[mint] = res.value.decimals); }
-  const loadWeb3 = () => window.solanaWeb3 ? Promise.resolve() : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = C.WEB3_CDN; s.onload = ok; s.onerror = () => bad(new Error('Не удалось загрузить библиотеку Solana')); document.head.appendChild(s); });
   async function execute(q) {
     const st = S.get(); if (!st.wallet.connected) throw new Error('Сначала подключите кошелёк');
     const sol = q.side === 'buy' ? q.amountIn : q.out, tokens = q.side === 'buy' ? q.out : q.amountIn;
@@ -31,7 +30,7 @@ MB.swap = (() => {
     if (C.MODE === 'demo') {
       const h = st.holdings[q.token.id]; if (q.side === 'sell' && (!h || h.qty + 1e-9 < q.amountIn)) throw new Error('Недостаточно монет');
     } else {
-      await loadWeb3();
+      await MB.wallet.web3();
       const body = { quoteResponse: q.raw, userPublicKey: st.wallet.address, dynamicComputeUnitLimit: true }; if (C.FEE_ACCOUNT) body.feeAccount = C.FEE_ACCOUNT;
       const r = await fetch(`${C.JUP_API}/swap`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       if (!r.ok) throw new Error('Не удалось подготовить сделку');

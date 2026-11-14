@@ -8,7 +8,7 @@ MB.views.market = (() => {
       ${MB.chart.spark(t.series, t.chg24 >= 0)}<span class="pr"><b class="p">${price(t.price)}</b><span class="c">${MB.ui.chg(t.chg24)}</span></span></a>`;
   async function fill() {
     const list = root.querySelector('#list');
-    try { const items = await MB.data.list(filter, q); list.innerHTML = items.length ? items.map((t, i) => row(t) + (i === 3 && !q.trim() ? MB.ads.card(MB.ads.pick('market', 0)) : '')).join('') : (filter === 'fav' && !q.trim() ? MB.ui.empty('В избранном пусто', 'Откройте монету и нажмите «В избранное».') : MB.ui.empty('Ничего не найдено', 'Попробуйте другое название или тикер.')); }
+    try { const items = await MB.data.list(filter, q); list.innerHTML = items.length ? items.map((t, i) => row(t) + (i === Math.min(3, items.length - 1) && !q.trim() ? MB.ads.card(MB.ads.pick('market', 0)) : '')).join('') : (filter === 'fav' && !q.trim() ? MB.ui.empty('В избранном пусто', 'Откройте монету и нажмите «В избранное».') : MB.ui.empty('Ничего не найдено', 'Попробуйте другое название или тикер.')); }
     catch (e) { list.innerHTML = MB.ui.empty('Не удалось загрузить монеты', esc(e.message), '<button class="btn ghost" id="retry">Повторить</button>'); const b = list.querySelector('#retry'); if (b) b.onclick = fill; }
   }
   return {

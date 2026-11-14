@@ -175,3 +175,12 @@ footer .langs{margin-bottom:12px}
 .dep .mut{color:var(--muted);font-size:14px;margin:6px 0 10px}
 .dep .addr{display:block;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;word-break:break-all;user-select:all;-webkit-user-select:all;margin-bottom:10px}
 .dep .qgrid{margin:0}
+.tfs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;max-width:100%}
+.tfs::-webkit-scrollbar{display:none}
+.tfs{gap:4px}
+.tfs .chip{padding:6px 8px;font-size:13px;flex:none}
+.chartc canvas{height:320px;cursor:grab;user-select:none;-webkit-user-select:none}
+.chartc canvas:active{cursor:grabbing}
+.chint{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+.chint small{color:var(--muted);font-size:12px}
+.chint .chip{flex:none;padding:6px 10px}

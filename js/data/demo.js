@@ -1,6 +1,7 @@
 /* Демо-поставщик данных: выдуманные монеты, цены двигаются случайно. Интерфейс тот же, что у live.js. */
 MB.providers = MB.providers || {};
 MB.providers.demo = (() => {
+  const TFS = { '15s': 15, '1m': 60, '5m': 300, '15m': 900, '1h': 3600, '4h': 14400, '1d': 86400 };
   const raw = [
     ['PLOV', 'Plov Inu', 0.00042, 4.2e6, 38, 2, 'Пёс, который охраняет казан. Монета сообщества любителей плова.'],
     ['SAMSA', 'Samsa Cat', 0.0000081, 8.1e5, 12, 1, 'Кот, который ворует самсу прямо из тандыра.'],
@@ -38,13 +39,15 @@ MB.providers.demo = (() => {
     start() { if (!timer) timer = setInterval(tick, 2500); },
     async list(filter = 'trend', q = '') { const s = q.trim().toLowerCase(), fav = MB.store.get().fav; return tokens.filter(t => filter !== 'fav' || fav.includes(t.id)).filter(t => !s || t.sym.toLowerCase().includes(s) || t.name.toLowerCase().includes(s)).sort(sorters[filter] || sorters.trend); },
     async get(id) { return tokens.find(t => t.id === id) || null; },
-    async series(id, tf) { const t = tokens.find(x => x.id === id); if (!t) return []; return tf === '1h' ? t.series.slice(-24) : tf === '1d' ? t.series.slice(-72) : t.series; },
-    /** Свечи из ряда цен: tf 1h — по 1 точке на свечу, 1d — по 2, 1w — по 4. Тени детерминированы номером свечи. */
+    /** Учебные свечи для любого таймфрейма: детерминированное случайное блуждание, которое заканчивается текущей ценой. */
     async candles(id, tf) {
-      const t = tokens.find(x => x.id === id); if (!t) return []; const g = tf === '1h' ? 1 : tf === '1d' ? 2 : 4, n = tf === '1h' ? 24 : tf === '1d' ? 72 : 168, s = t.series.slice(-n - 1), out = [];
-      for (let i = 1; i < s.length; i += g) { const part = s.slice(i, i + g), o = s[i - 1], c = part[part.length - 1], rr = MB.util.rng(t.hue * 1000 + i + s.length), w = Math.abs(c - o) * 0.6 + c * 0.004; out.push({ o, c, h: Math.max(o, c, ...part) + rr() * w, l: Math.max(c * 0.01, Math.min(o, c, ...part) - rr() * w) }); }
+      const t = tokens.find(x => x.id === id); if (!t) return []; const sec = TFS[tf] || 300, n = 240, r = MB.util.rng(t.hue * 7919 + sec), vol = 0.004 * Math.sqrt(sec / 60), now = Math.floor(Date.now() / 1000 / sec) * sec;
+      const out = []; let c = t.price;
+      for (let i = 0; i < n; i++) { const o = i === 0 ? c : c / (1 + (r() - 0.5) * 2 * vol + (r() - 0.48) * vol * 0.3), w = Math.abs(c - o) * 0.5 + c * vol * r(); out.push({ t: now - i * sec, o, c, h: Math.max(o, c) + w * r(), l: Math.max(c * 0.01, Math.min(o, c) - w * r()) }); c = o; }
+      out.reverse(); const lastC = out[n - 1]; lastC.o = out[n - 2].c; lastC.h = Math.max(lastC.h, lastC.o, lastC.c); lastC.l = Math.min(lastC.l, lastC.o, lastC.c);
       return out;
     },
+    async series(id, tf) { const t = tokens.find(x => x.id === id); if (!t) return []; return tf ? (await this.candles(id, tf)).map(c => c.c) : t.series; },
     solUsd: async () => MB.config.SOL_USD_DEMO,
     has: sym => tokens.some(t => t.sym.toLowerCase() === sym.toLowerCase()),
     add(c) { const t = build(c); tokens.push(t); return t; },

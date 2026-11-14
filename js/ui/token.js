@@ -1,7 +1,7 @@
 /* Экран монеты: цена, график (линия или свечи), ваша позиция, показатели и панель покупки/продажи. */
 MB.views = MB.views || {};
 MB.views.token = (() => {
-  const { esc, price, usd, num } = MB.util; let root, token, side = 'buy', tf = '1d', quote = null, qSeq = 0, status = null, busy = false;
+  const { esc, price, usd, num } = MB.util; let root, token, side = 'buy', tf = '5m', cdata = null, cseq = 0, raf = 0; const view = MB.chart.view(); let quote = null, qSeq = 0, status = null, busy = false;
   const hold = () => MB.store.get().holdings[token.id] || null, held = () => (hold() ? hold().qty : 0);
   const presets = () => side === 'buy' ? [['0.1', 0.1], ['0.5', 0.5], ['1', 1]].map(([l, v]) => `<button type="button" class="chip" data-v="${v}">${l} SOL</button>`).join('') : [25, 50, 100].map(p => `<button type="button" class="chip" data-p="${p}">${p}%</button>`).join('');
   /** Сумма из поля. При продаже число, почти равное остатку, считается «всем остатком», чтобы не оставалась пыль из-за округления. */
@@ -61,20 +61,26 @@ MB.views.token = (() => {
       <dl class="mp"><div><dt>Монет</dt><dd>${num(h.qty, 2)}</dd></div><div><dt>Стоимость</dt><dd>${usd(val)}</dd></div>${known ? `<div><dt>Средняя цена входа</dt><dd>${price(avg)}</dd></div><div><dt>Результат</dt><dd class="${pnl >= 0 ? 'up' : 'down'}">${pnl >= 0 ? '+' : ''}${usd(pnl)} (${MB.util.pct(pnl / h.costUsd * 100)})</dd></div>` : ''}</dl>`;
     el.querySelector('#sellall').onclick = () => { side = 'sell'; quote = null; status = null; panel(); root.querySelector('#amt').value = String(+held().toFixed(4)); requote(); root.querySelector('#panel').scrollIntoView({ block: 'center', behavior: 'smooth' }); };
   }
+  /** Загружает свечи выбранного таймфрейма и рисует их. Положение графика (куда пользователь его сдвинул) сохраняется. */
   async function chart() {
-    const type = MB.store.get().chartType, h = hold(), avg = h && h.costUsd > 0 ? h.costUsd / h.qty : 0;
-    const [s, cd] = await Promise.all([MB.data.series(token.id, tf).catch(() => []), type === 'candle' ? MB.data.candles(token.id, tf).catch(() => []) : Promise.resolve([])]);
-    const c = root && root.querySelector('#cv'); if (c) MB.chart.draw(c, s, { type, candles: cd, avg });
+    const seq = ++cseq, cd = await MB.data.candles(token.id, tf).catch(() => []); if (seq !== cseq || !root) return;
+    cdata = cd; redraw();
+  }
+  /** Перерисовка без загрузки — для жестов и смены вида (линия/свечи). */
+  function redraw() {
+    if (raf) return; raf = requestAnimationFrame(() => { raf = 0; const c = root && root.querySelector('#cv'); if (!c || !cdata) return;
+      const type = MB.store.get().chartType, h = hold(), avg = h && h.costUsd > 0 ? h.costUsd / h.qty : 0;
+      MB.chart.draw(c, cdata.map(x => x.c), { type, candles: cdata, avg, view, times: cdata.map(x => x.t) }); });
   }
   function head() {
     root.querySelector('#px').innerHTML = `<b>${price(token.price)}</b>${MB.ui.chg(token.chg24)}`;
     root.querySelector('#stats').innerHTML = [['Капитализация', usd(token.mc)], ['Объём за 24 ч', usd(token.vol24)], ['Ликвидность', usd(token.liquidityUsd)], ['Держатели', token.holders == null ? '—' : num(token.holders, 0)], ['Возраст', token.ageDays < 1 ? 'меньше дня' : Math.round(token.ageDays) + ' дн.']].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
   }
   function favBtn() { const on = MB.store.get().fav.includes(token.id), b = root.querySelector('#fav'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.textContent = on ? '★ В избранном' : '☆ В избранное'; }
-  const onResize = () => chart();
+  const onResize = () => redraw();
   return {
     async mount(el, id) {
-      root = el; quote = null; status = null; busy = false; side = 'buy'; el.innerHTML = '<div class="empty"><p>Загружаем монету…</p></div>';
+      root = el; quote = null; status = null; busy = false; side = 'buy'; cdata = null; Object.assign(view, MB.chart.view()); el.innerHTML = '<div class="empty"><p>Загружаем монету…</p></div>';
       try { token = await MB.data.get(id); } catch (e) { token = null; }
       if (!token) { el.innerHTML = MB.ui.empty('Монета не найдена', 'Возможно, ссылка устарела.', '<a class="btn ghost" href="#market">К списку монет</a>'); return; }
       MB.store.update(s => { s.recent = [token.id, ...s.recent.filter(x => x !== token.id)].slice(0, 8); }, true);
@@ -82,15 +88,17 @@ MB.views.token = (() => {
       el.innerHTML = `<a class="back" href="#market">← Все монеты</a>
         <div class="tgrid"><div class="tmain">
           <header class="thead">${MB.ui.avatar(token, 56)}<div><h1>${esc(token.name)}</h1><small>${esc(token.sym)} · ${esc(MB.util.short(token.mint))}</small><button type="button" class="chip favb" id="fav"></button></div><div class="px" id="px"></div></header>
-          <div class="card chartc"><div class="ctools"><div class="chips tfs">${[['1h', '1 ч'], ['1d', '1 д'], ['1w', '7 д']].map(([k, n]) => `<button type="button" class="chip ${k === tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('')}</div>
+          <div class="card chartc"><div class="ctools"><div class="chips tfs">${[['15s', '15 с'], ['1m', '1 м'], ['5m', '5 м'], ['15m', '15 м'], ['1h', '1 ч'], ['4h', '4 ч'], ['1d', '1 д']].map(([k, n]) => `<button type="button" class="chip ${k === tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('')}</div>
             <div class="chips ctype" role="group" aria-label="Вид графика"><button type="button" class="chip ${type === 'line' ? 'on' : ''}" data-ct="line" aria-pressed="${type === 'line'}">Линия</button><button type="button" class="chip ${type === 'candle' ? 'on' : ''}" data-ct="candle" aria-pressed="${type === 'candle'}">Свечи</button></div></div>
-            <canvas id="cv" role="img" aria-label="График цены ${esc(token.sym)}"></canvas></div>
+            <canvas id="cv" role="img" aria-label="График цены ${esc(token.sym)}"></canvas><div class="chint"><small>Двигайте график пальцем · два пальца — масштаб · двойное касание — сброс</small><button type="button" class="chip" id="creset" hidden>⟲ Сброс</button></div></div>
           <div class="card mypos" id="mypos" hidden></div>
           <dl class="stats" id="stats"></dl>
           ${token.desc ? `<div class="card about"><h2>О монете</h2><p>${esc(token.desc)}</p>${token.links && MB.ads.safe(token.links) ? `<p><a class="lnk" href="${esc(token.links)}" target="_blank" rel="noopener">Соцсеть монеты →</a></p>` : ''}</div>` : ''}
         </div><aside class="card panel" id="panel"></aside></div>`;
-      el.querySelectorAll('.tfs .chip').forEach(c => c.onclick = () => { tf = c.dataset.tf; el.querySelectorAll('.tfs .chip').forEach(x => x.classList.toggle('on', x === c)); chart(); });
-      el.querySelectorAll('.ctype .chip').forEach(c => c.onclick = () => { MB.store.update(s => { s.chartType = c.dataset.ct; }, true); el.querySelectorAll('.ctype .chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); }); chart(); });
+      el.querySelectorAll('.tfs .chip').forEach(c => c.onclick = () => { tf = c.dataset.tf; el.querySelectorAll('.tfs .chip').forEach(x => x.classList.toggle('on', x === c)); Object.assign(view, MB.chart.view()); el.querySelector('#creset').hidden = true; cdata = null; chart(); });
+      const rs = el.querySelector('#creset'); rs.onclick = () => { Object.assign(view, MB.chart.view()); rs.hidden = true; redraw(); };
+      MB.chart.attach(el.querySelector('#cv'), view, redraw, moved => { rs.hidden = !moved; });
+      el.querySelectorAll('.ctype .chip').forEach(c => c.onclick = () => { MB.store.update(s => { s.chartType = c.dataset.ct; }, true); el.querySelectorAll('.ctype .chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); }); redraw(); });
       el.querySelector('#fav').onclick = () => { MB.store.update(s => { const i = s.fav.indexOf(token.id); if (i >= 0) s.fav.splice(i, 1); else s.fav.push(token.id); }, true); favBtn(); };
       favBtn(); head(); panel(); mypos(); chart(); window.addEventListener('resize', onResize);
     },

@@ -2,6 +2,7 @@
    ВНИМАНИЕ: написан по публичной документации API и не проверен в боевом режиме. */
 MB.providers = MB.providers || {};
 MB.providers.live = (() => {
+  const TF = { '15s': ['second', 15], '1m': ['minute', 1], '5m': ['minute', 5], '15m': ['minute', 15], '1h': ['hour', 1], '4h': ['hour', 4], '1d': ['day', 1] };
   const C = MB.config, cache = new Map(); let timer = null, solUsd = 0;
   const j = async url => { const r = await fetch(url); if (!r.ok) throw new Error('Сеть: ' + r.status); return r.json(); };
   const fromPair = p => ({
@@ -30,18 +31,14 @@ MB.providers.live = (() => {
       return out.sort(sorters[filter] || sorters.trend);
     },
     async get(id) { const d = await j(C.DEX_API + '/latest/dex/tokens/' + id); const p = best(d.pairs); if (!p) return cache.get(id) || null; const t = fromPair(p); cache.set(id, t); return t; },
-    async series(id, tf) {
-      const t = cache.get(id) || await this.get(id); if (!t || !t.pool) return [];
-      const [unit, agg, limit] = tf === '1h' ? ['minute', 5, 12] : tf === '1d' ? ['hour', 1, 24] : ['hour', 4, 42];
-      const d = await j(`${C.GECKO_API}/networks/solana/pools/${t.pool}/ohlcv/${unit}?aggregate=${agg}&limit=${limit}`);
-      return ((d.data && d.data.attributes && d.data.attributes.ohlcv_list) || []).map(c => c[4]).reverse();
-    },
+    /** Свечи GeckoTerminal (до 300 штук, старые → новые). tf: 15s, 1m, 5m, 15m, 1h, 4h, 1d. */
     async candles(id, tf) {
       const t = cache.get(id) || await this.get(id); if (!t || !t.pool) return [];
-      const [unit, agg, limit] = tf === '1h' ? ['minute', 5, 12] : tf === '1d' ? ['hour', 1, 24] : ['hour', 4, 42];
-      const d = await j(`${C.GECKO_API}/networks/solana/pools/${t.pool}/ohlcv/${unit}?aggregate=${agg}&limit=${limit}`);
-      return ((d.data && d.data.attributes && d.data.attributes.ohlcv_list) || []).map(c => ({ o: c[1], h: c[2], l: c[3], c: c[4] })).reverse();
+      const [unit, agg] = TF[tf] || TF['5m'];
+      const d = await j(`${C.GECKO_API}/networks/solana/pools/${t.pool}/ohlcv/${unit}?aggregate=${agg}&limit=300`);
+      return ((d.data && d.data.attributes && d.data.attributes.ohlcv_list) || []).map(c => ({ t: c[0], o: +c[1], h: +c[2], l: +c[3], c: +c[4] })).sort((x, y) => x.t - y.t);
     },
+    async series(id, tf) { return (await this.candles(id, tf)).map(c => c.c); },
     async solUsd() { if (solUsd) return solUsd; const d = await j(C.DEX_API + '/latest/dex/tokens/' + C.SOL_MINT); const p = best(d.pairs); solUsd = p ? +p.priceUsd : 0; return solUsd; },
   };
 })();

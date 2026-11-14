@@ -596,7 +596,7 @@ MB.providers.demo = (() => {
 MB.providers = MB.providers || {};
 MB.providers.live = (() => {
   const TF = { '15s': ['second', 15], '1m': ['minute', 1], '5m': ['minute', 5], '15m': ['minute', 15], '1h': ['hour', 1], '4h': ['hour', 4], '1d': ['day', 1] };
-  const C = MB.config, cache = new Map(); let timer = null, solUsd = 0;
+  const C = MB.config, cache = new Map(); let timer = null, solUsd = 0, solTs = 0;
   const j = async url => { const r = await fetch(url); if (!r.ok) throw new Error('Сеть: ' + r.status); return r.json(); };
   const fromPair = p => ({
     id: p.baseToken.address, sym: p.baseToken.symbol, name: p.baseToken.name, desc: '', mint: p.baseToken.address, pool: p.pairAddress,
@@ -632,7 +632,7 @@ MB.providers.live = (() => {
       return ((d.data && d.data.attributes && d.data.attributes.ohlcv_list) || []).map(c => ({ t: c[0], o: +c[1], h: +c[2], l: +c[3], c: +c[4] })).sort((x, y) => x.t - y.t);
     },
     async series(id, tf) { return (await this.candles(id, tf)).map(c => c.c); },
-    async solUsd() { if (solUsd) return solUsd; const d = await j(C.DEX_API + '/latest/dex/tokens/' + C.SOL_MINT); const p = best(d.pairs); solUsd = p ? +p.priceUsd : 0; return solUsd; },
+    async solUsd() { if (solUsd && Date.now() - solTs < 60000) return solUsd; /* цена SOL обновляется раз в минуту */ const d = await j(C.DEX_API + '/latest/dex/tokens/' + C.SOL_MINT); const p = best(d.pairs); solUsd = p ? +p.priceUsd : solUsd; solTs = Date.now(); return solUsd; },
   };
 })();
 

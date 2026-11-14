@@ -40,3 +40,9 @@ Live-код написан по документации API и **не пров�
 6. Добавить страницу с условиями использования и предупреждением о рисках.
 
 Подробности устройства — в `ARCHITECTURE.md`.
+
+## Сервер-посредник для выпуска монет
+
+`worker/upload-worker.js` — Cloudflare Worker `membuy-upload`: загружает картинку и описание монеты в IPFS (Pinata).
+Cloudflare собирает его из этого репозитория автоматически при каждом изменении в ветке `main` (настройки — в `wrangler.jsonc`).
+Секрет `PINATA_JWT` хранится только в Cloudflare (Settings → Variables and Secrets).

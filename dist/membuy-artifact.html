@@ -212,6 +212,15 @@ footer .langs{margin-bottom:12px}
 .dep .dq{margin:6px 0 10px}
 .socl{margin-top:-4px}
 @media(max-width:860px){.socl{order:5}}
+.cunit{margin-top:8px}.cunit .chip{padding:5px 10px;font-size:13px}
+.actc .chips{margin-bottom:10px}
+.tlist{display:flex;flex-direction:column;gap:4px;max-height:420px;overflow-y:auto}
+.trow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;gap:10px;align-items:center;font-size:13.5px;padding:6px 2px;border-bottom:1px solid var(--line)}
+.trow small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow{display:grid;grid-template-columns:24px auto minmax(40px,1fr) auto;gap:10px;align-items:center;font-size:13.5px;padding:5px 2px}
+.bar{height:6px;border-radius:4px;background:var(--surface2);overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
+@media(max-width:860px){.actc{order:5}}
+@media(max-width:420px){.trow{grid-template-columns:auto auto minmax(0,1fr) auto}.trow small:last-child{display:none}}
 </style>
 <div class="demo" id="demoBar" hidden>Демо-режим: монеты и сделки учебные, настоящие деньги не используются</div>
 <div class="offline" id="offlineBar" hidden>Нет соединения. Показываем последние данные.</div>
@@ -257,7 +266,7 @@ MB.config.DEMO_ONLY = ['feed', 'leaders', 'create', 'invite'];
    Порядок поиска перевода: точное совпадение (D) → шаблоны с подстановкой (R) → замена фрагментов (F).
    Чтобы добавить язык: допишите код в LANGS и ещё один перевод в конец каждой строки D, R и F. */
 MB.i18n = (() => {
-  const LANGS = [['ru', 'Русский'], ['en', 'English'], ['tg', 'Тоҷикӣ']], KEY = 'membuy-lang';
+  const LANGS = [['ru', 'Русский'], ['en', 'English']], KEY = 'membuy-lang'; // языки сайта; третий столбец в словарях ниже — запасной таджикский, сейчас не используется
   let lang = 'ru'; try { const s = localStorage.getItem(KEY); if (LANGS.some(l => l[0] === s)) lang = s; } catch (e) { /* хранилище недоступно */ }
   const idx = () => LANGS.findIndex(l => l[0] === lang) - 1;
 
@@ -431,6 +440,18 @@ MB.i18n = (() => {
     "Откройте «Вывод», выберите монету SOL и сеть Solana.": ["Open “Withdraw”, choose the SOL coin and the Solana network.", "«Баровардан»-ро кушоед, тангаи SOL ва шабакаи Solana-ро интихоб кунед."],
     "Вставьте адрес выше и подтвердите вывод.": ["Paste the address above and confirm the withdrawal.", "Суроғаи болоро гузоред ва баровардани пулро тасдиқ кунед."],
     "Через 1–2 минуты нажмите «Обновить баланс».": ["After 1–2 minutes tap “Refresh balance”.", "Пас аз 1–2 дақиқа «Навсозии баланс»-ро пахш кунед."],
+    "Единицы графика": ["Chart units", ""],
+    "Цена": ["Price", ""],
+    "Загружаем…": ["Loading…", ""],
+    "Не удалось загрузить сделки": ["Could not load trades", ""],
+    "Не удалось загрузить держателей": ["Could not load holders", ""],
+    "Нет данных о держателях": ["No holder data", ""],
+    "Первым обычно стоит пул ликвидности или кривая pump.fun.": ["The first account is usually the liquidity pool or the pump.fun bonding curve.", ""],
+    "Скорость сделки": ["Trade speed", ""],
+    "Обычная (до 0,0002 SOL)": ["Normal (up to 0.0002 SOL)", ""],
+    "Быстрая (до 0,001 SOL)": ["Fast (up to 0.001 SOL)", ""],
+    "Очень быстрая (до 0,003 SOL)": ["Very fast (up to 0.003 SOL)", ""],
+    "pump.fun кривая / пул": ["pump.fun curve / pool", ""],
     'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
     'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
     'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
@@ -509,7 +530,7 @@ MB.i18n = (() => {
     LANGS, misses, t: s => tr(s), get lang() { return lang; },
     /** Локаль для чисел и дат. Для таджикского используется русская запись чисел. */
     locale: () => (lang === 'en' ? 'en-US' : 'ru-RU'),
-    units: () => (lang === 'en' ? ['K', 'M', 'B'] : lang === 'tg' ? [' ҳаз.', ' млн', ' млрд'] : [' тыс.', ' млн', ' млрд']),
+    units: () => (lang === 'en' ? ['K', 'M', 'B'] : [' тыс.', ' млн', ' млрд']),
     set(l) { if (!LANGS.some(x => x[0] === l) || l === lang) return; lang = l; try { localStorage.setItem(KEY, l); } catch (e) { /* игнорируем */ } document.documentElement.lang = l; MB.util.bus.emit('lang', l); node(document.body); },
     /** Запускает перевод страницы и слежение за изменениями. */
     start() { document.documentElement.lang = lang; node(document.body); obs = new MutationObserver(list => { for (const m of list) { if (m.type === 'childList') m.addedNodes.forEach(node); else node(m.target); } }); obs.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS }); },
@@ -556,7 +577,7 @@ MB.util = (() => {
 MB.store = (() => {
   const KEY = MB.config.MODE === 'live' ? 'membuy-live-v1' : 'membuy-demo-v1';
   const fresh = () => ({
-    wallet: { connected: false, address: '', sol: 0 }, holdings: {}, trades: [], slippageBps: MB.config.DEFAULT_SLIPPAGE_BPS,
+    wallet: { connected: false, address: '', sol: 0 }, holdings: {}, trades: [], slippageBps: MB.config.DEFAULT_SLIPPAGE_BPS, priority: 'high', chartUnit: 'price',
     profile: { name: 'trader' + Math.floor(1000 + Math.random() * 9000), bio: '', avatar: '' }, following: [], liked: [], myPosts: [], squad: null,
     campaigns: [], adStats: {}, coins: [], recent: [], notes: [], unread: 0, equity: [], notify: true, fav: [], chartType: 'line',
   });
@@ -635,6 +656,13 @@ MB.providers.demo = (() => {
       return out;
     },
     async series(id, tf) { const t = tokens.find(x => x.id === id); if (!t) return []; return tf ? (await this.candles(id, tf)).map(c => c.c) : t.series; },
+    /** Учебные сделки и держатели: выдуманные, но правдоподобные (кошельки-заглушки). */
+    async trades(id) { const t = tokens.find(x => x.id === id); if (!t) return []; const now = Math.floor(Date.now() / 1000), r = MB.util.rng(t.hue + Math.floor(now / 30)), out = [];
+      for (let i = 0; i < 25; i++) { const usd = Math.round(5 + r() * r() * 900), side = r() > 0.45 ? 'buy' : 'sell'; out.push({ ts: now - i * Math.round(20 + r() * 120), side, usd, tokens: usd / t.price, who: 'Demo' + Math.floor(r() * 1e9).toString(36) + 'Wallet', tx: '' }); }
+      return out; },
+    async holders(id) { const t = tokens.find(x => x.id === id); if (!t) return []; const r = MB.util.rng(t.hue * 13); let left = 100; const out = [{ who: 'pump.fun кривая / пул', pct: 0 }];
+      for (let i = 0; i < 19; i++) { const p = Math.max(0.1, left * (0.04 + r() * 0.08)); left -= p; out.push({ who: 'Demo' + Math.floor(r() * 1e9).toString(36) + 'Holder', pct: p }); }
+      out[0].pct = Math.max(5, left * 0.6); out.sort((a, b) => b.pct - a.pct); out.forEach(h => { h.qty = h.pct / 100 * t.supply; }); return out; },
     solUsd: async () => MB.config.SOL_USD_DEMO,
     has: sym => tokens.some(t => t.sym.toLowerCase() === sym.toLowerCase()),
     add(c) { const t = enrich(build(c)); tokens.push(t); return t; },
@@ -700,6 +728,20 @@ MB.providers.live = (() => {
       const [unit, agg] = TF[tf] || TF['5m'];
       const d = await j(`${C.GECKO_API}/networks/solana/pools/${t.pool}/ohlcv/${unit}?aggregate=${agg}&limit=300`);
       return ((d.data && d.data.attributes && d.data.attributes.ohlcv_list) || []).map(c => ({ t: c[0], o: +c[1], h: +c[2], l: +c[3], c: +c[4] })).sort((x, y) => x.t - y.t);
+    },
+    /** Последние сделки по монете (GeckoTerminal): покупка/продажа, сумма в $, кошелёк, время. */
+    async trades(id) {
+      const t = cache.get(id) || await this.get(id); if (!t || !t.pool) return [];
+      const d = await j(`${C.GECKO_API}/networks/solana/pools/${t.pool}/trades`);
+      return ((d && d.data) || []).map(x => x.attributes || {}).map(a => ({ ts: Date.parse(a.block_timestamp) / 1000 || 0, side: a.kind === 'sell' ? 'sell' : 'buy', usd: +a.volume_in_usd || 0,
+        tokens: +(a.kind === 'sell' ? a.from_token_amount : a.to_token_amount) || 0, who: String(a.tx_from_address || ''), tx: String(a.tx_hash || '') })).slice(0, 50);
+    },
+    /** Крупнейшие держатели (узел Solana): до 20 счетов и их доля от всех монет. Первым обычно стоит пул ликвидности или кривая pump.fun. */
+    async holders(id) {
+      const t = cache.get(id) || await this.get(id); if (!t) return [];
+      const [sup, big] = await Promise.all([MB.wallet.rpc('getTokenSupply', [t.mint]), MB.wallet.rpc('getTokenLargestAccounts', [t.mint])]);
+      const total = +(sup && sup.value && sup.value.uiAmount) || 0; if (!total) return [];
+      return ((big && big.value) || []).map(a => ({ who: String(a.address), qty: +a.uiAmount || 0, pct: (+a.uiAmount || 0) / total * 100 }));
     },
     async series(id, tf) { return (await this.candles(id, tf)).map(c => c.c); },
     async solUsd() { if (solUsd && Date.now() - solTs < 60000) return solUsd; /* цена SOL обновляется раз в минуту */ const d = await j(C.DEX_API + '/latest/dex/tokens/' + C.SOL_MINT); const p = best(d.pairs); solUsd = p ? +p.priceUsd : solUsd; solTs = Date.now(); return solUsd; },
@@ -951,7 +993,9 @@ MB.swap = (() => {
       const h = st.holdings[q.token.id]; if (q.side === 'sell' && (!h || h.qty + 1e-9 < q.amountIn)) throw new Error('Недостаточно монет');
     } else {
       await MB.wallet.web3();
-      const body = { quoteResponse: q.raw, userPublicKey: st.wallet.address, dynamicComputeUnitLimit: true }; if (C.FEE_ACCOUNT) body.feeAccount = C.FEE_ACCOUNT;
+      // Скорость сделки: приоритетный сбор сети (Jupiter сам подбирает сумму, не выше потолка).
+      const PR = { medium: 200000, high: 1000000, veryHigh: 3000000 }, pl = PR[st.priority] ? st.priority : 'high';
+      const body = { quoteResponse: q.raw, userPublicKey: st.wallet.address, dynamicComputeUnitLimit: true, prioritizationFeeLamports: { priorityLevelWithMaxLamports: { maxLamports: PR[pl], priorityLevel: pl } } }; if (C.FEE_ACCOUNT) body.feeAccount = C.FEE_ACCOUNT;
       const r = await fetch(`${C.JUP_API}/swap`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       if (!r.ok) throw new Error('Не удалось подготовить сделку');
       const { swapTransaction } = await r.json(), bytes = Uint8Array.from(atob(swapTransaction), c => c.charCodeAt(0));
@@ -978,7 +1022,7 @@ MB.chart = {
   /** opts: { type: 'line' | 'candle', candles: [{o,h,l,c,t}], avg: средняя цена покупки, view: окно просмотра (см. attach) }.
       Без view показывается весь ряд (график в профиле). С view — часть свечей, которую пользователь двигает пальцем. */
   draw(canvas, series, opts = {}) {
-    const css = getComputedStyle(document.documentElement), col = n => css.getPropertyValue(n).trim();
+    const css = getComputedStyle(document.documentElement), col = n => css.getPropertyValue(n).trim(), F = opts.fmt || MB.util.price;
     const dpr = window.devicePixelRatio || 1, W = canvas.clientWidth, H = canvas.clientHeight; if (!W || !H) return;
     canvas.width = W * dpr; canvas.height = H * dpr; const g = canvas.getContext('2d'); g.scale(dpr, dpr); g.clearRect(0, 0, W, H);
     const cd = opts.type === 'candle' ? (opts.candles || []) : null, pts = cd || series, N = pts.length;
@@ -994,7 +1038,7 @@ MB.chart = {
     const y = val => padY + (hi - val) / ((hi - lo) || 1) * (plotH - padY * 2);
     canvas._mb = { cw, n, N, lo, hi, plotW, plotH: plotH - padY * 2 };
     g.strokeStyle = col('--line'); g.fillStyle = col('--muted'); g.font = '12px Manrope, sans-serif'; g.lineWidth = 1;
-    for (let k = 0; k <= 3; k++) { const val = lo + (hi - lo) * (k + 0.5) / 4, yy = y(val); g.globalAlpha = .5; g.beginPath(); g.moveTo(0, yy); g.lineTo(plotW, yy); g.stroke(); g.globalAlpha = 1; g.fillText(MB.util.price(val), plotW + 6, yy + 4); }
+    for (let k = 0; k <= 3; k++) { const val = lo + (hi - lo) * (k + 0.5) / 4, yy = y(val); g.globalAlpha = .5; g.beginPath(); g.moveTo(0, yy); g.lineTo(plotW, yy); g.stroke(); g.globalAlpha = 1; g.fillText(F(val), plotW + 6, yy + 4); }
     if (padB) { const step = Math.max(1, Math.round(n / 4)); g.fillStyle = col('--muted'); for (let i = Math.ceil(first / step) * step; i < end; i += step) { const tt = times[i]; if (tt == null || i < 0) continue; const d = new Date(tt * 1000), span = N > 1 && times[1] && times[0] ? Math.abs(times[1] - times[0]) : 3600, lbl = span >= 86400 ? d.toLocaleDateString(MB.i18n.locale(), { day: '2-digit', month: '2-digit' }) : d.toLocaleTimeString(MB.i18n.locale(), { hour: '2-digit', minute: '2-digit', second: span < 60 ? '2-digit' : undefined }); const xx = X(i); if (xx > 20 && xx < plotW - 20) { g.textAlign = 'center'; g.fillText(lbl, xx, H - 5); g.textAlign = 'left'; } } }
     g.save(); g.beginPath(); g.rect(0, 0, plotW, plotH); g.clip();
     const last = cd ? cd[N - 1].c : series[N - 1];
@@ -1011,8 +1055,8 @@ MB.chart = {
     }
     g.restore();
     const tag = (val, text, bg, fg, dash, shift = 0) => { const yy = y(val); if (yy >= 0 && yy <= plotH) { g.setLineDash(dash); g.strokeStyle = bg; g.lineWidth = 1.2; g.beginPath(); g.moveTo(0, yy); g.lineTo(plotW, yy); g.stroke(); g.setLineDash([]); } g.font = 'bold 12px Manrope, sans-serif'; const tw = g.measureText(text).width + 10; const ly = Math.max(10, Math.min(plotH - 10, yy + shift)); g.fillStyle = bg; g.fillRect(plotW + 2, ly - 10, Math.min(tw, padR - 4), 20); g.fillStyle = fg; g.fillText(text, plotW + 7, ly + 4); };
-    if (opts.avg > 0) { const d = y(opts.avg) - y(last); tag(opts.avg, MB.t('вход') + ' ' + MB.util.price(opts.avg).slice(1), col('--accent'), col('--accent-ink'), [6, 5], Math.abs(d) < 22 ? (d >= 0 ? 22 - d : -22 - d) : 0); }
-    tag(last, MB.util.price(last), col('--text'), col('--bg'), [2, 4]);
+    if (opts.avg > 0) { const d = y(opts.avg) - y(last); tag(opts.avg, MB.t('вход') + ' ' + F(opts.avg).replace(/^\$/, ''), col('--accent'), col('--accent-ink'), [6, 5], Math.abs(d) < 22 ? (d >= 0 ? 22 - d : -22 - d) : 0); }
+    tag(last, F(last), col('--text'), col('--bg'), [2, 4]);
   },
   /** Новое окно просмотра: последние 60 свечей, цена подбирается сама. */
   view: () => ({ n: 60, end: Infinity, py: null, moved: false }),
@@ -1179,8 +1223,21 @@ MB.views.token = (() => {
   /** Перерисовка без загрузки — для жестов и смены вида (линия/свечи). */
   function redraw() {
     if (raf) return; raf = requestAnimationFrame(() => { raf = 0; const c = root && root.querySelector('#cv'); if (!c || !cdata) return;
-      const type = MB.store.get().chartType, h = hold(), avg = h && h.costUsd > 0 ? h.costUsd / h.qty : 0;
-      MB.chart.draw(c, cdata.map(x => x.c), { type, candles: cdata, avg, view, times: cdata.map(x => x.t) }); });
+      const st = MB.store.get(), type = st.chartType, h = hold(), mc = st.chartUnit === 'mc' && token.supply > 0, k = mc ? token.supply : 1, avg = h && h.costUsd > 0 ? h.costUsd / h.qty * k : 0;
+      // Капитализация = цена × количество монет (как на графике pump.fun).
+      const cd = mc ? cdata.map(x => ({ t: x.t, o: x.o * k, h: x.h * k, l: x.l * k, c: x.c * k })) : cdata;
+      MB.chart.draw(c, cd.map(x => x.c), { type, candles: cd, avg, view, times: cd.map(x => x.t), fmt: mc ? MB.util.usd : null }); });
+  }
+  let act = 'trades';
+  const ago = ts => { const m = Math.max(0, Math.round(Date.now() / 1000 - ts) / 60); return m < 1 ? 'только что' : m < 60 ? Math.round(m) + ' мин назад' : Math.round(m / 60) + ' ч назад'; };
+  const wl = (a, tx) => MB.config.LIVE && /^[1-9A-HJ-NP-Za-km-z]{32,88}$/.test(a) ? `<a class="lnk" href="https://solscan.io/${tx ? 'tx' : 'account'}/${esc(a)}" target="_blank" rel="noopener">${esc(MB.util.short(a))}</a>` : `<span>${esc(MB.util.short(a))}</span>`;
+  /** Вкладки под графиком: «Сделки» (последние покупки и продажи) и «Держатели» (крупнейшие счета). */
+  async function activity() {
+    const box = root && root.querySelector('#actb'); if (!box || !token) return; const id = token.id;
+    if (act === 'trades') { const tr = await MB.data.trades(id).catch(() => null); if (!root || !token || token.id !== id || act !== 'trades') return;
+      box.innerHTML = !tr ? '<div class="hint">Не удалось загрузить сделки</div>' : !tr.length ? '<div class="hint">Сделок пока нет</div>' : `<div class="tlist">${tr.map(x => `<div class="trow"><span class="tag ${x.side}">${x.side === 'buy' ? 'Покупка' : 'Продажа'}</span><b>${usd(x.usd)}</b><small>${num(x.tokens, 0)}</small>${wl(x.who)}<small>${ago(x.ts)}</small></div>`).join('')}</div>`; }
+    else { const hs = await MB.data.holders(id).catch(() => null); if (!root || !token || token.id !== id || act !== 'holders') return;
+      box.innerHTML = !hs ? '<div class="hint">Не удалось загрузить держателей</div>' : !hs.length ? '<div class="hint">Нет данных о держателях</div>' : `<p class="fine">Первым обычно стоит пул ликвидности или кривая pump.fun.</p><div class="tlist">${hs.map((x, i) => `<div class="hrow"><span class="rk">${i + 1}</span>${wl(x.who)}<span class="bar"><i style="width:${Math.min(100, x.pct).toFixed(1)}%"></i></span><b>${x.pct.toFixed(2)}%</b></div>`).join('')}</div>`; }
   }
   function head() {
     root.querySelector('#px').innerHTML = `<b>${price(token.price)}</b>${MB.ui.chg(token.chg24)}`;
@@ -1205,23 +1262,27 @@ MB.views.token = (() => {
           <header class="thead">${MB.ui.avatar(token, 56)}<div><h1>${esc(token.name)}</h1><small>${esc(token.sym)} · ${esc(MB.util.short(token.mint))}</small><button type="button" class="chip favb" id="fav"></button><button type="button" class="chip favb" id="share">Поделиться</button></div><div class="px" id="px"></div></header>
           <div class="card chartc"><div class="ctools"><div class="chips tfs">${[['15s', '15 с'], ['1m', '1 м'], ['5m', '5 м'], ['15m', '15 м'], ['1h', '1 ч'], ['4h', '4 ч'], ['1d', '1 д']].map(([k, n]) => `<button type="button" class="chip ${k === tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('')}</div>
             <div class="chips ctype" role="group" aria-label="Вид графика"><button type="button" class="chip ${type === 'line' ? 'on' : ''}" data-ct="line" aria-pressed="${type === 'line'}">Линия</button><button type="button" class="chip ${type === 'candle' ? 'on' : ''}" data-ct="candle" aria-pressed="${type === 'candle'}">Свечи</button></div></div>
+            <div class="chips cunit" role="group" aria-label="Единицы графика"><button type="button" class="chip ${MB.store.get().chartUnit !== 'mc' ? 'on' : ''}" data-cu="price">Цена</button><button type="button" class="chip ${MB.store.get().chartUnit === 'mc' ? 'on' : ''}" data-cu="mc">Капитализация</button></div>
             <canvas id="cv" role="img" aria-label="График цены ${esc(token.sym)}"></canvas><div class="chint"><small>Двигайте график пальцем · два пальца — масштаб · двойное касание — сброс</small><button type="button" class="chip" id="creset" hidden>⟲ Сброс</button></div></div>
           <div class="card mypos" id="mypos" hidden></div>
+          <div class="card actc"><div class="chips" role="tablist"><button type="button" class="chip on" role="tab" data-act="trades">Сделки</button><button type="button" class="chip" role="tab" data-act="holders">Держатели</button></div><div id="actb"><div class="hint">Загружаем…</div></div></div>
           <dl class="stats" id="stats"></dl><div class="chips socl" id="socl" hidden></div>
           ${token.desc ? `<div class="card about"><h2>О монете</h2><p>${esc(token.desc)}</p>${token.links && MB.ads.safe(token.links) ? `<p><a class="lnk" href="${esc(token.links)}" target="_blank" rel="noopener">Соцсеть монеты →</a></p>` : ''}</div>` : ''}
         </div><aside class="card panel" id="panel"></aside></div>`;
       el.querySelectorAll('.tfs .chip').forEach(c => c.onclick = () => { tf = c.dataset.tf; el.querySelectorAll('.tfs .chip').forEach(x => x.classList.toggle('on', x === c)); Object.assign(view, MB.chart.view()); el.querySelector('#creset').hidden = true; cdata = null; chart(); });
       const rs = el.querySelector('#creset'); rs.onclick = () => { Object.assign(view, MB.chart.view()); rs.hidden = true; redraw(); };
       MB.chart.attach(el.querySelector('#cv'), view, redraw, moved => { rs.hidden = !moved; });
+      el.querySelectorAll('.cunit .chip').forEach(c => c.onclick = () => { MB.store.update(s => { s.chartUnit = c.dataset.cu; }, true); el.querySelectorAll('.cunit .chip').forEach(x => x.classList.toggle('on', x === c)); Object.assign(view, MB.chart.view()); redraw(); });
+      act = 'trades'; el.querySelectorAll('[data-act]').forEach(c => c.onclick = () => { act = c.dataset.act; el.querySelectorAll('[data-act]').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-selected', x === c); }); el.querySelector('#actb').innerHTML = '<div class="hint">Загружаем…</div>'; activity(); });
       el.querySelectorAll('.ctype .chip').forEach(c => c.onclick = () => { MB.store.update(s => { s.chartType = c.dataset.ct; }, true); el.querySelectorAll('.ctype .chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); }); redraw(); });
       el.querySelector('#share').onclick = () => { const url = location.origin + location.pathname + location.search + '#t-' + token.id;
         if (navigator.share) navigator.share({ title: token.name, text: token.name + ' (' + token.sym + ') — Membuy', url }).catch(() => {});
         else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => MB.ui.toast('Ссылка скопирована'), () => MB.ui.toast('Не удалось скопировать ссылку', 'err')); };
       el.querySelector('#fav').onclick = () => { MB.store.update(s => { const i = s.fav.indexOf(token.id); if (i >= 0) s.fav.splice(i, 1); else s.fav.push(token.id); }, true); favBtn(); };
-      favBtn(); head(); panel(); mypos(); chart(); window.addEventListener('resize', onResize);
+      favBtn(); head(); panel(); mypos(); chart(); activity(); window.addEventListener('resize', onResize);
     },
     unmount() { window.removeEventListener('resize', onResize); root = null; },
-    async onTick() { if (!root || !token) return; const t = await MB.data.get(token.id).catch(() => null); if (!t || !root) return; token = t; head(); mypos(); chart(); if (quote && !busy) requote(); },
+    async onTick() { if (!root || !token) return; const t = await MB.data.get(token.id).catch(() => null); if (!t || !root) return; token = t; head(); mypos(); chart(); if (act === 'trades') activity(); if (quote && !busy) requote(); },
     /** Состояние изменилось (например, подключили кошелёк в шапке): обновляем панель, не теряя введённую сумму. */
     onState() { if (root && token && !busy && root.querySelector('#panel')) { panel(true); mypos(); } },
   };
@@ -1495,12 +1556,14 @@ MB.views = MB.views || {};
         <form class="card form" id="pform" novalidate><h2 class="h2">Профиль</h2><div class="fld"><span>Фото профиля</span><div class="crow">${MB.ui.userAva(st.profile.name, 40, 64)}<label class="btn ghost" for="pfile2">${st.profile.avatar ? 'Сменить фото' : 'Загрузить фото'}</label><input id="pfile2" type="file" accept="image/*" class="sr">${st.profile.avatar ? '<button type="button" class="btn ghost" id="pdel">Удалить фото</button>' : ''}</div></div><label class="fld"><span>Имя (латиница, цифры, _)</span><input id="pname" maxlength="20" value="${esc(st.profile.name)}" autocomplete="off"></label><label class="fld"><span>О себе</span><input id="pbio" maxlength="60" value="${esc(st.profile.bio)}" autocomplete="off"></label><button class="btn accent" type="submit">Сохранить</button></form>
         <div class="card form"><h2 class="h2">Язык</h2><div class="langs chips" role="group" aria-label="Язык">${MB.i18n.LANGS.map(([k, n]) => `<button type="button" class="chip ${k === MB.i18n.lang ? 'on' : ''}" data-lang="${k}" aria-pressed="${k === MB.i18n.lang}">${n}</button>`).join('')}</div></div>
         <div class="card form"><h2 class="h2">Сделки</h2><label class="fld inline"><span>Проскальзывание по умолчанию</span><select id="pslip">${[50, 100, 300, 500].map(b => `<option value="${b}" ${b === st.slippageBps ? 'selected' : ''}>${b / 100}%</option>`).join('')}</select></label>
+          ${MB.config.LIVE ? `<label class="fld inline"><span>Скорость сделки</span><select id="pprio">${[['medium', 'Обычная (до 0,0002 SOL)'], ['high', 'Быстрая (до 0,001 SOL)'], ['veryHigh', 'Очень быстрая (до 0,003 SOL)']].map(([k, n]) => `<option value="${k}" ${k === (st.priority || 'high') ? 'selected' : ''}>${n}</option>`).join('')}</select></label>` : ''}
           <label class="fld inline"><span>Уведомления о сделках</span><input type="checkbox" id="pnot" ${st.notify ? 'checked' : ''} style="width:22px;height:22px"></label></div>
         <div class="card form"><h2 class="h2">Режим</h2><p class="hint">${MB.config.MODE === 'demo' ? 'Демо: учебные монеты и сделки.' : 'Живой режим: настоящие сделки.'}</p>${MB.config.MODE === 'demo' ? '<button class="btn ghost" id="preset">Сбросить демо-счёт</button><div id="pconf" hidden class="crow"><span class="hint">Удалить все демо-данные?</span><button class="btn sell" id="pyes">Да, сбросить</button><button class="btn ghost" id="pno">Отмена</button></div>' : ''}</div>`;
       root.querySelector('#pform').addEventListener('submit', e => { e.preventDefault(); const n = root.querySelector('#pname').value.trim(); if (!/^[A-Za-z0-9_]{3,20}$/.test(n)) { MB.ui.toast('Имя: 3–20 латинских букв, цифр или _', 'err'); return; } const bio = root.querySelector('#pbio').value.trim(); MB.store.update(s => { const old = s.profile.name; s.profile = { name: n, bio, avatar: s.profile.avatar || '' }; s.myPosts.forEach(p => { if (p.user === old) p.user = n; }); }); MB.ui.toast('Профиль сохранён'); });
       root.querySelector('#pfile2').addEventListener('change', e => MB.util.squareImage(e.target.files[0], 128).then(url => { MB.store.update(s => { s.profile.avatar = url; }); MB.ui.toast('Фото профиля обновлено'); draw(); }, err => MB.ui.toast(err.message, 'err')));
       const pd = root.querySelector('#pdel'); if (pd) pd.onclick = () => { MB.store.update(s => { s.profile.avatar = ''; }); MB.ui.toast('Фото удалено'); draw(); };
       root.querySelector('#pslip').onchange = e => MB.store.update(s => { s.slippageBps = +e.target.value; }, true);
+      const pp = root.querySelector('#pprio'); if (pp) pp.onchange = e => MB.store.update(s => { s.priority = e.target.value; }, true);
       root.querySelector('#pnot').onchange = e => MB.store.update(s => { s.notify = e.target.checked; }, true);
       const rs = root.querySelector('#preset'); if (rs) { rs.onclick = () => { root.querySelector('#pconf').hidden = false; rs.hidden = true; }; root.querySelector('#pno').onclick = draw; root.querySelector('#pyes').onclick = () => { MB.store.reset(); MB.ui.toast('Демо-счёт сброшен'); location.hash = 'market'; }; }
     }

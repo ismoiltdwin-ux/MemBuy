@@ -52,6 +52,13 @@ MB.providers.demo = (() => {
       return out;
     },
     async series(id, tf) { const t = tokens.find(x => x.id === id); if (!t) return []; return tf ? (await this.candles(id, tf)).map(c => c.c) : t.series; },
+    /** Учебные сделки и держатели: выдуманные, но правдоподобные (кошельки-заглушки). */
+    async trades(id) { const t = tokens.find(x => x.id === id); if (!t) return []; const now = Math.floor(Date.now() / 1000), r = MB.util.rng(t.hue + Math.floor(now / 30)), out = [];
+      for (let i = 0; i < 25; i++) { const usd = Math.round(5 + r() * r() * 900), side = r() > 0.45 ? 'buy' : 'sell'; out.push({ ts: now - i * Math.round(20 + r() * 120), side, usd, tokens: usd / t.price, who: 'Demo' + Math.floor(r() * 1e9).toString(36) + 'Wallet', tx: '' }); }
+      return out; },
+    async holders(id) { const t = tokens.find(x => x.id === id); if (!t) return []; const r = MB.util.rng(t.hue * 13); let left = 100; const out = [{ who: 'pump.fun кривая / пул', pct: 0 }];
+      for (let i = 0; i < 19; i++) { const p = Math.max(0.1, left * (0.04 + r() * 0.08)); left -= p; out.push({ who: 'Demo' + Math.floor(r() * 1e9).toString(36) + 'Holder', pct: p }); }
+      out[0].pct = Math.max(5, left * 0.6); out.sort((a, b) => b.pct - a.pct); out.forEach(h => { h.qty = h.pct / 100 * t.supply; }); return out; },
     solUsd: async () => MB.config.SOL_USD_DEMO,
     has: sym => tokens.some(t => t.sym.toLowerCase() === sym.toLowerCase()),
     add(c) { const t = enrich(build(c)); tokens.push(t); return t; },

@@ -207,3 +207,12 @@ footer .langs{margin-bottom:12px}
 .dep .dq{margin:6px 0 10px}
 .socl{margin-top:-4px}
 @media(max-width:860px){.socl{order:5}}
+.cunit{margin-top:8px}.cunit .chip{padding:5px 10px;font-size:13px}
+.actc .chips{margin-bottom:10px}
+.tlist{display:flex;flex-direction:column;gap:4px;max-height:420px;overflow-y:auto}
+.trow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;gap:10px;align-items:center;font-size:13.5px;padding:6px 2px;border-bottom:1px solid var(--line)}
+.trow small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow{display:grid;grid-template-columns:24px auto minmax(40px,1fr) auto;gap:10px;align-items:center;font-size:13.5px;padding:5px 2px}
+.bar{height:6px;border-radius:4px;background:var(--surface2);overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
+@media(max-width:860px){.actc{order:5}}
+@media(max-width:420px){.trow{grid-template-columns:auto auto minmax(0,1fr) auto}.trow small:last-child{display:none}}

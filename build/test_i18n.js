@@ -1,10 +1,10 @@
-// Проверка перевода: node build/test_i18n.js — проходит все экраны на en и tg и показывает непереведённые строки.
+// Проверка перевода: node build/test_i18n.js — проходит все экраны на en и показывает непереведённые строки.
 const { chromium } = require('playwright'); const path = require('path');
 const URL = 'file://' + path.join(__dirname, '..', 'index.html'), SHOT = process.env.SHOT_DIR;
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4nGP8z8Dwn4GBgYGJAQoAHxcCAr7cKUIAAAAASUVORK5CYII=', 'base64');
 (async () => {
   const b = await chromium.launch(); let bad = 0;
-  for (const lang of ['en', 'tg']) {
+  for (const lang of ['en']) {
     const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }), p = await ctx.newPage(), errs = []; p.on('pageerror', e => errs.push(e.message));
     const go = async h => { await p.goto(URL + '#' + h); await p.evaluate(() => { const b = document.querySelector('#obskip'); if (b) b.click(); }); await p.waitForTimeout(400); }, left = new Set();
     // Собирает видимый русский текст (для en) вне пользовательского содержимого

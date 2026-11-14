@@ -8,7 +8,7 @@ MB.chart = {
   /** opts: { type: 'line' | 'candle', candles: [{o,h,l,c,t}], avg: средняя цена покупки, view: окно просмотра (см. attach) }.
       Без view показывается весь ряд (график в профиле). С view — часть свечей, которую пользователь двигает пальцем. */
   draw(canvas, series, opts = {}) {
-    const css = getComputedStyle(document.documentElement), col = n => css.getPropertyValue(n).trim();
+    const css = getComputedStyle(document.documentElement), col = n => css.getPropertyValue(n).trim(), F = opts.fmt || MB.util.price;
     const dpr = window.devicePixelRatio || 1, W = canvas.clientWidth, H = canvas.clientHeight; if (!W || !H) return;
     canvas.width = W * dpr; canvas.height = H * dpr; const g = canvas.getContext('2d'); g.scale(dpr, dpr); g.clearRect(0, 0, W, H);
     const cd = opts.type === 'candle' ? (opts.candles || []) : null, pts = cd || series, N = pts.length;
@@ -24,7 +24,7 @@ MB.chart = {
     const y = val => padY + (hi - val) / ((hi - lo) || 1) * (plotH - padY * 2);
     canvas._mb = { cw, n, N, lo, hi, plotW, plotH: plotH - padY * 2 };
     g.strokeStyle = col('--line'); g.fillStyle = col('--muted'); g.font = '12px Manrope, sans-serif'; g.lineWidth = 1;
-    for (let k = 0; k <= 3; k++) { const val = lo + (hi - lo) * (k + 0.5) / 4, yy = y(val); g.globalAlpha = .5; g.beginPath(); g.moveTo(0, yy); g.lineTo(plotW, yy); g.stroke(); g.globalAlpha = 1; g.fillText(MB.util.price(val), plotW + 6, yy + 4); }
+    for (let k = 0; k <= 3; k++) { const val = lo + (hi - lo) * (k + 0.5) / 4, yy = y(val); g.globalAlpha = .5; g.beginPath(); g.moveTo(0, yy); g.lineTo(plotW, yy); g.stroke(); g.globalAlpha = 1; g.fillText(F(val), plotW + 6, yy + 4); }
     if (padB) { const step = Math.max(1, Math.round(n / 4)); g.fillStyle = col('--muted'); for (let i = Math.ceil(first / step) * step; i < end; i += step) { const tt = times[i]; if (tt == null || i < 0) continue; const d = new Date(tt * 1000), span = N > 1 && times[1] && times[0] ? Math.abs(times[1] - times[0]) : 3600, lbl = span >= 86400 ? d.toLocaleDateString(MB.i18n.locale(), { day: '2-digit', month: '2-digit' }) : d.toLocaleTimeString(MB.i18n.locale(), { hour: '2-digit', minute: '2-digit', second: span < 60 ? '2-digit' : undefined }); const xx = X(i); if (xx > 20 && xx < plotW - 20) { g.textAlign = 'center'; g.fillText(lbl, xx, H - 5); g.textAlign = 'left'; } } }
     g.save(); g.beginPath(); g.rect(0, 0, plotW, plotH); g.clip();
     const last = cd ? cd[N - 1].c : series[N - 1];
@@ -41,8 +41,8 @@ MB.chart = {
     }
     g.restore();
     const tag = (val, text, bg, fg, dash, shift = 0) => { const yy = y(val); if (yy >= 0 && yy <= plotH) { g.setLineDash(dash); g.strokeStyle = bg; g.lineWidth = 1.2; g.beginPath(); g.moveTo(0, yy); g.lineTo(plotW, yy); g.stroke(); g.setLineDash([]); } g.font = 'bold 12px Manrope, sans-serif'; const tw = g.measureText(text).width + 10; const ly = Math.max(10, Math.min(plotH - 10, yy + shift)); g.fillStyle = bg; g.fillRect(plotW + 2, ly - 10, Math.min(tw, padR - 4), 20); g.fillStyle = fg; g.fillText(text, plotW + 7, ly + 4); };
-    if (opts.avg > 0) { const d = y(opts.avg) - y(last); tag(opts.avg, MB.t('вход') + ' ' + MB.util.price(opts.avg).slice(1), col('--accent'), col('--accent-ink'), [6, 5], Math.abs(d) < 22 ? (d >= 0 ? 22 - d : -22 - d) : 0); }
-    tag(last, MB.util.price(last), col('--text'), col('--bg'), [2, 4]);
+    if (opts.avg > 0) { const d = y(opts.avg) - y(last); tag(opts.avg, MB.t('вход') + ' ' + F(opts.avg).replace(/^\$/, ''), col('--accent'), col('--accent-ink'), [6, 5], Math.abs(d) < 22 ? (d >= 0 ? 22 - d : -22 - d) : 0); }
+    tag(last, F(last), col('--text'), col('--bg'), [2, 4]);
   },
   /** Новое окно просмотра: последние 60 свечей, цена подбирается сама. */
   view: () => ({ n: 60, end: Infinity, py: null, moved: false }),

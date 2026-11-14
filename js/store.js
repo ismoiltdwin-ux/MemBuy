@@ -2,7 +2,7 @@
 MB.store = (() => {
   const KEY = MB.config.MODE === 'live' ? 'membuy-live-v1' : 'membuy-demo-v1';
   const fresh = () => ({
-    wallet: { connected: false, address: '', sol: 0 }, holdings: {}, trades: [], slippageBps: MB.config.DEFAULT_SLIPPAGE_BPS,
+    wallet: { connected: false, address: '', sol: 0 }, holdings: {}, trades: [], slippageBps: MB.config.DEFAULT_SLIPPAGE_BPS, priority: 'high', chartUnit: 'price',
     profile: { name: 'trader' + Math.floor(1000 + Math.random() * 9000), bio: '', avatar: '' }, following: [], liked: [], myPosts: [], squad: null,
     campaigns: [], adStats: {}, coins: [], recent: [], notes: [], unread: 0, equity: [], notify: true, fav: [], chartType: 'line',
   });

@@ -57,6 +57,20 @@ MB.providers.live = (() => {
       const d = await j(`${C.GECKO_API}/networks/solana/pools/${t.pool}/ohlcv/${unit}?aggregate=${agg}&limit=300`);
       return ((d.data && d.data.attributes && d.data.attributes.ohlcv_list) || []).map(c => ({ t: c[0], o: +c[1], h: +c[2], l: +c[3], c: +c[4] })).sort((x, y) => x.t - y.t);
     },
+    /** Последние сделки по монете (GeckoTerminal): покупка/продажа, сумма в $, кошелёк, время. */
+    async trades(id) {
+      const t = cache.get(id) || await this.get(id); if (!t || !t.pool) return [];
+      const d = await j(`${C.GECKO_API}/networks/solana/pools/${t.pool}/trades`);
+      return ((d && d.data) || []).map(x => x.attributes || {}).map(a => ({ ts: Date.parse(a.block_timestamp) / 1000 || 0, side: a.kind === 'sell' ? 'sell' : 'buy', usd: +a.volume_in_usd || 0,
+        tokens: +(a.kind === 'sell' ? a.from_token_amount : a.to_token_amount) || 0, who: String(a.tx_from_address || ''), tx: String(a.tx_hash || '') })).slice(0, 50);
+    },
+    /** Крупнейшие держатели (узел Solana): до 20 счетов и их доля от всех монет. Первым обычно стоит пул ликвидности или кривая pump.fun. */
+    async holders(id) {
+      const t = cache.get(id) || await this.get(id); if (!t) return [];
+      const [sup, big] = await Promise.all([MB.wallet.rpc('getTokenSupply', [t.mint]), MB.wallet.rpc('getTokenLargestAccounts', [t.mint])]);
+      const total = +(sup && sup.value && sup.value.uiAmount) || 0; if (!total) return [];
+      return ((big && big.value) || []).map(a => ({ who: String(a.address), qty: +a.uiAmount || 0, pct: (+a.uiAmount || 0) / total * 100 }));
+    },
     async series(id, tf) { return (await this.candles(id, tf)).map(c => c.c); },
     async solUsd() { if (solUsd && Date.now() - solTs < 60000) return solUsd; /* цена SOL обновляется раз в минуту */ const d = await j(C.DEX_API + '/latest/dex/tokens/' + C.SOL_MINT); const p = best(d.pairs); solUsd = p ? +p.priceUsd : solUsd; solTs = Date.now(); return solUsd; },
   };

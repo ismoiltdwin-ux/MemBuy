@@ -69,8 +69,21 @@ MB.views.token = (() => {
   /** Перерисовка без загрузки — для жестов и смены вида (линия/свечи). */
   function redraw() {
     if (raf) return; raf = requestAnimationFrame(() => { raf = 0; const c = root && root.querySelector('#cv'); if (!c || !cdata) return;
-      const type = MB.store.get().chartType, h = hold(), avg = h && h.costUsd > 0 ? h.costUsd / h.qty : 0;
-      MB.chart.draw(c, cdata.map(x => x.c), { type, candles: cdata, avg, view, times: cdata.map(x => x.t) }); });
+      const st = MB.store.get(), type = st.chartType, h = hold(), mc = st.chartUnit === 'mc' && token.supply > 0, k = mc ? token.supply : 1, avg = h && h.costUsd > 0 ? h.costUsd / h.qty * k : 0;
+      // Капитализация = цена × количество монет (как на графике pump.fun).
+      const cd = mc ? cdata.map(x => ({ t: x.t, o: x.o * k, h: x.h * k, l: x.l * k, c: x.c * k })) : cdata;
+      MB.chart.draw(c, cd.map(x => x.c), { type, candles: cd, avg, view, times: cd.map(x => x.t), fmt: mc ? MB.util.usd : null }); });
+  }
+  let act = 'trades';
+  const ago = ts => { const m = Math.max(0, Math.round(Date.now() / 1000 - ts) / 60); return m < 1 ? 'только что' : m < 60 ? Math.round(m) + ' мин назад' : Math.round(m / 60) + ' ч назад'; };
+  const wl = (a, tx) => MB.config.LIVE && /^[1-9A-HJ-NP-Za-km-z]{32,88}$/.test(a) ? `<a class="lnk" href="https://solscan.io/${tx ? 'tx' : 'account'}/${esc(a)}" target="_blank" rel="noopener">${esc(MB.util.short(a))}</a>` : `<span>${esc(MB.util.short(a))}</span>`;
+  /** Вкладки под графиком: «Сделки» (последние покупки и продажи) и «Держатели» (крупнейшие счета). */
+  async function activity() {
+    const box = root && root.querySelector('#actb'); if (!box || !token) return; const id = token.id;
+    if (act === 'trades') { const tr = await MB.data.trades(id).catch(() => null); if (!root || !token || token.id !== id || act !== 'trades') return;
+      box.innerHTML = !tr ? '<div class="hint">Не удалось загрузить сделки</div>' : !tr.length ? '<div class="hint">Сделок пока нет</div>' : `<div class="tlist">${tr.map(x => `<div class="trow"><span class="tag ${x.side}">${x.side === 'buy' ? 'Покупка' : 'Продажа'}</span><b>${usd(x.usd)}</b><small>${num(x.tokens, 0)}</small>${wl(x.who)}<small>${ago(x.ts)}</small></div>`).join('')}</div>`; }
+    else { const hs = await MB.data.holders(id).catch(() => null); if (!root || !token || token.id !== id || act !== 'holders') return;
+      box.innerHTML = !hs ? '<div class="hint">Не удалось загрузить держателей</div>' : !hs.length ? '<div class="hint">Нет данных о держателях</div>' : `<p class="fine">Первым обычно стоит пул ликвидности или кривая pump.fun.</p><div class="tlist">${hs.map((x, i) => `<div class="hrow"><span class="rk">${i + 1}</span>${wl(x.who)}<span class="bar"><i style="width:${Math.min(100, x.pct).toFixed(1)}%"></i></span><b>${x.pct.toFixed(2)}%</b></div>`).join('')}</div>`; }
   }
   function head() {
     root.querySelector('#px').innerHTML = `<b>${price(token.price)}</b>${MB.ui.chg(token.chg24)}`;
@@ -95,23 +108,27 @@ MB.views.token = (() => {
           <header class="thead">${MB.ui.avatar(token, 56)}<div><h1>${esc(token.name)}</h1><small>${esc(token.sym)} · ${esc(MB.util.short(token.mint))}</small><button type="button" class="chip favb" id="fav"></button><button type="button" class="chip favb" id="share">Поделиться</button></div><div class="px" id="px"></div></header>
           <div class="card chartc"><div class="ctools"><div class="chips tfs">${[['15s', '15 с'], ['1m', '1 м'], ['5m', '5 м'], ['15m', '15 м'], ['1h', '1 ч'], ['4h', '4 ч'], ['1d', '1 д']].map(([k, n]) => `<button type="button" class="chip ${k === tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('')}</div>
             <div class="chips ctype" role="group" aria-label="Вид графика"><button type="button" class="chip ${type === 'line' ? 'on' : ''}" data-ct="line" aria-pressed="${type === 'line'}">Линия</button><button type="button" class="chip ${type === 'candle' ? 'on' : ''}" data-ct="candle" aria-pressed="${type === 'candle'}">Свечи</button></div></div>
+            <div class="chips cunit" role="group" aria-label="Единицы графика"><button type="button" class="chip ${MB.store.get().chartUnit !== 'mc' ? 'on' : ''}" data-cu="price">Цена</button><button type="button" class="chip ${MB.store.get().chartUnit === 'mc' ? 'on' : ''}" data-cu="mc">Капитализация</button></div>
             <canvas id="cv" role="img" aria-label="График цены ${esc(token.sym)}"></canvas><div class="chint"><small>Двигайте график пальцем · два пальца — масштаб · двойное касание — сброс</small><button type="button" class="chip" id="creset" hidden>⟲ Сброс</button></div></div>
           <div class="card mypos" id="mypos" hidden></div>
+          <div class="card actc"><div class="chips" role="tablist"><button type="button" class="chip on" role="tab" data-act="trades">Сделки</button><button type="button" class="chip" role="tab" data-act="holders">Держатели</button></div><div id="actb"><div class="hint">Загружаем…</div></div></div>
           <dl class="stats" id="stats"></dl><div class="chips socl" id="socl" hidden></div>
           ${token.desc ? `<div class="card about"><h2>О монете</h2><p>${esc(token.desc)}</p>${token.links && MB.ads.safe(token.links) ? `<p><a class="lnk" href="${esc(token.links)}" target="_blank" rel="noopener">Соцсеть монеты →</a></p>` : ''}</div>` : ''}
         </div><aside class="card panel" id="panel"></aside></div>`;
       el.querySelectorAll('.tfs .chip').forEach(c => c.onclick = () => { tf = c.dataset.tf; el.querySelectorAll('.tfs .chip').forEach(x => x.classList.toggle('on', x === c)); Object.assign(view, MB.chart.view()); el.querySelector('#creset').hidden = true; cdata = null; chart(); });
       const rs = el.querySelector('#creset'); rs.onclick = () => { Object.assign(view, MB.chart.view()); rs.hidden = true; redraw(); };
       MB.chart.attach(el.querySelector('#cv'), view, redraw, moved => { rs.hidden = !moved; });
+      el.querySelectorAll('.cunit .chip').forEach(c => c.onclick = () => { MB.store.update(s => { s.chartUnit = c.dataset.cu; }, true); el.querySelectorAll('.cunit .chip').forEach(x => x.classList.toggle('on', x === c)); Object.assign(view, MB.chart.view()); redraw(); });
+      act = 'trades'; el.querySelectorAll('[data-act]').forEach(c => c.onclick = () => { act = c.dataset.act; el.querySelectorAll('[data-act]').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-selected', x === c); }); el.querySelector('#actb').innerHTML = '<div class="hint">Загружаем…</div>'; activity(); });
       el.querySelectorAll('.ctype .chip').forEach(c => c.onclick = () => { MB.store.update(s => { s.chartType = c.dataset.ct; }, true); el.querySelectorAll('.ctype .chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); }); redraw(); });
       el.querySelector('#share').onclick = () => { const url = location.origin + location.pathname + location.search + '#t-' + token.id;
         if (navigator.share) navigator.share({ title: token.name, text: token.name + ' (' + token.sym + ') — Membuy', url }).catch(() => {});
         else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => MB.ui.toast('Ссылка скопирована'), () => MB.ui.toast('Не удалось скопировать ссылку', 'err')); };
       el.querySelector('#fav').onclick = () => { MB.store.update(s => { const i = s.fav.indexOf(token.id); if (i >= 0) s.fav.splice(i, 1); else s.fav.push(token.id); }, true); favBtn(); };
-      favBtn(); head(); panel(); mypos(); chart(); window.addEventListener('resize', onResize);
+      favBtn(); head(); panel(); mypos(); chart(); activity(); window.addEventListener('resize', onResize);
     },
     unmount() { window.removeEventListener('resize', onResize); root = null; },
-    async onTick() { if (!root || !token) return; const t = await MB.data.get(token.id).catch(() => null); if (!t || !root) return; token = t; head(); mypos(); chart(); if (quote && !busy) requote(); },
+    async onTick() { if (!root || !token) return; const t = await MB.data.get(token.id).catch(() => null); if (!t || !root) return; token = t; head(); mypos(); chart(); if (act === 'trades') activity(); if (quote && !busy) requote(); },
     /** Состояние изменилось (например, подключили кошелёк в шапке): обновляем панель, не теряя введённую сумму. */
     onState() { if (root && token && !busy && root.querySelector('#panel')) { panel(true); mypos(); } },
   };

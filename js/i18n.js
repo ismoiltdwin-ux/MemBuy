@@ -2,7 +2,7 @@
    Порядок поиска перевода: точное совпадение (D) → шаблоны с подстановкой (R) → замена фрагментов (F).
    Чтобы добавить язык: допишите код в LANGS и ещё один перевод в конец каждой строки D, R и F. */
 MB.i18n = (() => {
-  const LANGS = [['ru', 'Русский'], ['en', 'English'], ['tg', 'Тоҷикӣ']], KEY = 'membuy-lang';
+  const LANGS = [['ru', 'Русский'], ['en', 'English']], KEY = 'membuy-lang'; // языки сайта; третий столбец в словарях ниже — запасной таджикский, сейчас не используется
   let lang = 'ru'; try { const s = localStorage.getItem(KEY); if (LANGS.some(l => l[0] === s)) lang = s; } catch (e) { /* хранилище недоступно */ }
   const idx = () => LANGS.findIndex(l => l[0] === lang) - 1;
 
@@ -176,6 +176,18 @@ MB.i18n = (() => {
     "Откройте «Вывод», выберите монету SOL и сеть Solana.": ["Open “Withdraw”, choose the SOL coin and the Solana network.", "«Баровардан»-ро кушоед, тангаи SOL ва шабакаи Solana-ро интихоб кунед."],
     "Вставьте адрес выше и подтвердите вывод.": ["Paste the address above and confirm the withdrawal.", "Суроғаи болоро гузоред ва баровардани пулро тасдиқ кунед."],
     "Через 1–2 минуты нажмите «Обновить баланс».": ["After 1–2 minutes tap “Refresh balance”.", "Пас аз 1–2 дақиқа «Навсозии баланс»-ро пахш кунед."],
+    "Единицы графика": ["Chart units", ""],
+    "Цена": ["Price", ""],
+    "Загружаем…": ["Loading…", ""],
+    "Не удалось загрузить сделки": ["Could not load trades", ""],
+    "Не удалось загрузить держателей": ["Could not load holders", ""],
+    "Нет данных о держателях": ["No holder data", ""],
+    "Первым обычно стоит пул ликвидности или кривая pump.fun.": ["The first account is usually the liquidity pool or the pump.fun bonding curve.", ""],
+    "Скорость сделки": ["Trade speed", ""],
+    "Обычная (до 0,0002 SOL)": ["Normal (up to 0.0002 SOL)", ""],
+    "Быстрая (до 0,001 SOL)": ["Fast (up to 0.001 SOL)", ""],
+    "Очень быстрая (до 0,003 SOL)": ["Very fast (up to 0.003 SOL)", ""],
+    "pump.fun кривая / пул": ["pump.fun curve / pool", ""],
     'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
     'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
     'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
@@ -254,7 +266,7 @@ MB.i18n = (() => {
     LANGS, misses, t: s => tr(s), get lang() { return lang; },
     /** Локаль для чисел и дат. Для таджикского используется русская запись чисел. */
     locale: () => (lang === 'en' ? 'en-US' : 'ru-RU'),
-    units: () => (lang === 'en' ? ['K', 'M', 'B'] : lang === 'tg' ? [' ҳаз.', ' млн', ' млрд'] : [' тыс.', ' млн', ' млрд']),
+    units: () => (lang === 'en' ? ['K', 'M', 'B'] : [' тыс.', ' млн', ' млрд']),
     set(l) { if (!LANGS.some(x => x[0] === l) || l === lang) return; lang = l; try { localStorage.setItem(KEY, l); } catch (e) { /* игнорируем */ } document.documentElement.lang = l; MB.util.bus.emit('lang', l); node(document.body); },
     /** Запускает перевод страницы и слежение за изменениями. */
     start() { document.documentElement.lang = lang; node(document.body); obs = new MutationObserver(list => { for (const m of list) { if (m.type === 'childList') m.addedNodes.forEach(node); else node(m.target); } }); obs.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS }); },

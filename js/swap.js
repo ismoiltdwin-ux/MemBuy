@@ -31,7 +31,9 @@ MB.swap = (() => {
       const h = st.holdings[q.token.id]; if (q.side === 'sell' && (!h || h.qty + 1e-9 < q.amountIn)) throw new Error('Недостаточно монет');
     } else {
       await MB.wallet.web3();
-      const body = { quoteResponse: q.raw, userPublicKey: st.wallet.address, dynamicComputeUnitLimit: true }; if (C.FEE_ACCOUNT) body.feeAccount = C.FEE_ACCOUNT;
+      // Скорость сделки: приоритетный сбор сети (Jupiter сам подбирает сумму, не выше потолка).
+      const PR = { medium: 200000, high: 1000000, veryHigh: 3000000 }, pl = PR[st.priority] ? st.priority : 'high';
+      const body = { quoteResponse: q.raw, userPublicKey: st.wallet.address, dynamicComputeUnitLimit: true, prioritizationFeeLamports: { priorityLevelWithMaxLamports: { maxLamports: PR[pl], priorityLevel: pl } } }; if (C.FEE_ACCOUNT) body.feeAccount = C.FEE_ACCOUNT;
       const r = await fetch(`${C.JUP_API}/swap`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       if (!r.ok) throw new Error('Не удалось подготовить сделку');
       const { swapTransaction } = await r.json(), bytes = Uint8Array.from(atob(swapTransaction), c => c.charCodeAt(0));

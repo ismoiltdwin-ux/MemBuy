@@ -8,7 +8,8 @@
     const st0 = MB.store.get(); document.getElementById('bell').classList.toggle('has', st0.unread > 0); document.getElementById('bell').setAttribute('aria-label', 'Уведомления' + (st0.unread ? ': новых ' + st0.unread : ''));
     document.getElementById('walletSlot').innerHTML = MB.ui.walletBtn();
     document.getElementById('walletBtn').onclick = async () => {
-      try { if (MB.store.get().wallet.connected) { await MB.wallet.disconnect(); MB.ui.toast('Кошелёк отключён'); } else { await MB.wallet.connect(); MB.ui.toast('Кошелёк подключён'); } }
+      // Подключённый кошелёк: кнопка ведёт в профиль (баланс, пополнение, отключение) — случайно отключить нельзя.
+      try { if (MB.store.get().wallet.connected) { location.hash = 'profile'; } else { await MB.wallet.connect(); MB.ui.toast('Кошелёк подключён'); } }
       catch (e) { MB.ui.toast(e.message, 'err'); }
     };
   }
@@ -32,5 +33,5 @@
   function langs() { document.querySelectorAll('.langs').forEach(box => { box.innerHTML = MB.i18n.LANGS.map(([k, n]) => `<button type="button" class="chip ${k === MB.i18n.lang ? 'on' : ''}" data-lang="${k}" aria-pressed="${k === MB.i18n.lang}">${n}</button>`).join(''); }); }
   document.addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (b) MB.i18n.set(b.dataset.lang); });
   MB.util.bus.on('lang', () => { header(); langs(); route(); });
-  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route();
+  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route(); MB.wallet.restore().catch(() => {});
 })();

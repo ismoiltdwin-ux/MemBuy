@@ -23,6 +23,14 @@ MB.wallet = (() => {
         const next = {}; for (const [mint, qty] of Object.entries(found)) { const old = s.holdings[mint]; next[mint] = { qty, costUsd: old && old.qty > 0 ? old.costUsd * Math.min(1, qty / old.qty) : 0, sym: old ? old.sym : mint.slice(0, 4), name: old ? old.name : MB.util.short(mint) }; }
         s.holdings = next; });
     },
+    /** Живой режим: после перезагрузки страницы тихо подключает кошелёк, который пользователь уже разрешил, и следит за сменой аккаунта в Phantom. */
+    async restore() {
+      if (C.MODE === 'demo') return; const p = provider(); if (!p) return;
+      if (p.on && !p._mbListen) { p._mbListen = true;
+        p.on('accountChanged', pk => { if (pk) { S.set({ wallet: { connected: true, address: pk.toString(), sol: 0 } }); this.refresh().catch(() => {}); } else this.restore().catch(() => {}); });
+        p.on('disconnect', () => S.set({ wallet: { connected: false, address: '', sol: 0 } })); }
+      try { const res = await p.connect({ onlyIfTrusted: true }); S.set({ wallet: { connected: true, address: res.publicKey.toString(), sol: 0 } }); await this.refresh(); } catch (e) { /* не разрешал раньше — ждём нажатия «Подключить» */ }
+    },
     async disconnect() { if (C.MODE !== 'demo') { const p = provider(); if (p) await p.disconnect(); } const w = S.get().wallet; S.set({ wallet: { connected: false, address: '', sol: C.MODE === 'demo' ? w.sol : 0 } }); },
   };
 })();

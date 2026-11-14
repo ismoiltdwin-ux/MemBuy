@@ -176,6 +176,10 @@ img.ava{display:block}
 
 /* --- Языки --- */
 footer .langs{margin-bottom:12px}
+.dep{margin:14px 0}
+.dep .mut{color:var(--muted);font-size:14px;margin:6px 0 10px}
+.dep .addr{display:block;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;word-break:break-all;user-select:all;-webkit-user-select:all;margin-bottom:10px}
+.dep .qgrid{margin:0}
 </style>
 <div class="demo" id="demoBar" hidden>Демо-режим: монеты и сделки учебные, настоящие деньги не используются</div>
 <header class="top"><div class="wrap">
@@ -199,7 +203,7 @@ MB.config = {
   DEFAULT_SLIPPAGE_BPS: 100,    // проскальзывание по умолчанию: 1%
   SOL_USD_DEMO: 150,            // условная цена SOL в демо-режиме
   DEMO_START_SOL: 5,
-  RPC_URL: 'https://api.mainnet-beta.solana.com',
+  RPC_URL: 'https://mainnet.helius-rpc.com/?api-key=d9fb527b-3cbc-4e83-a9fe-9b36fcd56889',
   JUP_API: 'https://lite-api.jup.ag/swap/v1',
   DEX_API: 'https://api.dexscreener.com',
   GECKO_API: 'https://api.geckoterminal.com/api/v2',
@@ -228,7 +232,10 @@ MB.i18n = (() => {
     'Рынок': ['Market', 'Бозор'], 'Лента': ['Feed', 'Лента'], 'Рейтинг': ['Leaderboard', 'Рейтинг'], 'Профиль': ['Profile', 'Профил'],
     'Разделы': ['Sections', 'Бахшҳо'], 'Поиск': ['Search', 'Ҷустуҷӯ'], 'Уведомления': ['Notifications', 'Огоҳиҳо'],
     'Подключить': ['Connect', 'Пайваст'], 'кошелёк': ['wallet', 'кардани ҳамён'], 'Подключить кошелёк': ['Connect wallet', 'Пайваст кардани ҳамён'], 'Отключить кошелёк': ['Disconnect wallet', 'Қатъ кардани ҳамён'],
-    'Кошелёк подключён': ['Wallet connected', 'Ҳамён пайваст шуд'], 'Кошелёк отключён': ['Wallet disconnected', 'Ҳамён қатъ шуд'],
+    'Кошелёк подключён': ['Wallet connected', 'Ҳамён пайваст шуд'], 'Баланс и кошелёк': ['Balance and wallet', 'Баланс ва ҳамён'], 'Кошелёк': ['Wallet', 'Ҳамён'],
+    'Чтобы пополнить, отправьте SOL на этот адрес в сети Solana — с биржи или из другого кошелька.': ['To top up, send SOL to this address on the Solana network — from an exchange or another wallet.', 'Барои пур кардан, SOL-ро ба ин суроға дар шабакаи Solana фиристед — аз биржа ё ҳамёни дигар.'],
+    'Скопировать адрес': ['Copy address', 'Нусха бардоштани суроға'], 'Обновить баланс': ['Refresh balance', 'Навсозии баланс'], 'Адрес скопирован': ['Address copied', 'Суроға нусха шуд'],
+    'Не удалось скопировать — выделите адрес вручную': ['Could not copy — select the address manually', 'Нусха нашуд — суроғаро дастӣ интихоб кунед'], 'Баланс обновлён': ['Balance updated', 'Баланс нав шуд'], 'Отключить кошелёк?': ['Disconnect wallet?', 'Ҳамёнро қатъ кунем?'], 'Кошелёк отключён': ['Wallet disconnected', 'Ҳамён қатъ шуд'],
     'Membuy — интерфейс для обмена монет. Ключи и средства остаются в вашем кошельке. Мемкоины крайне рискованны: цена может упасть до нуля. Это не инвестиционная рекомендация.': ['Membuy is an interface for swapping coins. Your keys and funds stay in your wallet. Memecoins are extremely risky: the price can fall to zero. This is not investment advice.', 'Membuy — интерфейс барои иваз кардани тангаҳо. Калидҳо ва маблағ дар ҳамёни шумо мемонанд. Мемкоинҳо хеле хатарноканд: нарх метавонад то сифр афтад. Ин маслиҳати сармоягузорӣ нест.'],
     'Язык': ['Language', 'Забон'], 'Удалить': ['Delete', 'Нест кардан'], 'Сохранить': ['Save', 'Нигоҳ доштан'], 'Отмена': ['Cancel', 'Бекор кардан'], 'Повторить': ['Retry', 'Такрор'],
     // Рынок
@@ -643,6 +650,14 @@ MB.wallet = (() => {
         const next = {}; for (const [mint, qty] of Object.entries(found)) { const old = s.holdings[mint]; next[mint] = { qty, costUsd: old && old.qty > 0 ? old.costUsd * Math.min(1, qty / old.qty) : 0, sym: old ? old.sym : mint.slice(0, 4), name: old ? old.name : MB.util.short(mint) }; }
         s.holdings = next; });
     },
+    /** Живой режим: после перезагрузки страницы тихо подключает кошелёк, который пользователь уже разрешил, и следит за сменой аккаунта в Phantom. */
+    async restore() {
+      if (C.MODE === 'demo') return; const p = provider(); if (!p) return;
+      if (p.on && !p._mbListen) { p._mbListen = true;
+        p.on('accountChanged', pk => { if (pk) { S.set({ wallet: { connected: true, address: pk.toString(), sol: 0 } }); this.refresh().catch(() => {}); } else this.restore().catch(() => {}); });
+        p.on('disconnect', () => S.set({ wallet: { connected: false, address: '', sol: 0 } })); }
+      try { const res = await p.connect({ onlyIfTrusted: true }); S.set({ wallet: { connected: true, address: res.publicKey.toString(), sol: 0 } }); await this.refresh(); } catch (e) { /* не разрешал раньше — ждём нажатия «Подключить» */ }
+    },
     async disconnect() { if (C.MODE !== 'demo') { const p = provider(); if (p) await p.disconnect(); } const w = S.get().wallet; S.set({ wallet: { connected: false, address: '', sol: C.MODE === 'demo' ? w.sol : 0 } }); },
   };
 })();
@@ -751,7 +766,7 @@ MB.ui = MB.ui || {};
   MB.ui.empty = (title, text, action = '') => `<div class="empty"><b>${title}</b><p>${text}</p>${action}</div>`;
   MB.ui.walletBtn = () => {
     const w = MB.store.get().wallet;
-    return w.connected ? `<button class="btn ghost" id="walletBtn" title="Отключить кошелёк"><i class="dot"></i>${MB.util.num(w.sol, 3)} SOL</button>` : `<button class="btn accent" id="walletBtn">Подключить<span class="lg">&nbsp;кошелёк</span></button>`;
+    return w.connected ? `<button class="btn ghost" id="walletBtn" title="Баланс и кошелёк"><i class="dot"></i>${MB.util.num(w.sol, 3)} SOL</button>` : `<button class="btn accent" id="walletBtn">Подключить<span class="lg">&nbsp;кошелёк</span></button>`;
   };
 })();
 
@@ -990,8 +1005,12 @@ MB.views.profile = (() => {
     root.innerHTML = `<div class="prof"><div class="pava">${MB.ui.userAva(st.profile.name, 40, 84)}<label class="chip photob" for="pfile">${st.profile.avatar ? 'Сменить фото' : 'Загрузить фото'}</label><input id="pfile" type="file" accept="image/*" class="sr"></div><div class="nm"><h1>${esc(st.profile.name)}</h1><small>${esc(st.profile.bio || 'Без описания')} · ${esc(MB.util.short(st.wallet.address))}</small><small>Подписки: <b>${st.following.length}</b> · Постов: <b>${st.myPosts.length}</b>${st.squad ? ' · Отряд: <b>' + esc(st.squad) + '</b>' : ''}</small></div></div>
       <div class="qgrid">${MB.config.LIVE ? '' : '<a class="btn ghost" href="#invite">Пригласить друзей</a><a class="btn ghost" href="#create">Создать монету</a><a class="btn ghost" href="#ads">Реклама</a>'}<a class="btn ghost" href="#prefs">Настройки</a></div>
       <div class="card wcard"><small>Стоимость портфеля</small><b class="tot">${usd(total)}</b><div class="wline"><span>${num(st.wallet.sol, 4)} SOL свободно</span><span class="${pnl >= 0 ? 'up' : 'down'}">Результат: ${pnl >= 0 ? '+' : ''}${usd(pnl)} (${MB.util.pct(pct)})</span></div><canvas id="eq" role="img" aria-label="График стоимости портфеля"></canvas></div>
-      <div class="chips tabsx" role="tablist"><button class="chip ${tab === 'open' ? 'on' : ''}" role="tab" aria-selected="${tab === 'open'}" data-tab="open">Монеты</button><button class="chip ${tab === 'hist' ? 'on' : ''}" role="tab" aria-selected="${tab === 'hist'}" data-tab="hist">История</button></div>
+      <div class="card dep"><h2 class="h2">Кошелёк</h2>${MB.config.LIVE ? `<p class="mut">Чтобы пополнить, отправьте SOL на этот адрес в сети Solana — с биржи или из другого кошелька.</p><code class="addr">${esc(st.wallet.address)}</code>` : ''}<div class="qgrid">${MB.config.LIVE ? '<button class="btn accent" id="wcopy">Скопировать адрес</button><button class="btn ghost" id="wref">Обновить баланс</button>' : ''}<button class="btn ghost" id="wdis">Отключить кошелёк</button></div></div>
+            <div class="chips tabsx" role="tablist"><button class="chip ${tab === 'open' ? 'on' : ''}" role="tab" aria-selected="${tab === 'open'}" data-tab="open">Монеты</button><button class="chip ${tab === 'hist' ? 'on' : ''}" role="tab" aria-selected="${tab === 'hist'}" data-tab="hist">История</button></div>
       <div class="list">${tab === 'open' ? open : hist}</div>`;
+    const wc = root.querySelector('#wcopy'); if (wc) wc.onclick = () => navigator.clipboard.writeText(st.wallet.address).then(() => MB.ui.toast('Адрес скопирован'), () => MB.ui.toast('Не удалось скопировать — выделите адрес вручную', 'err'));
+    const wr = root.querySelector('#wref'); if (wr) wr.onclick = () => MB.wallet.refresh().then(() => MB.ui.toast('Баланс обновлён'), e => MB.ui.toast(e.message, 'err'));
+    root.querySelector('#wdis').onclick = () => { if (confirm(MB.t('Отключить кошелёк?'))) MB.wallet.disconnect().then(() => MB.ui.toast('Кошелёк отключён')); };
     root.querySelectorAll('[data-tab]').forEach(c => c.onclick = () => { tab = c.dataset.tab; draw(); });
     root.querySelector('#pfile').addEventListener('change', e => MB.util.squareImage(e.target.files[0], 128).then(url => { MB.store.update(s => { s.profile.avatar = url; }); MB.ui.toast('Фото профиля обновлено'); }, err => MB.ui.toast(err.message, 'err')));
     const eq = st.equity.length > 1 ? st.equity : [start, total]; MB.chart.draw(root.querySelector('#eq'), eq);
@@ -1137,7 +1156,8 @@ MB.views = MB.views || {};
     const st0 = MB.store.get(); document.getElementById('bell').classList.toggle('has', st0.unread > 0); document.getElementById('bell').setAttribute('aria-label', 'Уведомления' + (st0.unread ? ': новых ' + st0.unread : ''));
     document.getElementById('walletSlot').innerHTML = MB.ui.walletBtn();
     document.getElementById('walletBtn').onclick = async () => {
-      try { if (MB.store.get().wallet.connected) { await MB.wallet.disconnect(); MB.ui.toast('Кошелёк отключён'); } else { await MB.wallet.connect(); MB.ui.toast('Кошелёк подключён'); } }
+      // Подключённый кошелёк: кнопка ведёт в профиль (баланс, пополнение, отключение) — случайно отключить нельзя.
+      try { if (MB.store.get().wallet.connected) { location.hash = 'profile'; } else { await MB.wallet.connect(); MB.ui.toast('Кошелёк подключён'); } }
       catch (e) { MB.ui.toast(e.message, 'err'); }
     };
   }
@@ -1161,7 +1181,7 @@ MB.views = MB.views || {};
   function langs() { document.querySelectorAll('.langs').forEach(box => { box.innerHTML = MB.i18n.LANGS.map(([k, n]) => `<button type="button" class="chip ${k === MB.i18n.lang ? 'on' : ''}" data-lang="${k}" aria-pressed="${k === MB.i18n.lang}">${n}</button>`).join(''); }); }
   document.addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (b) MB.i18n.set(b.dataset.lang); });
   MB.util.bus.on('lang', () => { header(); langs(); route(); });
-  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route();
+  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route(); MB.wallet.restore().catch(() => {});
 })();
 
 </script>

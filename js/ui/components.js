@@ -18,6 +18,6 @@ MB.ui = MB.ui || {};
   MB.ui.empty = (title, text, action = '') => `<div class="empty"><b>${title}</b><p>${text}</p>${action}</div>`;
   MB.ui.walletBtn = () => {
     const w = MB.store.get().wallet;
-    return w.connected ? `<button class="btn ghost" id="walletBtn" title="Отключить кошелёк"><i class="dot"></i>${MB.util.num(w.sol, 3)} SOL</button>` : `<button class="btn accent" id="walletBtn">Подключить<span class="lg">&nbsp;кошелёк</span></button>`;
+    return w.connected ? `<button class="btn ghost" id="walletBtn" title="Баланс и кошелёк"><i class="dot"></i>${MB.util.num(w.sol, 3)} SOL</button>` : `<button class="btn accent" id="walletBtn">Подключить<span class="lg">&nbsp;кошелёк</span></button>`;
   };
 })();

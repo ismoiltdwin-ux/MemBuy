@@ -171,3 +171,7 @@ img.ava{display:block}
 
 /* --- Языки --- */
 footer .langs{margin-bottom:12px}
+.dep{margin:14px 0}
+.dep .mut{color:var(--muted);font-size:14px;margin:6px 0 10px}
+.dep .addr{display:block;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;word-break:break-all;user-select:all;-webkit-user-select:all;margin-bottom:10px}
+.dep .qgrid{margin:0}

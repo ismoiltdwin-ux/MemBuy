@@ -8,7 +8,7 @@ MB.config = {
   DEFAULT_SLIPPAGE_BPS: 100,    // проскальзывание по умолчанию: 1%
   SOL_USD_DEMO: 150,            // условная цена SOL в демо-режиме
   DEMO_START_SOL: 5,
-  RPC_URL: 'https://api.mainnet-beta.solana.com',
+  RPC_URL: 'https://mainnet.helius-rpc.com/?api-key=d9fb527b-3cbc-4e83-a9fe-9b36fcd56889',
   JUP_API: 'https://lite-api.jup.ag/swap/v1',
   DEX_API: 'https://api.dexscreener.com',
   GECKO_API: 'https://api.geckoterminal.com/api/v2',

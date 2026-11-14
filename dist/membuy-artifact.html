@@ -189,18 +189,31 @@ footer .langs{margin-bottom:12px}
 .chint{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
 .chint small{color:var(--muted);font-size:12px}
 .chint .chip{flex:none;padding:6px 10px}
+.offline{background:var(--down);color:#330707;font-size:13px;font-weight:700;text-align:center;padding-block:6px}
+.flinks{margin-top:8px}.flinks a{color:var(--accent)}
+.onb{position:fixed;inset:0;z-index:60;background:#120f24ee;backdrop-filter:blur(8px);display:grid;place-items:center;padding:16px}
+.onb .card{max-width:420px;width:100%;display:flex;flex-direction:column;gap:14px}
+.onb h2{font-family:var(--display);font-size:20px;font-weight:800}
+.onb ol{padding-left:20px;display:flex;flex-direction:column;gap:6px;color:var(--muted)}
+.onb li.cur{color:var(--text);font-weight:700}
+.onb .crow{justify-content:flex-end}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.faq summary{cursor:pointer;font-weight:700}
+.faq p{color:var(--muted);margin-top:8px}
 </style>
 <div class="demo" id="demoBar" hidden>Демо-режим: монеты и сделки учебные, настоящие деньги не используются</div>
+<div class="offline" id="offlineBar" hidden>Нет соединения. Показываем последние данные.</div>
 <header class="top"><div class="wrap">
   <a class="logo" href="#market"><i>M</i>Membuy</a>
   <nav class="tabs" aria-label="Разделы"><a href="#market" data-nav="market">Рынок</a><a href="#feed" data-nav="feed">Лента</a><a href="#leaders" data-nav="leaders">Рейтинг</a><a href="#profile" data-nav="profile">Профиль</a></nav>
   <span class="sp"></span><a class="ico" href="#search" aria-label="Поиск"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></a><a class="ico" id="bell" href="#notes" aria-label="Уведомления"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0112 0c0 6 2 7 2 7H4s2-1 2-7"/><path d="M10 20a2 2 0 004 0"/></svg></a><span id="walletSlot"></span>
 </div></header>
 <main class="wrap"><div id="view"></div>
-  <footer><div class="langs chips" role="group" aria-label="Язык"></div><p>Membuy — интерфейс для обмена монет. Ключи и средства остаются в вашем кошельке. Мемкоины крайне рискованны: цена может упасть до нуля. Это не инвестиционная рекомендация.</p></footer>
+  <footer><div class="langs chips" role="group" aria-label="Язык"></div><p>Membuy — интерфейс для обмена монет. Ключи и средства остаются в вашем кошельке. Мемкоины крайне рискованны: цена может упасть до нуля. Это не инвестиционная рекомендация.</p><p class="flinks"><a href="#help">Помощь</a> · <a href="#terms">Условия</a> · <a href="#privacy">Приватность</a></p></footer>
 </main>
 <nav class="bnav" aria-label="Разделы"><a href="#market" data-nav="market">Рынок</a><a href="#feed" data-nav="feed">Лента</a><a href="#leaders" data-nav="leaders">Рейтинг</a><a href="#profile" data-nav="profile">Профиль</a></nav>
 <div id="toasts" aria-live="polite"></div>
+<div id="onb" hidden></div>
 <script>
 /* Membuy — настройки. Меняйте только этот файл. */
 window.MB = window.MB || {};
@@ -324,6 +337,55 @@ MB.i18n = (() => {
     'Оплачено. Объявление отправлено на проверку': ['Paid. The ad has been sent for review', 'Пардохт шуд. Эълон барои санҷиш фиристода шуд'], 'Объявление одобрено': ['Ad approved', 'Эълон тасдиқ шуд'], 'Объявление отклонено': ['Ad rejected', 'Эълон рад шуд'],
     'Ссылка должна начинаться с https:// (до 120 знаков)': ['The link must start with https:// (up to 120 characters)', 'Пайванд бояд бо https:// оғоз шавад (то 120 аломат)'], 'Одобрять может только владелец площадки': ['Only the platform owner can approve', 'Танҳо соҳиби платформа тасдиқ карда метавонад'],
     'Рекламная площадка ещё не настроена': ['The ad platform is not set up yet', 'Платформаи реклама ҳоло танзим нашудааст'], 'Заголовок': ['Headline', 'Сарлавҳа'],
+    'Нет соединения. Показываем последние данные.': ["No connection. Showing the latest data.", "Пайваст нест. Маълумоти охирин нишон дода мешавад."],
+    'Помощь': ["Help", "Кӯмак"],
+    'Условия': ["Terms", "Шартҳо"],
+    'Приватность': ["Privacy", "Махфият"],
+    'Условия использования': ["Terms of use", "Шартҳои истифода"],
+    'Поделиться': ["Share", "Мубодила"],
+    'Не удалось скопировать ссылку': ["Could not copy the link", "Пайванд нусха нашуд"],
+    'Вы отклонили подпись': ["You rejected the signature", "Шумо имзоро рад кардед"],
+    'Сделка не адресована вашему кошельку — подпись отменена': ["The trade is not addressed to your wallet — signing cancelled", "Савдо ба ҳамёни шумо нигаронида нашудааст — имзо бекор шуд"],
+    'Далее': ["Next", "Минбаъд"],
+    'Назад': ["Back", "Бозгашт"],
+    'Пропустить': ["Skip", "Гузаштан"],
+    'Готово': ["Done", "Тайёр"],
+    'Настоящие деньги': ["Real money", "Пули воқеӣ"],
+    'Сделки реальные и подписываются в вашем кошельке. Мемкоины могут упасть до нуля — начинайте с малых сумм.': ["Trades are real and signed in your wallet. Memecoins can fall to zero — start with small amounts.", "Савдоҳо воқеӣ ҳастанд ва дар ҳамёни шумо имзо мешаванд. Мемкоинҳо метавонанд то сифр афтанд — бо маблағҳои хурд оғоз кунед."],
+    'Подключите Phantom': ["Connect Phantom", "Phantom-ро пайваст кунед"],
+    'Откройте сайт во встроенном браузере Phantom и нажмите «Подключить». Ключи остаются у вас.': ["Open the site in Phantom’s built-in browser and tap “Connect”. Your keys stay with you.", "Сайтро дар браузери дохилии Phantom кушоед ва «Пайваст»-ро пахш кунед. Калидҳо дар назди шумо мемонанд."],
+    'Пополните и купите': ["Top up and buy", "Пур кунед ва харед"],
+    'Профиль → «Скопировать адрес», отправьте SOL в сети Solana, затем выберите монету на рынке.': ["Profile → “Copy address”, send SOL on the Solana network, then pick a coin in the market.", "Профил → «Нусха бардоштани суроға», SOL-ро дар шабакаи Solana фиристед, баъд дар бозор тангаро интихоб кунед."],
+    'Это демо': ["This is a demo", "Ин демо аст"],
+    'Монеты и сделки учебные, настоящие деньги не используются. Пробуйте смело, чтобы понять, как всё работает.': ["Coins and trades are for practice, no real money is used. Try things freely to see how it all works.", "Тангаҳо ва савдоҳо омӯзишӣ мебошанд, пули воқеӣ истифода намешавад. Озодона санҷед, то бифаҳмед, ки ҳама чӣ тавр кор мекунад."],
+    'Подключите кошелёк': ["Connect a wallet", "Ҳамёнро пайваст кунед"],
+    'В демо кошелёк учебный: на нём 5 условных SOL.': ["In the demo the wallet is for practice: it holds 5 play SOL.", "Дар демо ҳамён омӯзишӣ аст: дар он 5 SOL-и шартӣ ҳаст."],
+    'Купите первую монету': ["Buy your first coin", "Тангаи аввалро харед"],
+    'Выберите монету на рынке, введите сумму и нажмите «Купить».': ["Pick a coin in the market, enter an amount and tap “Buy”.", "Дар бозор тангаро интихоб кунед, маблағро ворид кунед ва «Харидан»-ро пахш кунед."],
+    'Как это работает?': ["How does it work?", "Ин чӣ тавр кор мекунад?"],
+    'Вы подключаете Phantom, выбираете монету, вводите сумму и нажимаете «Купить» или «Продать». Membuy получает расчёт у Jupiter и готовит сделку, а подписываете её вы в Phantom.': ["You connect Phantom, pick a coin, enter an amount and tap “Buy” or “Sell”. Membuy gets a quote from Jupiter and prepares the trade, and you sign it in Phantom.", "Шумо Phantom-ро пайваст мекунед, тангаро интихоб мекунед, маблағро ворид мекунед ва «Харидан» ё «Фурӯхтан»-ро пахш мекунед. Membuy ҳисобро аз Jupiter мегирад ва савдоро омода мекунад, шумо онро дар Phantom имзо мекунед."],
+    'Что такое проскальзывание?': ["What is slippage?", "Лағжиши нарх чист?"],
+    'Это разница между ценой, которую вы видите, и ценой, по которой сделка исполнится. У мемкоинов с малой ликвидностью она бывает большой. По умолчанию Membuy ставит 1%.': ["It is the difference between the price you see and the price the trade executes at. For low-liquidity memecoins it can be large. Membuy uses 1% by default.", "Ин фарқи байни нархе, ки шумо мебинед, ва нархест, ки савдо иҷро мешавад. Дар мемкоинҳои камликвид он метавонад калон бошад. Membuy ба таври пешфарз 1% мегузорад."],
+    'Почему сделка не проходит?': ["Why does a trade fail?", "Чаро савдо иҷро намешавад?"],
+    'Причины: не хватает SOL на сделку и сетевой сбор, слишком сильное влияние на цену, цена успела измениться, или вы отклонили подпись в Phantom. Попробуйте сумму меньше или проскальзывание больше.': ["Reasons: not enough SOL for the trade and network fee, too much price impact, the price moved, or you rejected the signature in Phantom. Try a smaller amount or higher slippage.", "Сабабҳо: SOL барои савдо ва ҳаққи шабака намерасад, таъсир ба нарх аз ҳад зиёд аст, нарх тағйир ёфт, ё шумо имзоро дар Phantom рад кардед. Маблағи камтар ё лағжиши бештарро санҷед."],
+    'Где мои монеты?': ["Where are my coins?", "Тангаҳои ман куҷоянд?"],
+    'В вашем кошельке Phantom. Membuy не хранит ваши средства и не имеет к ним доступа.': ["In your Phantom wallet. Membuy does not hold your funds and has no access to them.", "Дар ҳамёни Phantom-и шумо. Membuy маблағҳои шуморо нигоҳ намедорад ва ба онҳо дастрасӣ надорад."],
+    'Это безопасно?': ["Is it safe?", "Оё ин бехатар аст?"],
+    'Ключи не покидают ваш кошелёк. Но мемкоины — крайне рискованный актив: цена может упасть до нуля. Никогда не вкладывайте больше, чем готовы потерять. Никому не сообщайте 12 секретных слов от кошелька.': ["Your keys never leave your wallet. But memecoins are an extremely risky asset: the price can fall to zero. Never invest more than you can afford to lose. Never share your wallet’s 12 secret words.", "Калидҳо ҳамёни шуморо тарк намекунанд. Аммо мемкоинҳо дороии хеле хатарноканд: нарх метавонад то сифр афтад. Ҳеҷ гоҳ бештар аз он ки гум карда метавонед, сармоягузорӣ накунед. 12 калимаи махфии ҳамёнро ба касе нагӯед."],
+    'Есть ли комиссия?': ["Is there a fee?", "Комиссия ҳаст?"],
+    'Комиссия площадки — не больше 0,5% от суммы сделки. Её точный размер показывается в расчёте перед каждой сделкой. Сеть Solana дополнительно берёт небольшой сетевой сбор.': ["The platform fee is at most 0.5% of the trade. The exact amount is shown in the quote before every trade. The Solana network also charges a small network fee.", "Комиссияи платформа на бештар аз 0,5% аз маблағи савдо. Андозаи дақиқи он пеш аз ҳар савдо дар ҳисоб нишон дода мешавад. Шабакаи Solana боз ҳаққи хурди шабака мегирад."],
+    'Как пополнить и вывести деньги?': ["How do I deposit and withdraw?", "Чӣ тавр пул гузоштан ва баровардан мумкин аст?"],
+    'Пополнить: Профиль → «Скопировать адрес» и отправьте SOL в сети Solana с биржи или другого кошелька. Вывести: отправьте SOL из Phantom на биржу.': ["Deposit: Profile → “Copy address” and send SOL on the Solana network from an exchange or another wallet. Withdraw: send SOL from Phantom to an exchange.", "Гузоштан: Профил → «Нусха бардоштани суроға» ва SOL-ро дар шабакаи Solana аз биржа ё ҳамёни дигар фиристед. Баровардан: SOL-ро аз Phantom ба биржа фиристед."],
+    'Как разместить рекламу?': ["How do I place an ad?", "Чӣ тавр реклама гузоштан мумкин аст?"],
+    'Профиль → «Реклама». Оплата в SOL уходит владельцу площадки, объявление показывается всем после проверки.': ["Profile → “Ad”. Payment in SOL goes to the platform owner; the ad is shown to everyone after review.", "Профил → «Реклама». Пардохт бо SOL ба соҳиби платформа меравад, эълон пас аз санҷиш ба ҳама намоиш дода мешавад."],
+    'Membuy — интерфейс для обмена мемкоинов. Мы не храним ваши средства и не даём инвестиционных рекомендаций.': ["Membuy is an interface for swapping memecoins. We do not hold your funds and do not give investment advice.", "Membuy — интерфейс барои иваз кардани мемкоинҳо. Мо маблағҳои шуморо нигоҳ намедорем ва маслиҳати сармоягузорӣ намедиҳем."],
+    'Мемкоины крайне рискованны: цена может упасть до нуля. Вы пользуетесь сервисом на свой риск.': ["Memecoins are extremely risky: the price can fall to zero. You use the service at your own risk.", "Мемкоинҳо хеле хатарноканд: нарх метавонад то сифр афтад. Шумо хизматро бо хатари худ истифода мебаред."],
+    'Демо-режим: все монеты и сделки учебные, настоящие деньги не используются.': ["Demo mode: all coins and trades are for practice, no real money is used.", "Реҷаи демо: ҳамаи тангаҳо ва савдоҳо омӯзишӣ мебошанд, пули воқеӣ истифода намешавад."],
+    'Режим с настоящими деньгами: сделки проходят в блокчейне Solana и не отменяются. Комиссия площадки — не больше 0,5%, точная сумма видна перед сделкой.': ["Real-money mode: trades happen on the Solana blockchain and cannot be reversed. The platform fee is at most 0.5%; the exact amount is shown before the trade.", "Реҷаи пули воқеӣ: савдоҳо дар блокчейни Solana мегузаранд ва бекор карда намешаванд. Комиссияи платформа на бештар аз 0,5%, маблағи дақиқ пеш аз савдо намоён аст."],
+    'Реклама: объявления проверяет владелец площадки. Запрещены обещания дохода, обман, чужие товарные знаки и ссылки на сбор ключей.': ["Ads: the platform owner reviews ads. Promises of income, deception, other people’s trademarks and links that collect keys are prohibited.", "Реклама: эълонҳоро соҳиби платформа месанҷад. Ваъдаи даромад, фиреб, тамғаҳои молии бегона ва пайвандҳо барои ҷамъ кардани калидҳо манъ аст."],
+    'Профиль, сделки, фото и настройки хранятся только в вашем браузере. У Membuy нет своего сервера, и мы их не получаем.': ["Your profile, trades, photo and settings are stored only in your browser. Membuy has no server of its own and does not receive them.", "Профил, савдоҳо, акс ва танзимот танҳо дар браузери шумо нигоҳ дошта мешаванд. Membuy сервери худро надорад ва онҳоро намегирад."],
+    'В режиме с настоящими деньгами сайт обращается к DexScreener и GeckoTerminal (цены и графики), Jupiter (расчёт и подготовка сделки) и узлу сети Solana (балансы). Им передаются ваш IP-адрес, а Jupiter и узлу Solana — ещё и адрес кошелька, без него нельзя посчитать сделку и баланс.': ["In real-money mode the site calls DexScreener and GeckoTerminal (prices and charts), Jupiter (quotes and trade preparation) and a Solana network node (balances). They receive your IP address, and Jupiter and the Solana node also receive your wallet address — trades and balances cannot be calculated without it.", "Дар реҷаи пули воқеӣ сайт ба DexScreener ва GeckoTerminal (нархҳо ва графикҳо), Jupiter (ҳисоб ва омодасозии савдо) ва гиреҳи шабакаи Solana (балансҳо) муроҷиат мекунад. Ба онҳо IP-суроғаи шумо, ба Jupiter ва гиреҳи Solana инчунин суроғаи ҳамён фиристода мешавад — бе он савдо ва балансро ҳисоб кардан мумкин нест."],
+    'Сделки и рекламные объявления записываются в блокчейн Solana и видны всем.': ["Trades and ads are recorded on the Solana blockchain and are visible to everyone.", "Савдоҳо ва эълонҳои рекламавӣ дар блокчейни Solana сабт мешаванд ва ба ҳама намоёнанд."],
     'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
     'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
     'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
@@ -662,14 +724,18 @@ MB.wallet = (() => {
   const C = MB.config, S = MB.store;
   const rpc = async (method, params) => { const r = await fetch(C.RPC_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) }); const d = await r.json(); if (d.error) throw new Error(d.error.message); return d.result; };
   const provider = () => (window.phantom && window.phantom.solana) || (window.solana && window.solana.isPhantom ? window.solana : null);
+  /** Отказ пользователя в Phantom (код 4001) превращаем в понятное сообщение. */
+  const rejected = e => (e && (e.code === 4001 || /reject|denied|cancel/i.test(e.message || ''))) ? new Error('Вы отклонили подпись') : e;
   return {
-    rpc, provider,
+    rpc, provider, rejected,
+    /** Подписать и отправить транзакцию через Phantom. */
+    async send(tx) { try { return await provider().signAndSendTransaction(tx); } catch (e) { throw rejected(e); } },
     /** Загружает библиотеку @solana/web3.js (нужна только для подписи сделок). */
     web3: () => window.solanaWeb3 ? Promise.resolve() : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = C.WEB3_CDN; s.onload = ok; s.onerror = () => bad(new Error('Не удалось загрузить библиотеку Solana')); document.head.appendChild(s); }),
     async connect() {
       if (C.MODE === 'demo') { const st = S.get(); S.set({ wallet: { connected: true, address: 'Demo' + 'MB7xQ2kLp9aVn3TzR4', sol: st.wallet.sol || C.DEMO_START_SOL } }); return; }
       const p = provider(); if (!p) throw new Error('Кошелёк Phantom не найден. Установите Phantom и откройте сайт в его браузере.');
-      const res = await p.connect(); const address = res.publicKey.toString();
+      let res; try { res = await p.connect(); } catch (e) { throw rejected(e); } const address = res.publicKey.toString();
       S.set({ wallet: { connected: true, address, sol: 0 } }); await this.refresh();
     },
     /** Живой режим: читает из сети баланс SOL и монет кошелька (обе программы токенов Solana). */
@@ -727,7 +793,7 @@ MB.adchain = (() => {
     const tx = new W.Transaction({ feePayer: from, recentBlockhash: blockhash });
     if (lamports > 0) tx.add(W.SystemProgram.transfer({ fromPubkey: from, toPubkey: new W.PublicKey(C.ADS_WALLET), lamports }));
     tx.add(new W.TransactionInstruction({ programId: new W.PublicKey(MEMO), keys: [{ pubkey: from, isSigner: true, isWritable: false }], data: new TextEncoder().encode(memo) }));
-    const res = await MB.wallet.provider().signAndSendTransaction(tx); loadedAt = 0; return res.signature;
+    const res = await MB.wallet.send(tx); loadedAt = 0; return res.signature;
   }
 
   /** Проверяет транзакцию в сети и запоминает результат (подтверждённая транзакция не меняется). */
@@ -820,7 +886,10 @@ MB.swap = (() => {
       if (!r.ok) throw new Error('Не удалось подготовить сделку');
       const { swapTransaction } = await r.json(), bytes = Uint8Array.from(atob(swapTransaction), c => c.charCodeAt(0));
       const tx = window.solanaWeb3.VersionedTransaction.deserialize(bytes);
-      const res = await MB.wallet.provider().signAndSendTransaction(tx); sig = res.signature;
+      // Проверка: сделка Jupiter должна касаться именно вашего кошелька — иначе не подписываем.
+      const keys = tx.message && tx.message.staticAccountKeys ? tx.message.staticAccountKeys.map(k => k.toBase58 ? k.toBase58() : String(k)) : [];
+      if (!keys.includes(st.wallet.address)) throw new Error('Сделка не адресована вашему кошельку — подпись отменена');
+      const res = await MB.wallet.send(tx); sig = res.signature;
     }
     S.applyTrade({ id: q.token.id, sym: q.token.sym, name: q.token.name, side: q.side, sol, tokens, usd: q.usd, price: q.token.price, feeUsd: q.feeUsd, ts: Date.now(), sig });
     if (C.MODE !== 'demo') [4000, 15000].forEach(ms => setTimeout(() => MB.wallet.refresh().catch(() => {}), ms));
@@ -1043,7 +1112,7 @@ MB.views.token = (() => {
       const type = MB.store.get().chartType;
       el.innerHTML = `<a class="back" href="#market">← Все монеты</a>
         <div class="tgrid"><div class="tmain">
-          <header class="thead">${MB.ui.avatar(token, 56)}<div><h1>${esc(token.name)}</h1><small>${esc(token.sym)} · ${esc(MB.util.short(token.mint))}</small><button type="button" class="chip favb" id="fav"></button></div><div class="px" id="px"></div></header>
+          <header class="thead">${MB.ui.avatar(token, 56)}<div><h1>${esc(token.name)}</h1><small>${esc(token.sym)} · ${esc(MB.util.short(token.mint))}</small><button type="button" class="chip favb" id="fav"></button><button type="button" class="chip favb" id="share">Поделиться</button></div><div class="px" id="px"></div></header>
           <div class="card chartc"><div class="ctools"><div class="chips tfs">${[['15s', '15 с'], ['1m', '1 м'], ['5m', '5 м'], ['15m', '15 м'], ['1h', '1 ч'], ['4h', '4 ч'], ['1d', '1 д']].map(([k, n]) => `<button type="button" class="chip ${k === tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('')}</div>
             <div class="chips ctype" role="group" aria-label="Вид графика"><button type="button" class="chip ${type === 'line' ? 'on' : ''}" data-ct="line" aria-pressed="${type === 'line'}">Линия</button><button type="button" class="chip ${type === 'candle' ? 'on' : ''}" data-ct="candle" aria-pressed="${type === 'candle'}">Свечи</button></div></div>
             <canvas id="cv" role="img" aria-label="График цены ${esc(token.sym)}"></canvas><div class="chint"><small>Двигайте график пальцем · два пальца — масштаб · двойное касание — сброс</small><button type="button" class="chip" id="creset" hidden>⟲ Сброс</button></div></div>
@@ -1055,6 +1124,9 @@ MB.views.token = (() => {
       const rs = el.querySelector('#creset'); rs.onclick = () => { Object.assign(view, MB.chart.view()); rs.hidden = true; redraw(); };
       MB.chart.attach(el.querySelector('#cv'), view, redraw, moved => { rs.hidden = !moved; });
       el.querySelectorAll('.ctype .chip').forEach(c => c.onclick = () => { MB.store.update(s => { s.chartType = c.dataset.ct; }, true); el.querySelectorAll('.ctype .chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); }); redraw(); });
+      el.querySelector('#share').onclick = () => { const url = location.origin + location.pathname + location.search + '#t-' + token.id;
+        if (navigator.share) navigator.share({ title: token.name, text: token.name + ' (' + token.sym + ') — Membuy', url }).catch(() => {});
+        else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => MB.ui.toast('Ссылка скопирована'), () => MB.ui.toast('Не удалось скопировать ссылку', 'err')); };
       el.querySelector('#fav').onclick = () => { MB.store.update(s => { const i = s.fav.indexOf(token.id); if (i >= 0) s.fav.splice(i, 1); else s.fav.push(token.id); }, true); favBtn(); };
       favBtn(); head(); panel(); mypos(); chart(); window.addEventListener('resize', onResize);
     },
@@ -1352,12 +1424,80 @@ MB.views = MB.views || {};
   MB.views.notes = { mount(el) { const st = MB.store.get(); MB.store.update(s => { s.unread = 0; }); el.innerHTML = `<h1 class="pt">Уведомления</h1><div class="list">${st.notes.length ? st.notes.map(n => `<div class="row"><span class="nm"><b>${esc(n.text)}</b><small>${new Date(n.ts).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</small></span></div>`).join('') : MB.ui.empty('Уведомлений нет', 'Здесь появятся сообщения о сделках и кампаниях.')}</div>`; } };
 })();
 
+/* Справка, условия, приватность и знакомство при первом входе. Тексты зависят от режима (демо / настоящие деньги). */
+MB.views = MB.views || {};
+(() => {
+  const C = MB.config, back = '<a class="back" href="#profile">← Профиль</a>';
+  const q = (title, text) => `<details><summary>${title}</summary><p>${text}</p></details>`;
+  MB.views.help = {
+    mount(el) {
+      el.innerHTML = `${back}<h1 class="pt">Помощь</h1><div class="faq">
+        ${q('Как это работает?', 'Вы подключаете Phantom, выбираете монету, вводите сумму и нажимаете «Купить» или «Продать». Membuy получает расчёт у Jupiter и готовит сделку, а подписываете её вы в Phantom.')}
+        ${q('Что такое проскальзывание?', 'Это разница между ценой, которую вы видите, и ценой, по которой сделка исполнится. У мемкоинов с малой ликвидностью она бывает большой. По умолчанию Membuy ставит 1%.')}
+        ${q('Почему сделка не проходит?', 'Причины: не хватает SOL на сделку и сетевой сбор, слишком сильное влияние на цену, цена успела измениться, или вы отклонили подпись в Phantom. Попробуйте сумму меньше или проскальзывание больше.')}
+        ${q('Где мои монеты?', 'В вашем кошельке Phantom. Membuy не хранит ваши средства и не имеет к ним доступа.')}
+        ${q('Это безопасно?', 'Ключи не покидают ваш кошелёк. Но мемкоины — крайне рискованный актив: цена может упасть до нуля. Никогда не вкладывайте больше, чем готовы потерять. Никому не сообщайте 12 секретных слов от кошелька.')}
+        ${q('Есть ли комиссия?', 'Комиссия площадки — не больше 0,5% от суммы сделки. Её точный размер показывается в расчёте перед каждой сделкой. Сеть Solana дополнительно берёт небольшой сетевой сбор.')}
+        ${q('Как пополнить и вывести деньги?', 'Пополнить: Профиль → «Скопировать адрес» и отправьте SOL в сети Solana с биржи или другого кошелька. Вывести: отправьте SOL из Phantom на биржу.')}
+        ${q('Как разместить рекламу?', 'Профиль → «Реклама». Оплата в SOL уходит владельцу площадки, объявление показывается всем после проверки.')}
+      </div>`;
+    },
+  };
+  MB.views.terms = {
+    mount(el) {
+      el.innerHTML = `${back}<h1 class="pt">Условия использования</h1><div class="card stack">
+        <p>Membuy — интерфейс для обмена мемкоинов. Мы не храним ваши средства и не даём инвестиционных рекомендаций.</p>
+        <p>Мемкоины крайне рискованны: цена может упасть до нуля. Вы пользуетесь сервисом на свой риск.</p>
+        <p>Демо-режим: все монеты и сделки учебные, настоящие деньги не используются.</p>
+        <p>Режим с настоящими деньгами: сделки проходят в блокчейне Solana и не отменяются. Комиссия площадки — не больше 0,5%, точная сумма видна перед сделкой.</p>
+        <p>Реклама: объявления проверяет владелец площадки. Запрещены обещания дохода, обман, чужие товарные знаки и ссылки на сбор ключей.</p></div>`;
+    },
+  };
+  MB.views.privacy = {
+    mount(el) {
+      el.innerHTML = `${back}<h1 class="pt">Приватность</h1><div class="card stack">
+        <p>Профиль, сделки, фото и настройки хранятся только в вашем браузере. У Membuy нет своего сервера, и мы их не получаем.</p>
+        <p>В режиме с настоящими деньгами сайт обращается к DexScreener и GeckoTerminal (цены и графики), Jupiter (расчёт и подготовка сделки) и узлу сети Solana (балансы). Им передаются ваш IP-адрес, а Jupiter и узлу Solana — ещё и адрес кошелька, без него нельзя посчитать сделку и баланс.</p>
+        <p>Сделки и рекламные объявления записываются в блокчейн Solana и видны всем.</p></div>`;
+    },
+  };
+
+  /** Знакомство при первом входе: три шага, показывается один раз для каждого режима. */
+  const KEY = 'membuy-onb-' + C.MODE;
+  const STEPS = () => C.LIVE ? [
+    ['Настоящие деньги', 'Сделки реальные и подписываются в вашем кошельке. Мемкоины могут упасть до нуля — начинайте с малых сумм.'],
+    ['Подключите Phantom', 'Откройте сайт во встроенном браузере Phantom и нажмите «Подключить». Ключи остаются у вас.'],
+    ['Пополните и купите', 'Профиль → «Скопировать адрес», отправьте SOL в сети Solana, затем выберите монету на рынке.'],
+  ] : [
+    ['Это демо', 'Монеты и сделки учебные, настоящие деньги не используются. Пробуйте смело, чтобы понять, как всё работает.'],
+    ['Подключите кошелёк', 'В демо кошелёк учебный: на нём 5 условных SOL.'],
+    ['Купите первую монету', 'Выберите монету на рынке, введите сумму и нажмите «Купить».'],
+  ];
+  MB.views.onboarding = {
+    maybeShow() {
+      try { if (localStorage.getItem(KEY)) return; } catch (e) { return; }
+      const box = document.getElementById('onb'); if (!box) return; let step = 0;
+      const done = () => { try { localStorage.setItem(KEY, '1'); } catch (e) { /* нет хранилища */ } box.hidden = true; box.innerHTML = ''; };
+      const draw = () => { const s = STEPS(), last = step === s.length - 1;
+        box.hidden = false;
+        box.innerHTML = `<div class="onb" role="dialog" aria-modal="true" aria-labelledby="onbt"><div class="card"><h2 id="onbt">${s[step][0]}</h2><p class="hint">${s[step][1]}</p>
+          <ol>${s.map((x, i) => `<li class="${i === step ? 'cur' : ''}">${x[0]}</li>`).join('')}</ol>
+          <div class="crow">${step ? '<button class="btn ghost" id="obprev">Назад</button>' : ''}<button class="btn ghost" id="obskip">Пропустить</button><button class="btn accent" id="obnext">${last ? 'Готово' : 'Далее'}</button></div></div></div>`;
+        box.querySelector('#obnext').onclick = () => { if (last) done(); else { step++; draw(); } };
+        box.querySelector('#obskip').onclick = done;
+        const p = box.querySelector('#obprev'); if (p) p.onclick = () => { step--; draw(); };
+        box.querySelector('#obnext').focus(); };
+      draw();
+    },
+  };
+})();
+
 /* Точка входа: выбор поставщика данных, маршруты, шапка. Маршруты — простые якоря: #market, #portfolio, #history, #t-<id>. */
 (() => {
   const C = MB.config; MB.data = MB.providers[C.MODE === 'live' ? 'live' : 'demo'];
   const main = document.getElementById('view'); let cur = null;
-  const routes = { market: MB.views.market, feed: MB.views.feed, leaders: MB.views.leaders, profile: MB.views.profile, create: MB.views.create, ads: MB.views.ads, invite: MB.views.invite, prefs: MB.views.prefs, search: MB.views.search, notes: MB.views.notes };
-  const SUB = { create: 'profile', ads: 'profile', invite: 'profile', prefs: 'profile', notes: 'profile', search: 'market' };
+  const routes = { market: MB.views.market, feed: MB.views.feed, leaders: MB.views.leaders, profile: MB.views.profile, create: MB.views.create, ads: MB.views.ads, invite: MB.views.invite, prefs: MB.views.prefs, search: MB.views.search, notes: MB.views.notes, help: MB.views.help, terms: MB.views.terms, privacy: MB.views.privacy };
+  const SUB = { create: 'profile', ads: 'profile', invite: 'profile', prefs: 'profile', notes: 'profile', search: 'market', help: 'profile', terms: 'profile', privacy: 'profile' };
   function header() {
     const st0 = MB.store.get(); document.getElementById('bell').classList.toggle('has', st0.unread > 0); document.getElementById('bell').setAttribute('aria-label', 'Уведомления' + (st0.unread ? ': новых ' + st0.unread : ''));
     document.getElementById('walletSlot').innerHTML = MB.ui.walletBtn();
@@ -1382,12 +1522,13 @@ MB.views = MB.views || {};
   MB.util.bus.on('refresh', () => cur && cur.onTick && cur.onTick());
   MB.util.bus.on('state', () => { header(); if (cur && cur.onState) cur.onState(); });
   window.addEventListener('hashchange', route);
+  const off = document.getElementById('offlineBar'), net = () => { off.hidden = navigator.onLine !== false; }; window.addEventListener('online', net); window.addEventListener('offline', net); net();
   document.getElementById('demoBar').hidden = C.MODE !== 'demo';
   if (C.LIVE) { document.body.classList.add('live'); document.querySelectorAll('[data-nav]').forEach(a => { if (C.DEMO_ONLY.includes(a.dataset.nav)) a.hidden = true; }); }
   function langs() { document.querySelectorAll('.langs').forEach(box => { box.innerHTML = MB.i18n.LANGS.map(([k, n]) => `<button type="button" class="chip ${k === MB.i18n.lang ? 'on' : ''}" data-lang="${k}" aria-pressed="${k === MB.i18n.lang}">${n}</button>`).join(''); }); }
   document.addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (b) MB.i18n.set(b.dataset.lang); });
   MB.util.bus.on('lang', () => { header(); langs(); route(); });
-  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route(); MB.wallet.restore().catch(() => {}); if (C.LIVE) MB.adchain.load().then(a => a.length && MB.util.bus.emit('refresh'), () => {});
+  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route(); MB.views.onboarding.maybeShow(); MB.wallet.restore().catch(() => {}); if (C.LIVE) MB.adchain.load().then(a => a.length && MB.util.bus.emit('refresh'), () => {});
 })();
 
 </script>

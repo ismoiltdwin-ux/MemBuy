@@ -6,7 +6,7 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR
   const b = await chromium.launch(); let bad = 0;
   for (const lang of ['en', 'tg']) {
     const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }), p = await ctx.newPage(), errs = []; p.on('pageerror', e => errs.push(e.message));
-    const go = async h => { await p.goto(URL + '#' + h); await p.waitForTimeout(400); }, left = new Set();
+    const go = async h => { await p.goto(URL + '#' + h); await p.evaluate(() => { const b = document.querySelector('#obskip'); if (b) b.click(); }); await p.waitForTimeout(400); }, left = new Set();
     // Собирает видимый русский текст (для en) вне пользовательского содержимого
     const scan = async () => { (await p.evaluate(() => { const out = [], w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) { const t = n.nodeValue.trim(), pe = n.parentElement; if (t && /[А-Яа-яЁё]/.test(t) && pe && !/^(SCRIPT|STYLE)$/.test(pe.tagName) && !pe.closest('[data-lang]')) out.push(t); } document.querySelectorAll('[placeholder],[title],[aria-label],[alt]').forEach(e => ['placeholder', 'title', 'aria-label', 'alt'].forEach(a => { const v = e.getAttribute(a); if (v && /[А-Яа-яЁё]/.test(v)) out.push(a + '=' + v); })); return out; })).forEach(x => left.add(x)); };
     await go('market'); await p.click('[data-lang=' + lang + ']'); await p.waitForTimeout(500); await scan(); if (SHOT) await p.screenshot({ path: `${SHOT}/i18n-${lang}-market.png` });

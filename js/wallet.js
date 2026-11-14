@@ -3,14 +3,18 @@ MB.wallet = (() => {
   const C = MB.config, S = MB.store;
   const rpc = async (method, params) => { const r = await fetch(C.RPC_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) }); const d = await r.json(); if (d.error) throw new Error(d.error.message); return d.result; };
   const provider = () => (window.phantom && window.phantom.solana) || (window.solana && window.solana.isPhantom ? window.solana : null);
+  /** Отказ пользователя в Phantom (код 4001) превращаем в понятное сообщение. */
+  const rejected = e => (e && (e.code === 4001 || /reject|denied|cancel/i.test(e.message || ''))) ? new Error('Вы отклонили подпись') : e;
   return {
-    rpc, provider,
+    rpc, provider, rejected,
+    /** Подписать и отправить транзакцию через Phantom. */
+    async send(tx) { try { return await provider().signAndSendTransaction(tx); } catch (e) { throw rejected(e); } },
     /** Загружает библиотеку @solana/web3.js (нужна только для подписи сделок). */
     web3: () => window.solanaWeb3 ? Promise.resolve() : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = C.WEB3_CDN; s.onload = ok; s.onerror = () => bad(new Error('Не удалось загрузить библиотеку Solana')); document.head.appendChild(s); }),
     async connect() {
       if (C.MODE === 'demo') { const st = S.get(); S.set({ wallet: { connected: true, address: 'Demo' + 'MB7xQ2kLp9aVn3TzR4', sol: st.wallet.sol || C.DEMO_START_SOL } }); return; }
       const p = provider(); if (!p) throw new Error('Кошелёк Phantom не найден. Установите Phantom и откройте сайт в его браузере.');
-      const res = await p.connect(); const address = res.publicKey.toString();
+      let res; try { res = await p.connect(); } catch (e) { throw rejected(e); } const address = res.publicKey.toString();
       S.set({ wallet: { connected: true, address, sol: 0 } }); await this.refresh();
     },
     /** Живой режим: читает из сети баланс SOL и монет кошелька (обе программы токенов Solana). */

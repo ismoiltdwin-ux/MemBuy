@@ -1,6 +1,6 @@
 // Сборка Membuy: index.html (обычный сайт, отдельные файлы) и dist/membuy-artifact.html (один файл для предпросмотра).
 const fs = require('fs'), path = require('path'), R = path.join(__dirname, '..');
-const JS = ['config', 'i18n', 'util', 'store', 'data/demo', 'data/live', 'data/social', 'data/ads', 'wallet', 'adchain', 'swap', 'chart', 'ui/components', 'ui/market', 'ui/token', 'ui/feed', 'ui/leaders', 'ui/portfolio', 'ui/create', 'ui/adsview', 'ui/more', 'app'];
+const JS = ['config', 'i18n', 'util', 'store', 'data/demo', 'data/live', 'data/social', 'data/ads', 'wallet', 'adchain', 'swap', 'chart', 'ui/components', 'ui/market', 'ui/token', 'ui/feed', 'ui/leaders', 'ui/portfolio', 'ui/create', 'ui/adsview', 'ui/more', 'ui/info', 'app'];
 const body = fs.readFileSync(path.join(__dirname, 'body.html'), 'utf8');
 const fonts = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">';
 fs.writeFileSync(path.join(R, 'index.html'), `<!doctype html>

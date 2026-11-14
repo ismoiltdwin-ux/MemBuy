@@ -8,7 +8,7 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR
   for (const [w, h, n] of [[1280, 860, 'desktop'], [390, 844, 'mobile']]) {
     const ctx = await b.newContext({ viewport: { width: w, height: h } }), p = await ctx.newPage();
     p.on('pageerror', e => errs.push(n + ': ' + e.message)); p.on('console', c => { if (c.type() === 'error') errs.push(n + ' console: ' + c.text()); });
-    const go = async hsh => { await p.goto(URL + '#' + hsh); await p.waitForTimeout(450); };
+    const go = async hsh => { await p.goto(URL + '#' + hsh); await p.evaluate(() => { const b = document.querySelector('#obskip'); if (b) b.click(); }); await p.waitForTimeout(450); };
     const sw = async name => ok(`${n} нет горизонтальной прокрутки: ${name}`, await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
     const shot = async name => { if (SHOT) await p.screenshot({ path: `${SHOT}/t-${n}-${name}.png` }); };
     await go('t-YAK'); await p.click('#panel .chip[data-v="0.1"]'); await p.waitForTimeout(250); await p.click('#go'); await p.waitForTimeout(500);

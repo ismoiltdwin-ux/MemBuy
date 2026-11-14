@@ -87,7 +87,7 @@ MB.views.token = (() => {
       const type = MB.store.get().chartType;
       el.innerHTML = `<a class="back" href="#market">← Все монеты</a>
         <div class="tgrid"><div class="tmain">
-          <header class="thead">${MB.ui.avatar(token, 56)}<div><h1>${esc(token.name)}</h1><small>${esc(token.sym)} · ${esc(MB.util.short(token.mint))}</small><button type="button" class="chip favb" id="fav"></button></div><div class="px" id="px"></div></header>
+          <header class="thead">${MB.ui.avatar(token, 56)}<div><h1>${esc(token.name)}</h1><small>${esc(token.sym)} · ${esc(MB.util.short(token.mint))}</small><button type="button" class="chip favb" id="fav"></button><button type="button" class="chip favb" id="share">Поделиться</button></div><div class="px" id="px"></div></header>
           <div class="card chartc"><div class="ctools"><div class="chips tfs">${[['15s', '15 с'], ['1m', '1 м'], ['5m', '5 м'], ['15m', '15 м'], ['1h', '1 ч'], ['4h', '4 ч'], ['1d', '1 д']].map(([k, n]) => `<button type="button" class="chip ${k === tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('')}</div>
             <div class="chips ctype" role="group" aria-label="Вид графика"><button type="button" class="chip ${type === 'line' ? 'on' : ''}" data-ct="line" aria-pressed="${type === 'line'}">Линия</button><button type="button" class="chip ${type === 'candle' ? 'on' : ''}" data-ct="candle" aria-pressed="${type === 'candle'}">Свечи</button></div></div>
             <canvas id="cv" role="img" aria-label="График цены ${esc(token.sym)}"></canvas><div class="chint"><small>Двигайте график пальцем · два пальца — масштаб · двойное касание — сброс</small><button type="button" class="chip" id="creset" hidden>⟲ Сброс</button></div></div>
@@ -99,6 +99,9 @@ MB.views.token = (() => {
       const rs = el.querySelector('#creset'); rs.onclick = () => { Object.assign(view, MB.chart.view()); rs.hidden = true; redraw(); };
       MB.chart.attach(el.querySelector('#cv'), view, redraw, moved => { rs.hidden = !moved; });
       el.querySelectorAll('.ctype .chip').forEach(c => c.onclick = () => { MB.store.update(s => { s.chartType = c.dataset.ct; }, true); el.querySelectorAll('.ctype .chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); }); redraw(); });
+      el.querySelector('#share').onclick = () => { const url = location.origin + location.pathname + location.search + '#t-' + token.id;
+        if (navigator.share) navigator.share({ title: token.name, text: token.name + ' (' + token.sym + ') — Membuy', url }).catch(() => {});
+        else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => MB.ui.toast('Ссылка скопирована'), () => MB.ui.toast('Не удалось скопировать ссылку', 'err')); };
       el.querySelector('#fav').onclick = () => { MB.store.update(s => { const i = s.fav.indexOf(token.id); if (i >= 0) s.fav.splice(i, 1); else s.fav.push(token.id); }, true); favBtn(); };
       favBtn(); head(); panel(); mypos(); chart(); window.addEventListener('resize', onResize);
     },

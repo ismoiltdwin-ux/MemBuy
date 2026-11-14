@@ -42,7 +42,7 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   p.once('dialog', d => d.accept()); await p.click('#wdis'); await p.waitForTimeout(400); ok('отключение — только из профиля, с подтверждением', await p.evaluate(() => !MB.store.get().wallet.connected));
   // ---- Реклама в блокчейне ----
   const setOwner = () => p.evaluate(o => { MB.config.ADS_WALLET = o; }, OWNER);
-  await p.goto(URL + '#ads'); await p.waitForTimeout(600); ok('реклама без кошелька площадки: «не настроена»', (await p.textContent('#view')).includes('не настроена'));
+  await p.goto(URL + '#profile'); await p.waitForTimeout(500); await p.evaluate(() => { MB.config.ADS_WALLET = ''; location.hash = 'ads'; }); await p.waitForTimeout(600); ok('реклама без кошелька площадки: «не настроена»', (await p.textContent('#view')).includes('не настроена'));
   await setOwner(); await p.evaluate(() => { location.hash = 'profile'; }); await p.waitForTimeout(300); await p.evaluate(() => { location.hash = 'ads'; }); await p.waitForTimeout(700);
   ok('цена рекламы в SOL', (await p.textContent('#aprice')).includes('0,15') || (await p.textContent('#aprice')).includes('0.15'));
   await p.fill('#atitle', 'Мой проект'); await p.fill('#atext', 'Лучший мемкоин недели на Solana'); await p.fill('#alink', 'javascript:alert(1)'); await p.click('#apay'); await p.waitForTimeout(400);

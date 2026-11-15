@@ -72,7 +72,7 @@ MB.views.feed = (() => {
     if (ltab === 'top') info.sort((a, b) => (b.val || 0) - (a.val || 0));
     box.innerHTML = info.map(({ p, t, val }) => { const fol = st.following.includes(p.author), mine = p.author === me, nm = p.name || MB.util.short(p.author);
       const coin = t ? `<a class="pos" href="#t-${esc(t.id)}">${MB.ui.avatar(t, 36)}<span class="nm"><b>${esc(t.sym)}</b><small>${esc(t.name)}</small></span><span class="kv"><small>Позиция</small><b>${val > 0 ? usd(val) : 'продана'}</b></span><span class="kv"><small>24 ч</small><b>${MB.util.pct(t.chg24)}</b></span></a>` : '';
-      return `<article class="post"><div class="ph">${MB.ui.avatar({ sym: (p.name || p.author).slice(0, 2).toUpperCase(), hue: hue(p.author) }, 44)}<div class="nm"><b class="ugc">${esc(nm)}</b><small>${agoS(p.ts)}</small></div>
+      return `<article class="post"><div class="ph"><a href="#u-${esc(p.author)}" aria-label="Профиль автора">${MB.ui.avatar({ sym: (p.name || p.author).slice(0, 2).toUpperCase(), hue: hue(p.author) }, 44)}</a><div class="nm"><a class="ugc" href="#u-${esc(p.author)}"><b>${esc(nm)}</b></a><small>${agoS(p.ts)}</small></div>
         ${mine ? '' : `<button class="chip ${fol ? 'on' : ''}" data-lfollow="${esc(p.author)}">${fol ? 'Вы подписаны' : 'Подписаться'}</button>`}</div>
         <p class="pt2">${esc(p.text)}</p>${coin}
         <div class="acts">${t ? `<span class="act">МК ${usd(t.mc)}</span>` : ''}<a class="act" href="https://solscan.io/tx/${esc(p.sig)}" target="_blank" rel="noopener">В блокчейне</a>${owner ? `<button class="act" data-hide="${esc(p.sig)}">Скрыть</button>` : ''}</div></article>`; }).join('');

@@ -229,6 +229,11 @@ footer .langs{margin-bottom:12px}
 .recent{margin-bottom:12px}.recent .rrow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px}
 .recent .row{background:none;border:0;padding:8px 0}.recent .x{background:none;border:0;color:var(--muted);font-size:22px;cursor:pointer;padding:4px 8px}
 a.act{color:var(--muted);font-size:14px;font-weight:600}
+.send{max-height:88vh;overflow-y:auto}.send .shead h2{font-family:var(--display);font-size:18px;font-weight:800;flex:1;text-align:center}
+.send .x{background:none;border:0;color:var(--muted);font-size:26px;cursor:pointer;padding:2px 8px;line-height:1}
+.sasset{width:100%;text-align:left;cursor:pointer;color:var(--text)}
+.ssum{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:6px 0}.ssum .big{font-family:var(--display);font-size:28px;font-weight:800}
+.post .ph a{color:inherit}
 </style>
 <div class="demo" id="demoBar" hidden>Демо-режим: монеты и сделки учебные, настоящие деньги не используются</div>
 <div class="offline" id="offlineBar" hidden>Нет соединения. Показываем последние данные.</div>
@@ -558,6 +563,30 @@ MB.i18n = (() => {
     "Забрать награды": ["Claim rewards", ""],
     "Награды отправлены на ваш кошелёк": ["Rewards sent to your wallet", ""],
     "Наград автора пока нет": ["No creator rewards yet", ""],
+    "Отправить": ["Send", ""],
+    "Выберите монету для отправки": ["Choose a coin to send", ""],
+    "Закрыть": ["Close", ""],
+    "Нечего отправить": ["Nothing to send", ""],
+    "Пополните кошелёк.": ["Top up your wallet.", ""],
+    "Кому": ["To", ""],
+    "Адрес кошелька Solana": ["Solana wallet address", ""],
+    "Сводка": ["Summary", ""],
+    "Комиссия сети": ["Network fee", ""],
+    "Перевод в блокчейне нельзя отменить. Проверьте адрес получателя.": ["A blockchain transfer cannot be undone. Check the recipient address.", ""],
+    "Отправлено ✅": ["Sent ✅", ""],
+    "Неверный адрес получателя": ["Invalid recipient address", ""],
+    "Нельзя отправить самому себе": ["You cannot send to yourself", ""],
+    "Недостаточно SOL (оставьте немного на сборы сети)": ["Not enough SOL (keep a little for network fees)", ""],
+    "Этот адрес не похож на кошелёк — отправка отменена": ["This address does not look like a wallet — sending cancelled", ""],
+    "Не удалось прочитать монету": ["Could not read the coin", ""],
+    "Слишком маленькая сумма": ["Amount is too small", ""],
+    "← Лента": ["← Feed", ""],
+    "Сообщение": ["Message", ""],
+    "Посты": ["Posts", ""],
+    "Постов пока нет": ["No posts yet", ""],
+    "Загружаем профиль…": ["Loading profile…", ""],
+    "Неверный адрес": ["Invalid address", ""],
+    "Профиль автора": ["Author profile", ""],
     'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
     'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
     'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
@@ -594,6 +623,7 @@ MB.i18n = (() => {
     [/^Комиссия со сделок (.+)% включена\. Накоплено: (.+)$/, 'Trading fee $1% is on. Collected: $2', ''], [/^Плата за выпуск монеты \((.+) SOL\) и оплата рекламы приходят прямо на ваш кошелёк\.$/, 'The coin launch fee ($1 SOL) and ad payments go straight to your wallet.', ''],
     [/^(\d+) ч — (.+)$/, '$1h — $2', ''], [/^(.+) SOL · (\d+) ч · (.+)$/, '$1 SOL · $2h · $3', ''],
     [/^Пост записывается в блокчейн Solana: подтвердите в Phantom, сбор (.+) SOL\. Ссылки и «раздачи» запрещены\.$/, 'Your post is written to the Solana blockchain: confirm in Phantom, fee $1 SOL. Links and “giveaways” are not allowed.', ''],
+    [/^Сумма, (.+)$/, 'Amount, $1', ''], [/^Баланс: (.+)$/, 'Balance: $1', ''], [/^Отправить (.+)$/, 'Send $1', ''], [/^Отправлено (.+)$/, 'Sent $1', ''],
     [/^Куплено на (.+) · продано на (.+)$/, 'Bought for $1 · sold for $2', 'Харида шуд ба $1 · фурӯхта шуд ба $2'], [/^МК (.+)$/, 'MC $1', 'КБ $1'], [/^Об\. (.+)$/, 'Vol $1', 'Ҳаҷм $1'], [/^Сделок: (.+)$/, 'Txns: $1', 'Савдоҳо: $1'],
     [/^(\d+) мин$/, '$1m', '$1 дақ'], [/^(\d+) ч$/, '$1h', '$1 с'], [/^В демо пополнять не нужно: на учебном кошельке (\d+) условных SOL\.$/, 'No deposit needed in the demo: the practice wallet holds $1 play SOL.', 'Дар демо пур кардан лозим нест: дар ҳамёни омӯзишӣ $1 SOL-и шартӣ ҳаст.'],
     [/^Куплено (.+) за (.+)$/, 'Bought $1 for $2', 'Харида шуд: $1 ба $2'], [/^Продано (.+) за (.+)$/, 'Sold $1 for $2', 'Фурӯхта шуд: $1 ба $2'],
@@ -1295,6 +1325,68 @@ MB.pumpcreate = (() => {
   return { enabled, validate, create, withFee, claimCreatorFees };
 })();
 
+/* Отправка SOL и монет любому адресу Solana (живой режим). Сервер не нужен: перевод собирается в браузере и подписывается в Phantom.
+   Монеты: если у получателя ещё нет счёта для этой монеты, он создаётся в той же транзакции (залог ~0,002 SOL платит отправитель). */
+MB.send = (() => {
+  const C = MB.config, ATA = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL', SOL_RESERVE = 0.002;
+  const isAddr = a => /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(String(a || '').trim());
+
+  /** Что можно отправить: SOL и монеты кошелька (с ценой в $, если известна). */
+  async function assets() {
+    const st = MB.store.get(), su = await MB.data.solUsd().catch(() => 0), ids = Object.keys(st.holdings);
+    const ts = ids.length && MB.data.many ? await MB.data.many(ids).catch(() => []) : [], by = {}; ts.forEach(t => { by[t.id] = t; });
+    return [{ id: 'SOL', sym: 'SOL', name: 'Solana', qty: st.wallet.sol, max: Math.max(0, st.wallet.sol - SOL_RESERVE), usd: st.wallet.sol * su, price: su, hue: 270 },
+      ...ids.map(id => { const h = st.holdings[id], t = by[id]; return { id, sym: (t && t.sym) || h.sym, name: (t && t.name) || h.name, qty: h.qty, max: h.qty, usd: t ? h.qty * t.price : 0, price: t ? t.price : 0, icon: t && t.icon, hue: t ? t.hue : 200 }; })]
+      .filter(a => a.qty > 0);
+  }
+
+  /** Сводка перед отправкой: сколько уйдёт сборов. */
+  async function preview(to, asset) {
+    if (asset.id === 'SOL') return { network: 0.000005, rent: 0 };
+    await MB.wallet.web3(); const W = window.solanaWeb3, mint = await mintInfo(asset.id);
+    const dest = ata(W, to, asset.id, mint.program), info = await MB.wallet.rpc('getAccountInfo', [dest.toBase58(), { encoding: 'base64' }]).catch(() => null);
+    return { network: 0.000005, rent: info && info.value ? 0 : 0.00204 };
+  }
+  async function mintInfo(mint) {
+    const r = await MB.wallet.rpc('getAccountInfo', [mint, { encoding: 'jsonParsed' }]); const v = r && r.value;
+    if (!v || !v.data || !v.data.parsed) throw new Error('Не удалось прочитать монету');
+    return { program: v.owner, decimals: v.data.parsed.info.decimals };
+  }
+  const ata = (W, owner, mint, program) => W.PublicKey.findProgramAddressSync([new W.PublicKey(owner).toBuffer(), new W.PublicKey(program).toBuffer(), new W.PublicKey(mint).toBuffer()], new W.PublicKey(ATA))[0];
+
+  async function transfer(to, asset, amount) {
+    const st = MB.store.get(); if (!st.wallet.connected) throw new Error('Сначала подключите кошелёк');
+    to = String(to || '').trim(); amount = +String(amount).replace(',', '.');
+    if (!isAddr(to)) throw new Error('Неверный адрес получателя');
+    if (to === st.wallet.address) throw new Error('Нельзя отправить самому себе');
+    if (!(amount > 0)) throw new Error('Введите сумму');
+    if (amount > asset.max + 1e-12) throw new Error(asset.id === 'SOL' ? 'Недостаточно SOL (оставьте немного на сборы сети)' : 'Недостаточно монет');
+    await MB.wallet.web3(); const W = window.solanaWeb3, me = new W.PublicKey(st.wallet.address), dest = new W.PublicKey(to);
+    if (!W.PublicKey.isOnCurve(dest.toBytes())) throw new Error('Этот адрес не похож на кошелёк — отправка отменена');
+    const { blockhash } = (await MB.wallet.rpc('getLatestBlockhash', [{ commitment: 'confirmed' }])).value;
+    const tx = new W.Transaction({ feePayer: me, recentBlockhash: blockhash });
+    if (asset.id === 'SOL') tx.add(W.SystemProgram.transfer({ fromPubkey: me, toPubkey: dest, lamports: Math.round(amount * 1e9) }));
+    else {
+      const mint = await mintInfo(asset.id), prog = new W.PublicKey(mint.program), mintPk = new W.PublicKey(asset.id);
+      const accs = await MB.wallet.rpc('getTokenAccountsByOwner', [st.wallet.address, { mint: asset.id }, { encoding: 'jsonParsed' }]);
+      const src = ((accs && accs.value) || []).sort((a, b) => (+b.account.data.parsed.info.tokenAmount.uiAmount || 0) - (+a.account.data.parsed.info.tokenAmount.uiAmount || 0))[0];
+      if (!src) throw new Error('Недостаточно монет');
+      const destAta = ata(W, to, asset.id, mint.program), raw = BigInt(Math.floor(amount * 10 ** mint.decimals + 1e-6));
+      if (raw <= 0n) throw new Error('Слишком маленькая сумма');
+      const data = new Uint8Array(10); data[0] = 12; new DataView(data.buffer).setBigUint64(1, raw, true); data[9] = mint.decimals; // TransferChecked
+      tx.add(new W.TransactionInstruction({ programId: new W.PublicKey(ATA), data: Uint8Array.of(1), keys: [ // счёт получателя, если его нет
+        { pubkey: me, isSigner: true, isWritable: true }, { pubkey: destAta, isSigner: false, isWritable: true }, { pubkey: dest, isSigner: false, isWritable: false },
+        { pubkey: mintPk, isSigner: false, isWritable: false }, { pubkey: W.SystemProgram.programId, isSigner: false, isWritable: false }, { pubkey: prog, isSigner: false, isWritable: false }] }));
+      tx.add(new W.TransactionInstruction({ programId: prog, data, keys: [
+        { pubkey: new W.PublicKey(src.pubkey), isSigner: false, isWritable: true }, { pubkey: mintPk, isSigner: false, isWritable: false },
+        { pubkey: destAta, isSigner: false, isWritable: true }, { pubkey: me, isSigner: true, isWritable: false }] }));
+    }
+    const { signature } = await MB.wallet.send(tx);
+    MB.store.note('Отправлено ' + MB.util.num(amount, 4) + ' ' + asset.sym); setTimeout(() => MB.wallet.refresh().catch(() => {}), 5000); return signature;
+  }
+  return { isAddr, assets, preview, transfer };
+})();
+
 /* Обмен. quote() считает, сколько получит пользователь; execute() исполняет сделку.
    Демо: простая модель цены с влиянием на цену. Live: Jupiter (не проверено в боевом режиме). */
 MB.swap = (() => {
@@ -1714,7 +1806,7 @@ MB.views.feed = (() => {
     if (ltab === 'top') info.sort((a, b) => (b.val || 0) - (a.val || 0));
     box.innerHTML = info.map(({ p, t, val }) => { const fol = st.following.includes(p.author), mine = p.author === me, nm = p.name || MB.util.short(p.author);
       const coin = t ? `<a class="pos" href="#t-${esc(t.id)}">${MB.ui.avatar(t, 36)}<span class="nm"><b>${esc(t.sym)}</b><small>${esc(t.name)}</small></span><span class="kv"><small>Позиция</small><b>${val > 0 ? usd(val) : 'продана'}</b></span><span class="kv"><small>24 ч</small><b>${MB.util.pct(t.chg24)}</b></span></a>` : '';
-      return `<article class="post"><div class="ph">${MB.ui.avatar({ sym: (p.name || p.author).slice(0, 2).toUpperCase(), hue: hue(p.author) }, 44)}<div class="nm"><b class="ugc">${esc(nm)}</b><small>${agoS(p.ts)}</small></div>
+      return `<article class="post"><div class="ph"><a href="#u-${esc(p.author)}" aria-label="Профиль автора">${MB.ui.avatar({ sym: (p.name || p.author).slice(0, 2).toUpperCase(), hue: hue(p.author) }, 44)}</a><div class="nm"><a class="ugc" href="#u-${esc(p.author)}"><b>${esc(nm)}</b></a><small>${agoS(p.ts)}</small></div>
         ${mine ? '' : `<button class="chip ${fol ? 'on' : ''}" data-lfollow="${esc(p.author)}">${fol ? 'Вы подписаны' : 'Подписаться'}</button>`}</div>
         <p class="pt2">${esc(p.text)}</p>${coin}
         <div class="acts">${t ? `<span class="act">МК ${usd(t.mc)}</span>` : ''}<a class="act" href="https://solscan.io/tx/${esc(p.sig)}" target="_blank" rel="noopener">В блокчейне</a>${owner ? `<button class="act" data-hide="${esc(p.sig)}">Скрыть</button>` : ''}</div></article>`; }).join('');
@@ -1817,12 +1909,13 @@ MB.views.profile = (() => {
     root.innerHTML = `<div class="prof"><div class="pava">${MB.ui.userAva(st.profile.name, 40, 84)}<label class="chip photob" for="pfile">${st.profile.avatar ? 'Сменить фото' : 'Загрузить фото'}</label><input id="pfile" type="file" accept="image/*" class="sr"></div><div class="nm"><h1>${esc(st.profile.name)}</h1><small>${esc(st.profile.bio || 'Без описания')} · ${esc(MB.util.short(st.wallet.address))}</small><small>Подписки: <b>${st.following.length}</b> · Постов: <b>${st.myPosts.length}</b>${st.squad ? ' · Отряд: <b>' + esc(st.squad) + '</b>' : ''}</small></div></div>
       <div class="qgrid">${MB.config.LIVE ? '<a class="btn ghost" href="#invite">Пригласить друзей</a><a class="btn ghost" href="#create">Создать монету</a><a class="btn ghost" href="#ads">Реклама</a>' : '<a class="btn ghost" href="#invite">Пригласить друзей</a><a class="btn ghost" href="#create">Создать монету</a><a class="btn ghost" href="#ads">Реклама</a>'}<a class="btn ghost" href="#prefs">Настройки</a></div>
       <div class="card wcard"><small>Стоимость портфеля</small><b class="tot">${usd(total)}</b><div class="wline"><span>${num(st.wallet.sol, 4)} SOL свободно</span><span class="${pnl >= 0 ? 'up' : 'down'}">Результат: ${pnl >= 0 ? '+' : ''}${usd(pnl)} (${MB.util.pct(pct)})</span></div><canvas id="eq" role="img" aria-label="График стоимости портфеля"></canvas></div>
-      <div class="card dep"><h2 class="h2">Кошелёк</h2><div class="qgrid dq"><a class="btn accent" href="#deposit">Депозит</a><a class="btn ghost" href="#deposit">Получить</a></div>${MB.config.LIVE ? `<p class="mut">Чтобы пополнить, отправьте SOL на этот адрес в сети Solana — с биржи или из другого кошелька.</p><code class="addr">${esc(st.wallet.address)}</code>` : ''}<div class="qgrid">${MB.config.LIVE ? '<button class="btn accent" id="wcopy">Скопировать адрес</button><button class="btn ghost" id="wref">Обновить баланс</button>' : ''}<button class="btn ghost" id="wdis">Отключить кошелёк</button></div></div>
+      <div class="card dep"><h2 class="h2">Кошелёк</h2><div class="qgrid dq"><a class="btn accent" href="#deposit">Депозит</a><a class="btn ghost" href="#deposit">Получить</a></div>${MB.config.LIVE ? `<p class="mut">Чтобы пополнить, отправьте SOL на этот адрес в сети Solana — с биржи или из другого кошелька.</p><code class="addr">${esc(st.wallet.address)}</code>` : ''}<div class="qgrid">${MB.config.LIVE ? '<button class="btn accent" id="wcopy">Скопировать адрес</button><button class="btn ghost" id="wsend">Отправить</button><button class="btn ghost" id="wref">Обновить баланс</button>' : ''}<button class="btn ghost" id="wdis">Отключить кошелёк</button></div></div>
             ${MB.config.LIVE ? '<div class="card stack creator"><h2 class="h2">Награды автора монет</h2><p class="hint">Если вы создали монету на pump.fun (в том числе через Membuy), вам идёт доля с каждой сделки этой монетой. Заберите её на свой кошелёк.</p><div class="qgrid"><button class="btn accent" id="cclaim">Забрать награды</button></div></div>' : ''}
       <div id="income"></div>
       <div class="chips tabsx" role="tablist"><button class="chip ${tab === 'open' ? 'on' : ''}" role="tab" aria-selected="${tab === 'open'}" data-tab="open">Открыто</button><button class="chip ${tab === 'closed' ? 'on' : ''}" role="tab" aria-selected="${tab === 'closed'}" data-tab="closed">Закрыто</button><button class="chip ${tab === 'hist' ? 'on' : ''}" role="tab" aria-selected="${tab === 'hist'}" data-tab="hist">История</button></div>
       <div class="list">${tab === 'open' ? open : tab === 'closed' ? closed : hist}</div>`;
     const wc = root.querySelector('#wcopy'); if (wc) wc.onclick = () => navigator.clipboard.writeText(st.wallet.address).then(() => MB.ui.toast('Адрес скопирован'), () => MB.ui.toast('Не удалось скопировать — выделите адрес вручную', 'err'));
+    const ws = root.querySelector('#wsend'); if (ws) ws.onclick = () => MB.ui.sendSheet();
     const wr = root.querySelector('#wref'); if (wr) wr.onclick = () => MB.wallet.refresh().then(() => MB.ui.toast('Баланс обновлён'), e => MB.ui.toast(e.message, 'err'));
     root.querySelector('#wdis').onclick = () => { if (confirm(MB.t('Отключить кошелёк?'))) MB.wallet.disconnect().then(() => MB.ui.toast('Кошелёк отключён')); };
     income();
@@ -2139,6 +2232,76 @@ MB.views = MB.views || {};
   };
 })();
 
+/* Профиль трейдера (#u-адрес) и окно «Отправить» (как в pump.fun: монета → сумма → сводка → отправка). */
+MB.views = MB.views || {};
+(() => {
+  const { esc, usd, num, short } = MB.util;
+  const hue = a => parseInt(String(a).slice(0, 3), 36) % 360;
+
+  /** Окно отправки. to — адрес получателя (если пусто, его вводят в окне). */
+  MB.ui.sendSheet = async (to = '', label = '') => {
+    const box = document.getElementById('onb'); if (!box) return;
+    if (!MB.store.get().wallet.connected) { try { await MB.wallet.connect(); } catch (e) { MB.ui.toast(e.message, 'err'); return; } }
+    let asset = null; const close = () => { box.hidden = true; box.innerHTML = ''; };
+    const frame = inner => { box.hidden = false; box.innerHTML = `<div class="onb" role="dialog" aria-modal="true" aria-labelledby="sdt"><div class="card send">${inner}</div></div>`;
+      box.querySelector('.onb').addEventListener('click', e => { if (e.target.classList.contains('onb')) close(); }); const x = box.querySelector('[data-close]'); if (x) x.onclick = close; };
+    const who = () => label ? `${esc(label)} · ${esc(short(to))}` : esc(short(to));
+
+    async function pick() {
+      frame(`<div class="shead"><h2 id="sdt">Выберите монету для отправки</h2><button class="x" data-close aria-label="Закрыть">×</button></div><div class="list" id="slist"><div class="hint">Загружаем…</div></div>`);
+      const list = await MB.send.assets().catch(() => []); const el = box.querySelector('#slist'); if (!el) return;
+      el.innerHTML = list.length ? list.map((a, i) => `<button class="row sasset" data-i="${i}">${MB.ui.avatar(a, 40)}<span class="nm"><b>${esc(a.sym)}</b><small>${num(a.qty, 4)} ${esc(a.sym)}</small></span><span class="pr"><b>${a.usd ? usd(a.usd) : '—'}</b></span></button>`).join('') : MB.ui.empty('Нечего отправить', 'Пополните кошелёк.');
+      el.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { asset = list[+b.dataset.i]; amountStep(); });
+    }
+    function amountStep() {
+      frame(`<div class="shead"><button class="x" id="sback" aria-label="Назад">‹</button><h2 id="sdt">Введите сумму</h2><button class="x" data-close aria-label="Закрыть">×</button></div>
+        <label class="fld"><span>Кому</span>${to ? `<b class="ugc">${who()}</b>` : '<input id="sto" class="inp" placeholder="Адрес кошелька Solana" autocomplete="off">'}</label>
+        <label class="fld"><span>Сумма, ${esc(asset.sym)}</span><input id="samt" inputmode="decimal" placeholder="0" autocomplete="off"><small>Баланс: ${num(asset.qty, 6)} ${esc(asset.sym)}<span id="susd"></span></small></label>
+        <div class="chips">${[25, 50, 75, 100].map(p => `<button type="button" class="chip" data-p="${p}">${p}%</button>`).join('')}</div>
+        <button class="btn big accent" id="snext">Далее</button>`);
+      const amt = box.querySelector('#samt'), upd = () => { const v = +amt.value.replace(',', '.') || 0; box.querySelector('#susd').textContent = asset.price ? ' · ≈ ' + usd(v * asset.price) : ''; };
+      amt.addEventListener('input', upd); box.querySelector('#sback').onclick = pick;
+      box.querySelectorAll('[data-p]').forEach(c => c.onclick = () => { amt.value = String(+(asset.max * c.dataset.p / 100).toFixed(asset.id === 'SOL' ? 6 : 4)); upd(); });
+      box.querySelector('#snext').onclick = () => { const t = to || (box.querySelector('#sto') || {}).value || ''; if (!MB.send.isAddr(t)) { MB.ui.toast('Неверный адрес получателя', 'err'); return; } to = t.trim();
+        const v = +amt.value.replace(',', '.'); if (!(v > 0)) { MB.ui.toast('Введите сумму', 'err'); return; } if (v > asset.max + 1e-12) { MB.ui.toast(asset.id === 'SOL' ? 'Недостаточно SOL (оставьте немного на сборы сети)' : 'Недостаточно монет', 'err'); return; } summary(v); };
+    }
+    async function summary(v) {
+      frame(`<div class="shead"><button class="x" id="sback" aria-label="Назад">‹</button><h2 id="sdt">Сводка</h2><button class="x" data-close aria-label="Закрыть">×</button></div>
+        <div class="ssum">${MB.ui.avatar(asset, 56)}<b class="big">${num(v, 6)} ${esc(asset.sym)}</b><small>${asset.price ? '≈ ' + usd(v * asset.price) : ''}</small></div>
+        <dl class="quote"><div><dt>Кому</dt><dd class="ugc">${who()}</dd></div><div><dt>Комиссия сети</dt><dd id="sfee">…</dd></div></dl>
+        <p class="fine">Перевод в блокчейне нельзя отменить. Проверьте адрес получателя.</p><button class="btn big accent" id="sgo">Отправить ${num(v, 6)} ${esc(asset.sym)}</button><div id="sst" class="tstatus" role="status"></div>`);
+      box.querySelector('#sback').onclick = amountStep;
+      MB.send.preview(to, asset).then(f => { const el = box.querySelector('#sfee'); if (el) el.textContent = num(f.network, 6) + ' SOL' + (f.rent ? ' + ' + num(f.rent, 5) + ' SOL (счёт получателя)' : ''); }, () => {});
+      box.querySelector('#sgo').onclick = async () => { const b = box.querySelector('#sgo'); if (b.disabled) return; b.disabled = true;
+        try { const sig = await MB.send.transfer(to, asset, v); frame(`<div class="ssum"><h2 id="sdt">Отправлено ✅</h2><b class="big">${num(v, 6)} ${esc(asset.sym)}</b><small>${who()}</small></div><div class="qgrid"><a class="btn ghost" href="https://solscan.io/tx/${esc(sig)}" target="_blank" rel="noopener">Транзакция</a><button class="btn accent" data-close>Готово</button></div>`); }
+        catch (e) { const s = box.querySelector('#sst'); if (s && e.message) { s.className = 'tstatus err'; s.textContent = e.message; } b.disabled = false; } };
+    }
+    pick();
+  };
+
+  /** Профиль трейдера: адрес, подписка, отправка, его посты в ленте. Сообщения — только при взаимной подписке (chat.js). */
+  MB.views.user = (() => {
+    let root, addr = '';
+    async function draw() {
+      if (!root) return; const st = MB.store.get(), me = st.wallet.address, fol = st.following.includes(addr), mine = addr === me;
+      const posts = MB.postchain && MB.postchain.enabled() ? (await MB.postchain.load().catch(() => [])).filter(p => p.author === addr) : [];
+      if (!root) return; const name = (posts.find(p => p.name) || {}).name || '';
+      const sol = await MB.wallet.rpc('getBalance', [addr]).then(r => r.value / 1e9, () => null); if (!root) return;
+      const chat = MB.chat && MB.chat.enabled();
+      root.innerHTML = `<a class="back" href="#feed">← Лента</a>
+        <div class="prof">${MB.ui.avatar({ sym: (name || addr).slice(0, 2).toUpperCase(), hue: hue(addr) }, 84)}<div class="nm"><h1 class="ugc">${esc(name || short(addr))}</h1><small><code class="ugc">${esc(short(addr))}</code> <button class="chip sm2" id="ucopy">Скопировать адрес</button></small>${sol != null ? `<small>Баланс: <b>${num(sol, 3)} SOL</b></small>` : ''}</div></div>
+        ${mine ? '' : `<div class="qgrid"><button class="btn ${fol ? 'ghost' : 'accent'}" id="ufol">${fol ? 'Вы подписаны' : 'Подписаться'}</button>${chat ? '<button class="btn ghost" id="umsg">Сообщение</button>' : ''}<button class="btn ghost" id="usend">Отправить</button></div>`}
+        <div id="umsgnote"></div>
+        <h2 class="h2">Посты</h2><div class="list">${posts.length ? posts.slice(0, 20).map(p => `<article class="post"><p class="pt2">${esc(p.text)}</p><small class="hint">${new Date(p.ts * 1000).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</small></article>`).join('') : MB.ui.empty('Постов пока нет', '')}</div>`;
+      root.querySelector('#ucopy').onclick = () => navigator.clipboard && navigator.clipboard.writeText(addr).then(() => MB.ui.toast('Адрес скопирован'), () => {});
+      const f = root.querySelector('#ufol'); if (f) f.onclick = async () => { MB.store.update(s => { const i = s.following.indexOf(addr); if (i >= 0) s.following.splice(i, 1); else s.following.push(addr); }, true); if (chat) await MB.chat.follow(addr, !fol).catch(e => MB.ui.toast(e.message, 'err')); draw(); };
+      const s = root.querySelector('#usend'); if (s) s.onclick = () => MB.ui.sendSheet(addr, name);
+      const m = root.querySelector('#umsg'); if (m) m.onclick = () => MB.chat.open(addr, name);
+    }
+    return { mount(el, a) { root = el; addr = a; el.innerHTML = '<div class="empty"><p>Загружаем профиль…</p></div>'; if (!MB.send.isAddr(a)) { el.innerHTML = MB.ui.empty('Неверный адрес', ''); return; } return draw(); }, unmount() { root = null; }, onState() { if (root) draw(); } };
+  })();
+})();
+
 /* Точка входа: выбор поставщика данных, маршруты, шапка. Маршруты — простые якоря: #market, #portfolio, #history, #t-<id>. */
 (() => {
   const C = MB.config; MB.data = MB.providers[C.MODE === 'live' ? 'live' : 'demo'];
@@ -2157,8 +2320,8 @@ MB.views = MB.views || {};
   async function route() {
     let h = decodeURIComponent(location.hash.slice(1)) || 'market'; if (C.LIVE && C.DEMO_ONLY.includes(h)) h = 'market';
     if (cur && cur.unmount) cur.unmount();
-    document.querySelectorAll('[data-nav]').forEach(a => { const on = a.dataset.nav === (h.startsWith('t-') ? 'market' : (SUB[h] || h)); a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-    if (h.startsWith('t-')) { cur = MB.views.token; await cur.mount(main, h.slice(2)); } else { cur = routes[h] || routes.market; await cur.mount(main); }
+    document.querySelectorAll('[data-nav]').forEach(a => { const on = a.dataset.nav === (h.startsWith('t-') ? 'market' : h.startsWith('u-') ? 'feed' : (SUB[h] || h)); a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    if (h.startsWith('t-')) { cur = MB.views.token; await cur.mount(main, h.slice(2)); } else if (h.startsWith('u-')) { cur = MB.views.user; await cur.mount(main, h.slice(2)); } else { cur = routes[h] || routes.market; await cur.mount(main); }
     window.scrollTo(0, 0);
   }
   let tn = 0;

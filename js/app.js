@@ -16,8 +16,8 @@
   async function route() {
     let h = decodeURIComponent(location.hash.slice(1)) || 'market'; if (C.LIVE && C.DEMO_ONLY.includes(h)) h = 'market';
     if (cur && cur.unmount) cur.unmount();
-    document.querySelectorAll('[data-nav]').forEach(a => { const on = a.dataset.nav === (h.startsWith('t-') ? 'market' : (SUB[h] || h)); a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-    if (h.startsWith('t-')) { cur = MB.views.token; await cur.mount(main, h.slice(2)); } else { cur = routes[h] || routes.market; await cur.mount(main); }
+    document.querySelectorAll('[data-nav]').forEach(a => { const on = a.dataset.nav === (h.startsWith('t-') ? 'market' : h.startsWith('u-') ? 'feed' : (SUB[h] || h)); a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    if (h.startsWith('t-')) { cur = MB.views.token; await cur.mount(main, h.slice(2)); } else if (h.startsWith('u-')) { cur = MB.views.user; await cur.mount(main, h.slice(2)); } else { cur = routes[h] || routes.market; await cur.mount(main); }
     window.scrollTo(0, 0);
   }
   let tn = 0;

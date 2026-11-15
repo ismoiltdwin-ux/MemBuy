@@ -131,6 +131,15 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   await p.evaluate(() => { MB.store.set({ wallet: { connected: true, address: 'WalletAAA1111111111111111111111111111111111', sol: 2 } }); location.hash = 'profile'; }); await p.waitForTimeout(700);
   global.__pp = null; await p.click('#cclaim'); await p.waitForTimeout(700);
   ok('«Забрать награды»: запрос collectCreatorFee для вашего кошелька, подписано', global.__pp && global.__pp.action === 'collectCreatorFee' && global.__pp.publicKey.startsWith('WalletAAA'));
+  // ---- Профиль трейдера и «Отправить» ----
+  const OTHER = 'TraderBBB11111111111111111111111111111111111';
+  await p.evaluate(() => { MB.store.set({ wallet: { connected: true, address: 'WalletAAA1111111111111111111111111111111111', sol: 2 } }); }); await p.evaluate(o => { location.hash = 'u-' + o; }, OTHER); await p.waitForTimeout(900);
+  ok('профиль трейдера: кнопки «Подписаться» и «Отправить»', await p.locator('#ufol').count() === 1 && await p.locator('#usend').count() === 1);
+  await p.click('#usend'); await p.waitForTimeout(600); ok('отправка: шаг 1 — выбор монеты (есть SOL)', (await p.textContent('#slist')).includes('SOL'));
+  await p.click('#slist [data-i="0"]'); await p.waitForTimeout(300); await p.click('[data-p="50"]'); ok('отправка: шаг 2 — 50% от доступного', +(await p.inputValue('#samt')) > 0.99 && +(await p.inputValue('#samt')) < 1);
+  await p.fill('#samt', '5'); await p.click('#snext'); await p.waitForTimeout(300); ok('отправка: больше баланса не пускает дальше', await p.locator('#samt').count() === 1);
+  await p.fill('#samt', '0.3'); await p.click('#snext'); await p.waitForTimeout(500); ok('отправка: шаг 3 — сводка с получателем и комиссией сети', (await p.textContent('.send')).includes('Сводка') && (await p.textContent('.send')).includes('Trad') && /0[,.]000005 SOL/.test(await p.textContent('#sfee')));
+  await p.click('[data-close]');
   // ---- Комиссия со сделок ----
   ok('без счёта комиссии сделки идут без комиссии', !calls.some(u => String(u).includes('platformFeeBps')) && !/feeAccount/.test(global.__swapBody || ''));
   global.__feeAcct = true; await p.evaluate(() => { MB.store.set({ wallet: { connected: true, address: 'WalletAAA1111111111111111111111111111111111', sol: 2 } }); });

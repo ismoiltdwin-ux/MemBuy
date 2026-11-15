@@ -224,3 +224,8 @@ footer .langs{margin-bottom:12px}
 .recent{margin-bottom:12px}.recent .rrow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px}
 .recent .row{background:none;border:0;padding:8px 0}.recent .x{background:none;border:0;color:var(--muted);font-size:22px;cursor:pointer;padding:4px 8px}
 a.act{color:var(--muted);font-size:14px;font-weight:600}
+.send{max-height:88vh;overflow-y:auto}.send .shead h2{font-family:var(--display);font-size:18px;font-weight:800;flex:1;text-align:center}
+.send .x{background:none;border:0;color:var(--muted);font-size:26px;cursor:pointer;padding:2px 8px;line-height:1}
+.sasset{width:100%;text-align:left;cursor:pointer;color:var(--text)}
+.ssum{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:6px 0}.ssum .big{font-family:var(--display);font-size:28px;font-weight:800}
+.post .ph a{color:inherit}

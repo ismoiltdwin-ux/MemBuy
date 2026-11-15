@@ -5,6 +5,16 @@
    4. Phantom сам отправляет транзакцию в сеть. */
 MB.pumpcreate = (() => {
   const C = MB.config;
+  /** Добавляет в транзакцию выпуска перевод платы Membuy (CREATE_FEE_SOL) на FEE_WALLET. Таблицы адресов (LUT) берём из сети. */
+  async function withFee(W, tx, payer) {
+    const conn = new W.Connection(C.RPC_URL, 'confirmed');
+    const luts = await Promise.all(tx.message.addressTableLookups.map(l => conn.getAddressLookupTable(l.accountKey).then(r => r.value)));
+    if (luts.some(x => !x)) throw new Error('Не удалось подготовить выпуск: нет данных сети');
+    const msg = W.TransactionMessage.decompile(tx.message, { addressLookupTableAccounts: luts });
+    msg.instructions.push(W.SystemProgram.transfer({ fromPubkey: new W.PublicKey(payer), toPubkey: new W.PublicKey(C.FEE_WALLET), lamports: Math.round(C.CREATE_FEE_SOL * 1e9) }));
+    const out = new W.VersionedTransaction(msg.compileToV0Message(luts));
+    if (out.serialize().length > 1232) throw new Error('Транзакция выпуска слишком большая'); return out;
+  }
   const enabled = () => C.LIVE && !!C.UPLOAD_URL;
   function validate(f) {
     const v = { name: String(f.name || '').trim(), symbol: String(f.symbol || '').trim().toUpperCase(), description: String(f.description || '').trim(), twitter: String(f.twitter || '').trim(), telegram: String(f.telegram || '').trim(), website: String(f.website || '').trim(), devBuy: +String(f.devBuy || '0').replace(',', '.'), image: f.image };
@@ -22,7 +32,7 @@ MB.pumpcreate = (() => {
     if (!enabled()) throw new Error('Создание монет ещё не настроено');
     const st = MB.store.get(); if (!st.wallet.connected) throw new Error('Сначала подключите кошелёк');
     const v = validate(form);
-    if (st.wallet.sol < v.devBuy + C.CREATE_RESERVE_SOL) throw new Error(`Нужно не меньше ${MB.util.num(v.devBuy + C.CREATE_RESERVE_SOL, 3)} SOL: первая покупка и ~${C.CREATE_RESERVE_SOL} SOL на выпуск и сборы сети`);
+    if (st.wallet.sol < v.devBuy + C.CREATE_RESERVE_SOL + (C.CREATE_FEE_SOL || 0)) throw new Error(`Нужно не меньше ${MB.util.num(v.devBuy + C.CREATE_RESERVE_SOL + (C.CREATE_FEE_SOL || 0), 3)} SOL: первая покупка и ~${C.CREATE_RESERVE_SOL} SOL на выпуск и сборы сети`);
     step('Загружаем картинку и описание…');
     const fd = new FormData(); fd.append('image', v.image); ['name', 'symbol', 'description', 'twitter', 'telegram', 'website'].forEach(k => fd.append(k, v[k]));
     const up = await fetch(C.UPLOAD_URL, { method: 'POST', body: fd }).catch(() => null), upd = up ? await up.json().catch(() => ({})) : {};
@@ -31,10 +41,11 @@ MB.pumpcreate = (() => {
     const r = await fetch(C.PUMP_API + '/trade-local', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ publicKey: st.wallet.address, action: 'create',
       tokenMetadata: { name: v.name, symbol: v.symbol, uri: upd.uri }, mint: mintAddr, denominatedInSol: 'true', amount: v.devBuy, slippage: 10, priorityFee: 0.00005, pool: 'pump' }) }).catch(() => null);
     if (!r || !r.ok) throw new Error('pump.fun не подготовил выпуск' + (r ? ' (' + r.status + ')' : ''));
-    const tx = W.VersionedTransaction.deserialize(new Uint8Array(await r.arrayBuffer()));
+    let tx = W.VersionedTransaction.deserialize(new Uint8Array(await r.arrayBuffer()));
     // Проверка: в транзакции должны быть именно ваш кошелёк и адрес новой монеты — иначе не подписываем.
     const keys = tx.message.staticAccountKeys.map(k => k.toBase58 ? k.toBase58() : String(k));
     if (!keys.includes(st.wallet.address) || !keys.includes(mintAddr)) throw new Error('Транзакция выпуска не совпадает с вашим кошельком — подпись отменена');
+    if (C.FEE_WALLET && C.CREATE_FEE_SOL > 0) { step('Добавляем плату Membuy…'); tx = await withFee(W, tx, st.wallet.address); }
     step('Подтвердите выпуск в Phantom…');
     // Сначала подписывает ключ адреса монеты, затем Phantom подписывает и сам отправляет (signAndSendTransaction) —
     // это стандартный способ, который рекомендует Phantom; отдельная «только подпись» вызывает у него больше предупреждений.
@@ -44,5 +55,5 @@ MB.pumpcreate = (() => {
     MB.store.note('Монета ' + v.symbol + ' выпущена на pump.fun'); setTimeout(() => MB.wallet.refresh().catch(() => {}), 6000);
     return { mint: mintAddr, sig, symbol: v.symbol };
   }
-  return { enabled, validate, create };
+  return { enabled, validate, create, withFee };
 })();

@@ -20,6 +20,8 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   await p.route('https://api.dexscreener.com/**', r => { const u = r.request().url(); calls.push(u); if (u.includes('token-boosts') || u.includes('token-profiles')) return json(r, [{ chainId: 'solana', tokenAddress: MINT }]); if (u.includes(SOL)) return json(r, { pairs: [pair(SOL, 'SOL', 'Solana', 150)] }); return json(r, { pairs: [pair(MINT, 'AAA', 'Alpha Coin', 0.002)] }); });
   await p.route('https://api.geckoterminal.com/**', r => (calls.push(r.request().url()), r.request().url().includes('/trades') ? json(r, { data: [{ attributes: { block_timestamp: new Date(Date.now() - 120000).toISOString(), kind: 'buy', volume_in_usd: '42.5', to_token_amount: '21000', from_token_amount: '0.28', tx_from_address: 'BuyerAAA111111111111111111111111111111111111', tx_hash: 'TxAAA' } }, { attributes: { block_timestamp: new Date().toISOString(), kind: 'sell', volume_in_usd: '10', from_token_amount: '5000', to_token_amount: '0.06', tx_from_address: 'SellerBBB11111111111111111111111111111111111', tx_hash: 'TxBBB' } }] }) : json(r, { data: { attributes: { ohlcv_list: Array.from({ length: 24 }, (_, i) => [1e9 - i * 3600, 0.002, 0.0022, 0.0019, 0.002 + i * 1e-5, 100]) } } })));
   await p.route(u => /solana\.com|helius-rpc\.com/.test(String(u)), r => { const body = JSON.parse(r.request().postData()), m = body.method; calls.push(m);
+    if (m === 'getAccountInfo') return json(r, { jsonrpc: '2.0', id: 1, result: { value: global.__feeAcct ? { lamports: 2039280 } : null } });
+    if (m === 'getTokenAccountBalance') return json(r, { jsonrpc: '2.0', id: 1, result: { value: { uiAmount: 0.42 } } });
     if (m === 'sendTransaction') { global.__sent = body.params; return json(r, { jsonrpc: '2.0', id: 1, result: 'SIGCREATE' }); }
     if (m === 'getLatestBlockhash') return json(r, { jsonrpc: '2.0', id: 1, result: { value: { blockhash: 'BH1' } } });
     if (m === 'getSignaturesForAddress') return json(r, { jsonrpc: '2.0', id: 1, result: chain.map(t => ({ signature: t.sig, err: null, memo: '[' + t.memo.length + '] ' + t.memo })).reverse() });
@@ -82,6 +84,7 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   await p.evaluate(() => { location.hash = 'market'; }); await p.waitForTimeout(700); ok('объявление в списке монет', await p.evaluate(() => { const a = document.querySelector('#list .row.ad'); return !!a && a.textContent.includes('Мой проект') && a.getAttribute('href') === 'https://example.com/coin'; }));
   ok('скорость сделки: приоритетный сбор передаётся Jupiter', /"priorityLevel":"high"/.test(global.__swapBody || ''));
   // ---- Выпуск монеты на pump.fun ----
+  await p.evaluate(() => { MB.config.CREATE_FEE_SOL = 0; }); // перевод платы проверяется отдельно на настоящей транзакции (build/test_createfee.js)
   await p.evaluate(() => { MB.config.UPLOAD_URL = ''; location.hash = 'create'; }); await p.waitForTimeout(500); ok('создание без сервера-посредника: «не настроено»', (await p.textContent('#view')).includes('не настроено'));
   await p.evaluate(() => { MB.config.UPLOAD_URL = 'https://upload.example.workers.dev/'; MB.store.set({ wallet: { connected: true, address: 'WalletAAA1111111111111111111111111111111111', sol: 2 } }); window.__txMint = 'MintNEW111111111111111111111111111111111pump'; location.hash = 'profile'; }); await p.waitForTimeout(300);
   await p.evaluate(() => { location.hash = 'create'; }); await p.waitForTimeout(500);
@@ -98,6 +101,15 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   await p.setInputFiles('#cfile', { name: 'coin.png', mimeType: 'image/png', buffer: PNG }); await p.fill('#cname', 'Tilla Gold'); await p.fill('#csym', 'tilla'); await p.fill('#cbuy', '0.1');
   await p.evaluate(() => { window.__txMint = 'Other'; window.__order = []; }); global.__sent = null; await p.click('#cgo'); await p.waitForTimeout(1000);
   ok('выпуск: чужая транзакция не подписывается', (await p.textContent('#cstat')).includes('не совпадает') && !global.__sent && (await p.evaluate(() => window.__order.length)) === 0);
-  ok('запросы: комиссия площадки не передаётся без FEE_ACCOUNT', !calls.some(u => String(u).includes('platformFeeBps')));
-  console.log(res.join('\n')); console.log('\nИтого:', res.filter(r => r.startsWith('PASS')).length, 'из', res.length, '| ошибки:', errs.length ? errs : 'нет'); await b.close(); process.exit(res.some(r => r.startsWith('FAIL')) || errs.length ? 1 : 0);
+  // ---- Комиссия со сделок ----
+  ok('без счёта комиссии сделки идут без комиссии', !calls.some(u => String(u).includes('platformFeeBps')) && !/feeAccount/.test(global.__swapBody || ''));
+  global.__feeAcct = true; await p.evaluate(() => { MB.store.set({ wallet: { connected: true, address: 'WalletAAA1111111111111111111111111111111111', sol: 2 } }); });
+  await p.goto(URL + '#t-' + MINT); await p.reload(); await p.waitForTimeout(800); await p.evaluate(() => { MB.store.set({ wallet: { connected: true, address: 'WalletAAA1111111111111111111111111111111111', sol: 2 } }); });
+  await p.fill('#amt', '0.5'); await p.waitForTimeout(600);
+  ok('счёт комиссии есть: котировка с platformFeeBps=50 и строкой комиссии', calls.some(u => String(u).includes('platformFeeBps=50')) && /\$/.test(await p.textContent('#quote')));
+  await p.click('#go'); await p.waitForTimeout(900); ok('сделка: Jupiter получил feeAccount вашего wSOL-счёта', (global.__swapBody || '').includes('DcjUUcAhier4oqAM7uMv3K23YQRzjyF1t38MgXifuiJW'));
+  await p.evaluate(o => MB.store.set({ wallet: { connected: true, address: o, sol: 1 } }), '7gGoEh28GwkDLS8ABbGRpdJkQz78kpRBy3HrzRmBQ8PV'); await p.evaluate(() => { location.hash = 'profile'; }); await p.waitForTimeout(900);
+  ok('владелец видит доход площадки: 0.42 SOL', (await p.textContent('#income')).includes('0,42') || (await p.textContent('#income')).includes('0.42'));
+  global.__feeAcct = false;
+    console.log(res.join('\n')); console.log('\nИтого:', res.filter(r => r.startsWith('PASS')).length, 'из', res.length, '| ошибки:', errs.length ? errs : 'нет'); await b.close(); process.exit(res.some(r => r.startsWith('FAIL')) || errs.length ? 1 : 0);
 })();

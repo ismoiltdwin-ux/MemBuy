@@ -22,7 +22,7 @@ MB.views.create = (() => {
     const back = '<a class="back" href="#profile">← Профиль</a><h1 class="pt">Создать монету</h1>';
     if (!MB.pumpcreate.enabled()) { el.innerHTML = back + MB.ui.empty('Создание монет ещё не настроено', 'Владелец сайта должен подключить загрузку картинок.'); return; }
     let file = null;
-    el.innerHTML = back + `<div class="note">Монета выпускается по-настоящему на pump.fun и навсегда появляется в блокчейне Solana. Выпуск стоит около ${MB.config.CREATE_RESERVE_SOL} SOL плюс первая покупка. Данные монеты нельзя изменить после создания.</div>
+    el.innerHTML = back + `<div class="note">Монета выпускается по-настоящему на pump.fun и навсегда появляется в блокчейне Solana. Выпуск стоит около ${MB.config.CREATE_RESERVE_SOL} SOL (сборы сети и pump.fun)${MB.config.CREATE_FEE_SOL > 0 ? ' + плата Membuy ' + MB.config.CREATE_FEE_SOL + ' SOL' : ''} плюс первая покупка. Данные монеты нельзя изменить после создания.</div>
       <form class="card form" id="lform" novalidate>
         <div class="fld"><span>Картинка (PNG, JPG, GIF или WEBP, до 4 МБ)</span><div class="crow"><span id="prev" class="prev"></span><label class="btn ghost" for="cfile">Выбрать файл</label><input id="cfile" type="file" accept="image/png,image/jpeg,image/gif,image/webp" class="sr"></div></div>
         <label class="fld"><span>Название</span><input id="cname" maxlength="32" placeholder="Например, Tilla" autocomplete="off"></label>

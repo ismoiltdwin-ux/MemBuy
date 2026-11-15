@@ -4,7 +4,9 @@ MB.config = {
   MODE: 'demo',                 // 'demo' — учебные данные и сделки; 'live' — Phantom + Jupiter + DexScreener
   APP_NAME: 'Membuy',
   PLATFORM_FEE_BPS: 50,         // комиссия площадки: 50 = 0.5%
-  FEE_ACCOUNT: '',              // live: ваш токен-аккаунт для комиссии Jupiter (пусто = без комиссии)
+  FEE_WALLET: '7gGoEh28GwkDLS8ABbGRpdJkQz78kpRBy3HrzRmBQ8PV',   // live: ваш кошелёк — сюда идёт доход площадки
+  FEE_ACCOUNT: 'DcjUUcAhier4oqAM7uMv3K23YQRzjyF1t38MgXifuiJW',  // live: wSOL-счёт этого кошелька для комиссии со сделок (Jupiter)
+  CREATE_FEE_SOL: 0.01,         // live: плата Membuy за выпуск монеты, SOL (0 = без платы)
   DEFAULT_SLIPPAGE_BPS: 100,    // проскальзывание по умолчанию: 1%
   SOL_USD_DEMO: 150,            // условная цена SOL в демо-режиме
   DEMO_START_SOL: 5,

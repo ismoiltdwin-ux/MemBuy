@@ -247,7 +247,9 @@ MB.config = {
   MODE: 'demo',                 // 'demo' — учебные данные и сделки; 'live' — Phantom + Jupiter + DexScreener
   APP_NAME: 'Membuy',
   PLATFORM_FEE_BPS: 50,         // комиссия площадки: 50 = 0.5%
-  FEE_ACCOUNT: '',              // live: ваш токен-аккаунт для комиссии Jupiter (пусто = без комиссии)
+  FEE_WALLET: '7gGoEh28GwkDLS8ABbGRpdJkQz78kpRBy3HrzRmBQ8PV',   // live: ваш кошелёк — сюда идёт доход площадки
+  FEE_ACCOUNT: 'DcjUUcAhier4oqAM7uMv3K23YQRzjyF1t38MgXifuiJW',  // live: wSOL-счёт этого кошелька для комиссии со сделок (Jupiter)
+  CREATE_FEE_SOL: 0.01,         // live: плата Membuy за выпуск монеты, SOL (0 = без платы)
   DEFAULT_SLIPPAGE_BPS: 100,    // проскальзывание по умолчанию: 1%
   SOL_USD_DEMO: 150,            // условная цена SOL в демо-режиме
   DEMO_START_SOL: 5,
@@ -505,6 +507,17 @@ MB.i18n = (() => {
     "Создать ещё монету": ["Create another coin", ""],
     "Отправлено в сеть…": ["Sent to the network…", ""],
     "Где новости Membuy?": ["Where can I follow Membuy news?", ""],
+    "Доход площадки (вы владелец)": ["Platform income (you are the owner)", ""],
+    "Вывести комиссию": ["Withdraw fees", ""],
+    "Включить комиссию": ["Enable fees", ""],
+    "Комиссия со сделок выключена: для неё нужен отдельный счёт. Создание стоит около 0,002 SOL (залог сети, возвращается при выводе).": ["Trading fees are off: they need a separate account. Creating it costs about 0.002 SOL (a network deposit, returned when you withdraw).", ""],
+    "Счёт для комиссии создан": ["Fee account created", ""],
+    "Комиссия выведена": ["Fees withdrawn", ""],
+    "Это может сделать только владелец площадки": ["Only the platform owner can do this", ""],
+    "Вывести комиссию? Счёт закроется, все SOL придут на ваш кошелёк. Потом нажмите «Включить комиссию» снова.": ["Withdraw fees? The account will be closed and all SOL will go to your wallet. Then tap “Enable fees” again.", ""],
+    "Добавляем плату Membuy…": ["Adding the Membuy fee…", ""],
+    "Не удалось подготовить выпуск: нет данных сети": ["Could not prepare the launch: network data unavailable", ""],
+    "Транзакция выпуска слишком большая": ["The launch transaction is too large", ""],
     'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
     'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
     'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
@@ -538,6 +551,7 @@ MB.i18n = (() => {
     [/^(.+) SOL · (\d+) дн\. · (.+)$/, '$1 SOL · $2 days · $3', '$1 SOL · $2 рӯз · $3'], [/^до (\d.+)$/, 'until $1', 'то $1'],
     [/^Монета (.+) выпущена$/, 'Coin $1 launched', ''], [/^Монета (.+) выпущена на pump\.fun$/, 'Coin $1 launched on pump.fun', ''], [/^Нужно не меньше (.+) SOL: первая покупка и ~(.+) SOL на выпуск и сборы сети$/, 'You need at least $1 SOL: the initial buy plus ~$2 SOL for the launch and network fees', ''],
     [/^Монета выпускается по-настоящему на pump\.fun и навсегда появляется в блокчейне Solana\. Выпуск стоит около (.+) SOL плюс первая покупка\. Данные монеты нельзя изменить после создания\.$/, 'The coin is launched for real on pump.fun and stays on the Solana blockchain forever. Launching costs about $1 SOL plus the initial buy. Coin data cannot be changed after creation.', ''],
+    [/^Комиссия со сделок (.+)% включена\. Накоплено: (.+)$/, 'Trading fee $1% is on. Collected: $2', ''], [/^Плата за выпуск монеты \((.+) SOL\) и оплата рекламы приходят прямо на ваш кошелёк\.$/, 'The coin launch fee ($1 SOL) and ad payments go straight to your wallet.', ''],
     [/^Куплено на (.+) · продано на (.+)$/, 'Bought for $1 · sold for $2', 'Харида шуд ба $1 · фурӯхта шуд ба $2'], [/^МК (.+)$/, 'MC $1', 'КБ $1'], [/^Об\. (.+)$/, 'Vol $1', 'Ҳаҷм $1'], [/^Сделок: (.+)$/, 'Txns: $1', 'Савдоҳо: $1'],
     [/^(\d+) мин$/, '$1m', '$1 дақ'], [/^(\d+) ч$/, '$1h', '$1 с'], [/^В демо пополнять не нужно: на учебном кошельке (\d+) условных SOL\.$/, 'No deposit needed in the demo: the practice wallet holds $1 play SOL.', 'Дар демо пур кардан лозим нест: дар ҳамёни омӯзишӣ $1 SOL-и шартӣ ҳаст.'],
     [/^Куплено (.+) за (.+)$/, 'Bought $1 for $2', 'Харида шуд: $1 ба $2'], [/^Продано (.+) за (.+)$/, 'Sold $1 for $2', 'Фурӯхта шуд: $1 ба $2'],
@@ -938,6 +952,51 @@ MB.wallet = (() => {
   };
 })();
 
+/* Доход площадки (живой режим).
+   • Сделки: Jupiter берёт PLATFORM_FEE_BPS (0,5%) и кладёт на FEE_ACCOUNT — wSOL-счёт кошелька FEE_WALLET.
+     Пока этот счёт не создан, комиссия не включается (иначе Jupiter отклонил бы сделку).
+   • Выпуск монеты: в транзакцию выпуска добавляется перевод CREATE_FEE_SOL на FEE_WALLET (см. pumpcreate.js).
+   • Реклама: оплата сразу идёт на ADS_WALLET (см. adchain.js).
+   Владелец (кошелёк FEE_WALLET) видит в профиле доход, может создать счёт для комиссии и вывести накопленное. */
+MB.fees = (() => {
+  const C = MB.config, WSOL = 'So11111111111111111111111111111111111111112';
+  const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', ATA = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
+  let known = null, checkedAt = 0;
+
+  /** Существует ли счёт для комиссии. «Да» запоминаем навсегда, «нет» — перепроверяем раз в минуту. */
+  async function ready() {
+    if (!C.LIVE || !C.FEE_ACCOUNT || !(C.PLATFORM_FEE_BPS > 0)) return false;
+    if (known === true || (known === false && Date.now() - checkedAt < 60000)) return known;
+    try { const r = await MB.wallet.rpc('getAccountInfo', [C.FEE_ACCOUNT, { encoding: 'base64' }]); known = !!(r && r.value); } catch (e) { known = false; }
+    checkedAt = Date.now(); return known;
+  }
+  const isOwner = () => C.LIVE && !!C.FEE_WALLET && MB.store.get().wallet.connected && MB.store.get().wallet.address === C.FEE_WALLET;
+
+  /** Отправить простую транзакцию из инструкций (подписывает и отправляет Phantom). */
+  async function send(build) {
+    await MB.wallet.web3(); const W = window.solanaWeb3, me = new W.PublicKey(MB.store.get().wallet.address);
+    const { blockhash } = (await MB.wallet.rpc('getLatestBlockhash', [{ commitment: 'confirmed' }])).value;
+    const tx = new W.Transaction({ feePayer: me, recentBlockhash: blockhash }); build(W, me).forEach(i => tx.add(i));
+    const r = await MB.wallet.send(tx); known = null; return r.signature;
+  }
+  const createIx = (W, me) => new W.TransactionInstruction({ programId: new W.PublicKey(ATA), data: Uint8Array.of(1), keys: [ // создать счёт, если его ещё нет
+    { pubkey: me, isSigner: true, isWritable: true }, { pubkey: new W.PublicKey(C.FEE_ACCOUNT), isSigner: false, isWritable: true },
+    { pubkey: me, isSigner: false, isWritable: false }, { pubkey: new W.PublicKey(WSOL), isSigner: false, isWritable: false },
+    { pubkey: W.SystemProgram.programId, isSigner: false, isWritable: false }, { pubkey: new W.PublicKey(TOKEN), isSigner: false, isWritable: false }] });
+
+  return {
+    ready, isOwner,
+    /** Накопленная комиссия в SOL (сумма на wSOL-счёте). */
+    async balance() { const r = await MB.wallet.rpc('getTokenAccountBalance', [C.FEE_ACCOUNT]).catch(() => null); return r && r.value ? +r.value.uiAmount || 0 : 0; },
+    /** Владелец: создать счёт для комиссии (около 0,002 SOL — залог сети, возвращается при закрытии счёта). */
+    enable() { if (!isOwner()) throw new Error('Это может сделать только владелец площадки'); return send((W, me) => [createIx(W, me)]); },
+    /** Владелец: вывести накопленное — счёт закрывается, всё (комиссия + залог) приходит обычными SOL. Потом комиссию нужно включить снова. */
+    withdraw() { if (!isOwner()) throw new Error('Это может сделать только владелец площадки');
+      return send((W, me) => [new W.TransactionInstruction({ programId: new W.PublicKey(TOKEN), data: Uint8Array.of(9), keys: [
+        { pubkey: new W.PublicKey(C.FEE_ACCOUNT), isSigner: false, isWritable: true }, { pubkey: me, isSigner: false, isWritable: true }, { pubkey: me, isSigner: true, isWritable: false }] })]); },
+  };
+})();
+
 /* Настоящая реклама без сервера (живой режим). Всё хранится в блокчейне Solana:
    1. Рекламодатель одной транзакцией платит SOL на кошелёк площадки (config.ADS_WALLET) и пишет в заметку (Memo) текст объявления: MB1|{json}.
    2. Владелец площадки со своего кошелька одобряет (MBOK|подпись) или отклоняет (MBNO|подпись) объявление — это тоже заметка в блокчейне.
@@ -1031,6 +1090,16 @@ MB.adchain = (() => {
    4. Phantom сам отправляет транзакцию в сеть. */
 MB.pumpcreate = (() => {
   const C = MB.config;
+  /** Добавляет в транзакцию выпуска перевод платы Membuy (CREATE_FEE_SOL) на FEE_WALLET. Таблицы адресов (LUT) берём из сети. */
+  async function withFee(W, tx, payer) {
+    const conn = new W.Connection(C.RPC_URL, 'confirmed');
+    const luts = await Promise.all(tx.message.addressTableLookups.map(l => conn.getAddressLookupTable(l.accountKey).then(r => r.value)));
+    if (luts.some(x => !x)) throw new Error('Не удалось подготовить выпуск: нет данных сети');
+    const msg = W.TransactionMessage.decompile(tx.message, { addressLookupTableAccounts: luts });
+    msg.instructions.push(W.SystemProgram.transfer({ fromPubkey: new W.PublicKey(payer), toPubkey: new W.PublicKey(C.FEE_WALLET), lamports: Math.round(C.CREATE_FEE_SOL * 1e9) }));
+    const out = new W.VersionedTransaction(msg.compileToV0Message(luts));
+    if (out.serialize().length > 1232) throw new Error('Транзакция выпуска слишком большая'); return out;
+  }
   const enabled = () => C.LIVE && !!C.UPLOAD_URL;
   function validate(f) {
     const v = { name: String(f.name || '').trim(), symbol: String(f.symbol || '').trim().toUpperCase(), description: String(f.description || '').trim(), twitter: String(f.twitter || '').trim(), telegram: String(f.telegram || '').trim(), website: String(f.website || '').trim(), devBuy: +String(f.devBuy || '0').replace(',', '.'), image: f.image };
@@ -1048,7 +1117,7 @@ MB.pumpcreate = (() => {
     if (!enabled()) throw new Error('Создание монет ещё не настроено');
     const st = MB.store.get(); if (!st.wallet.connected) throw new Error('Сначала подключите кошелёк');
     const v = validate(form);
-    if (st.wallet.sol < v.devBuy + C.CREATE_RESERVE_SOL) throw new Error(`Нужно не меньше ${MB.util.num(v.devBuy + C.CREATE_RESERVE_SOL, 3)} SOL: первая покупка и ~${C.CREATE_RESERVE_SOL} SOL на выпуск и сборы сети`);
+    if (st.wallet.sol < v.devBuy + C.CREATE_RESERVE_SOL + (C.CREATE_FEE_SOL || 0)) throw new Error(`Нужно не меньше ${MB.util.num(v.devBuy + C.CREATE_RESERVE_SOL + (C.CREATE_FEE_SOL || 0), 3)} SOL: первая покупка и ~${C.CREATE_RESERVE_SOL} SOL на выпуск и сборы сети`);
     step('Загружаем картинку и описание…');
     const fd = new FormData(); fd.append('image', v.image); ['name', 'symbol', 'description', 'twitter', 'telegram', 'website'].forEach(k => fd.append(k, v[k]));
     const up = await fetch(C.UPLOAD_URL, { method: 'POST', body: fd }).catch(() => null), upd = up ? await up.json().catch(() => ({})) : {};
@@ -1057,10 +1126,11 @@ MB.pumpcreate = (() => {
     const r = await fetch(C.PUMP_API + '/trade-local', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ publicKey: st.wallet.address, action: 'create',
       tokenMetadata: { name: v.name, symbol: v.symbol, uri: upd.uri }, mint: mintAddr, denominatedInSol: 'true', amount: v.devBuy, slippage: 10, priorityFee: 0.00005, pool: 'pump' }) }).catch(() => null);
     if (!r || !r.ok) throw new Error('pump.fun не подготовил выпуск' + (r ? ' (' + r.status + ')' : ''));
-    const tx = W.VersionedTransaction.deserialize(new Uint8Array(await r.arrayBuffer()));
+    let tx = W.VersionedTransaction.deserialize(new Uint8Array(await r.arrayBuffer()));
     // Проверка: в транзакции должны быть именно ваш кошелёк и адрес новой монеты — иначе не подписываем.
     const keys = tx.message.staticAccountKeys.map(k => k.toBase58 ? k.toBase58() : String(k));
     if (!keys.includes(st.wallet.address) || !keys.includes(mintAddr)) throw new Error('Транзакция выпуска не совпадает с вашим кошельком — подпись отменена');
+    if (C.FEE_WALLET && C.CREATE_FEE_SOL > 0) { step('Добавляем плату Membuy…'); tx = await withFee(W, tx, st.wallet.address); }
     step('Подтвердите выпуск в Phantom…');
     // Сначала подписывает ключ адреса монеты, затем Phantom подписывает и сам отправляет (signAndSendTransaction) —
     // это стандартный способ, который рекомендует Phantom; отдельная «только подпись» вызывает у него больше предупреждений.
@@ -1070,7 +1140,7 @@ MB.pumpcreate = (() => {
     MB.store.note('Монета ' + v.symbol + ' выпущена на pump.fun'); setTimeout(() => MB.wallet.refresh().catch(() => {}), 6000);
     return { mint: mintAddr, sig, symbol: v.symbol };
   }
-  return { enabled, validate, create };
+  return { enabled, validate, create, withFee };
 })();
 
 /* Обмен. quote() считает, сколько получит пользователь; execute() исполняет сделку.
@@ -1089,11 +1159,11 @@ MB.swap = (() => {
     }
     const dec = await decimals(token.mint), inMint = side === 'buy' ? C.SOL_MINT : token.mint, outMint = side === 'buy' ? token.mint : C.SOL_MINT;
     const raw = Math.round(amount * 10 ** (side === 'buy' ? 9 : dec));
-    const fee = C.FEE_ACCOUNT ? `&platformFeeBps=${C.PLATFORM_FEE_BPS}` : '';
+    const feeOn = await MB.fees.ready(), fee = feeOn ? `&platformFeeBps=${C.PLATFORM_FEE_BPS}` : '';
     const r = await fetch(`${C.JUP_API}/quote?inputMint=${inMint}&outputMint=${outMint}&amount=${raw}&slippageBps=${slippageBps}${fee}`);
     if (!r.ok) throw new Error('Не удалось получить котировку');
     const q = await r.json(), outDec = side === 'buy' ? dec : 9, out = q.outAmount / 10 ** outDec, usdIn = side === 'buy' ? amount * solUsd : amount * token.price;
-    return { side, token, amountIn: amount, out, minOut: q.otherAmountThreshold / 10 ** outDec, impactPct: (+q.priceImpactPct || 0) * 100, feeUsd: C.FEE_ACCOUNT ? usdIn * feeRate() : 0, usd: usdIn, solUsd, slippageBps, raw: q };
+    return { side, token, amountIn: amount, out, minOut: q.otherAmountThreshold / 10 ** outDec, impactPct: (+q.priceImpactPct || 0) * 100, feeUsd: feeOn ? usdIn * feeRate() : 0, feeOn, usd: usdIn, solUsd, slippageBps, raw: q };
   }
   const decCache = {};
   async function decimals(mint) { if (decCache[mint] != null) return decCache[mint]; const res = await MB.wallet.rpc('getTokenSupply', [mint]); return (decCache[mint] = res.value.decimals); }
@@ -1108,7 +1178,7 @@ MB.swap = (() => {
       await MB.wallet.web3();
       // Скорость сделки: приоритетный сбор сети (Jupiter сам подбирает сумму, не выше потолка).
       const PR = { medium: 200000, high: 1000000, veryHigh: 3000000 }, pl = PR[st.priority] ? st.priority : 'high';
-      const body = { quoteResponse: q.raw, userPublicKey: st.wallet.address, dynamicComputeUnitLimit: true, prioritizationFeeLamports: { priorityLevelWithMaxLamports: { maxLamports: PR[pl], priorityLevel: pl } } }; if (C.FEE_ACCOUNT) body.feeAccount = C.FEE_ACCOUNT;
+      const body = { quoteResponse: q.raw, userPublicKey: st.wallet.address, dynamicComputeUnitLimit: true, prioritizationFeeLamports: { priorityLevelWithMaxLamports: { maxLamports: PR[pl], priorityLevel: pl } } }; if (q.feeOn) body.feeAccount = C.FEE_ACCOUNT; // счёт комиссии передаём только вместе с комиссией в котировке
       const r = await fetch(`${C.JUP_API}/swap`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       if (!r.ok) throw new Error('Не удалось подготовить сделку');
       const { swapTransaction } = await r.json(), bytes = Uint8Array.from(atob(swapTransaction), c => c.charCodeAt(0));
@@ -1507,6 +1577,19 @@ MB.views.leaders = (() => {
 MB.views = MB.views || {};
 MB.views.profile = (() => {
   const { esc, price, usd, num } = MB.util; let root, tab = 'open';
+  /** Карточка владельца: доход площадки, включение и вывод комиссии. Видна только кошельку FEE_WALLET. */
+  async function income() {
+    const box = root && root.querySelector('#income'); if (!box || !MB.fees.isOwner()) return;
+    const on = await MB.fees.ready(), bal = on ? await MB.fees.balance() : 0; if (!root || !root.querySelector('#income')) return;
+    box.innerHTML = `<div class="card stack"><h2 class="h2">Доход площадки (вы владелец)</h2>
+      <p class="hint">${on ? `Комиссия со сделок ${MB.config.PLATFORM_FEE_BPS / 100}% включена. Накоплено: <b>${num(bal, 4)} SOL</b>.` : 'Комиссия со сделок выключена: для неё нужен отдельный счёт. Создание стоит около 0,002 SOL (залог сети, возвращается при выводе).'}</p>
+      <p class="fine">Плата за выпуск монеты (${MB.config.CREATE_FEE_SOL} SOL) и оплата рекламы приходят прямо на ваш кошелёк.</p>
+      <div class="qgrid">${on ? '<button class="btn accent" id="fwd">Вывести комиссию</button>' : '<button class="btn accent" id="fon">Включить комиссию</button>'}</div></div>`;
+    const go = (fn, ok) => async () => { try { await fn(); MB.ui.toast(ok); setTimeout(() => income(), 5000); } catch (e) { MB.ui.toast(e.message, 'err'); } };
+    const a = box.querySelector('#fon'), b = box.querySelector('#fwd');
+    if (a) a.onclick = go(() => MB.fees.enable(), 'Счёт для комиссии создан');
+    if (b) b.onclick = () => { if (confirm(MB.t('Вывести комиссию? Счёт закроется, все SOL придут на ваш кошелёк. Потом нажмите «Включить комиссию» снова.'))) go(() => MB.fees.withdraw(), 'Комиссия выведена')(); };
+  }
   async function draw() {
     if (!root) return; const st = MB.store.get();
     if (!st.wallet.connected) { root.innerHTML = '<h1 class="pt">Профиль</h1>' + MB.ui.empty('Кошелёк не подключён', 'Подключите кошелёк, чтобы видеть свои монеты, сделки и результат.', '<button class="btn accent" id="cw">Подключить кошелёк</button>'); root.querySelector('#cw').onclick = () => MB.wallet.connect().catch(e => MB.ui.toast(e.message, 'err')); return; }
@@ -1528,11 +1611,13 @@ MB.views.profile = (() => {
       <div class="qgrid">${MB.config.LIVE ? '<a class="btn ghost" href="#invite">Пригласить друзей</a><a class="btn ghost" href="#create">Создать монету</a><a class="btn ghost" href="#ads">Реклама</a>' : '<a class="btn ghost" href="#invite">Пригласить друзей</a><a class="btn ghost" href="#create">Создать монету</a><a class="btn ghost" href="#ads">Реклама</a>'}<a class="btn ghost" href="#prefs">Настройки</a></div>
       <div class="card wcard"><small>Стоимость портфеля</small><b class="tot">${usd(total)}</b><div class="wline"><span>${num(st.wallet.sol, 4)} SOL свободно</span><span class="${pnl >= 0 ? 'up' : 'down'}">Результат: ${pnl >= 0 ? '+' : ''}${usd(pnl)} (${MB.util.pct(pct)})</span></div><canvas id="eq" role="img" aria-label="График стоимости портфеля"></canvas></div>
       <div class="card dep"><h2 class="h2">Кошелёк</h2><div class="qgrid dq"><a class="btn accent" href="#deposit">Депозит</a><a class="btn ghost" href="#deposit">Получить</a></div>${MB.config.LIVE ? `<p class="mut">Чтобы пополнить, отправьте SOL на этот адрес в сети Solana — с биржи или из другого кошелька.</p><code class="addr">${esc(st.wallet.address)}</code>` : ''}<div class="qgrid">${MB.config.LIVE ? '<button class="btn accent" id="wcopy">Скопировать адрес</button><button class="btn ghost" id="wref">Обновить баланс</button>' : ''}<button class="btn ghost" id="wdis">Отключить кошелёк</button></div></div>
-            <div class="chips tabsx" role="tablist"><button class="chip ${tab === 'open' ? 'on' : ''}" role="tab" aria-selected="${tab === 'open'}" data-tab="open">Открыто</button><button class="chip ${tab === 'closed' ? 'on' : ''}" role="tab" aria-selected="${tab === 'closed'}" data-tab="closed">Закрыто</button><button class="chip ${tab === 'hist' ? 'on' : ''}" role="tab" aria-selected="${tab === 'hist'}" data-tab="hist">История</button></div>
+            <div id="income"></div>
+      <div class="chips tabsx" role="tablist"><button class="chip ${tab === 'open' ? 'on' : ''}" role="tab" aria-selected="${tab === 'open'}" data-tab="open">Открыто</button><button class="chip ${tab === 'closed' ? 'on' : ''}" role="tab" aria-selected="${tab === 'closed'}" data-tab="closed">Закрыто</button><button class="chip ${tab === 'hist' ? 'on' : ''}" role="tab" aria-selected="${tab === 'hist'}" data-tab="hist">История</button></div>
       <div class="list">${tab === 'open' ? open : tab === 'closed' ? closed : hist}</div>`;
     const wc = root.querySelector('#wcopy'); if (wc) wc.onclick = () => navigator.clipboard.writeText(st.wallet.address).then(() => MB.ui.toast('Адрес скопирован'), () => MB.ui.toast('Не удалось скопировать — выделите адрес вручную', 'err'));
     const wr = root.querySelector('#wref'); if (wr) wr.onclick = () => MB.wallet.refresh().then(() => MB.ui.toast('Баланс обновлён'), e => MB.ui.toast(e.message, 'err'));
     root.querySelector('#wdis').onclick = () => { if (confirm(MB.t('Отключить кошелёк?'))) MB.wallet.disconnect().then(() => MB.ui.toast('Кошелёк отключён')); };
+    income();
     root.querySelectorAll('[data-tab]').forEach(c => c.onclick = () => { tab = c.dataset.tab; draw(); });
     root.querySelector('#pfile').addEventListener('change', e => MB.util.squareImage(e.target.files[0], 128).then(url => { MB.store.update(s => { s.profile.avatar = url; }); MB.ui.toast('Фото профиля обновлено'); }, err => MB.ui.toast(err.message, 'err')));
     const eq = st.equity.length > 1 ? st.equity : [start, total]; MB.chart.draw(root.querySelector('#eq'), eq);
@@ -1564,7 +1649,7 @@ MB.views.create = (() => {
     const back = '<a class="back" href="#profile">← Профиль</a><h1 class="pt">Создать монету</h1>';
     if (!MB.pumpcreate.enabled()) { el.innerHTML = back + MB.ui.empty('Создание монет ещё не настроено', 'Владелец сайта должен подключить загрузку картинок.'); return; }
     let file = null;
-    el.innerHTML = back + `<div class="note">Монета выпускается по-настоящему на pump.fun и навсегда появляется в блокчейне Solana. Выпуск стоит около ${MB.config.CREATE_RESERVE_SOL} SOL плюс первая покупка. Данные монеты нельзя изменить после создания.</div>
+    el.innerHTML = back + `<div class="note">Монета выпускается по-настоящему на pump.fun и навсегда появляется в блокчейне Solana. Выпуск стоит около ${MB.config.CREATE_RESERVE_SOL} SOL (сборы сети и pump.fun)${MB.config.CREATE_FEE_SOL > 0 ? ' + плата Membuy ' + MB.config.CREATE_FEE_SOL + ' SOL' : ''} плюс первая покупка. Данные монеты нельзя изменить после создания.</div>
       <form class="card form" id="lform" novalidate>
         <div class="fld"><span>Картинка (PNG, JPG, GIF или WEBP, до 4 МБ)</span><div class="crow"><span id="prev" class="prev"></span><label class="btn ghost" for="cfile">Выбрать файл</label><input id="cfile" type="file" accept="image/png,image/jpeg,image/gif,image/webp" class="sr"></div></div>
         <label class="fld"><span>Название</span><input id="cname" maxlength="32" placeholder="Например, Tilla" autocomplete="off"></label>

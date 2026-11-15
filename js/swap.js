@@ -14,11 +14,11 @@ MB.swap = (() => {
     }
     const dec = await decimals(token.mint), inMint = side === 'buy' ? C.SOL_MINT : token.mint, outMint = side === 'buy' ? token.mint : C.SOL_MINT;
     const raw = Math.round(amount * 10 ** (side === 'buy' ? 9 : dec));
-    const fee = C.FEE_ACCOUNT ? `&platformFeeBps=${C.PLATFORM_FEE_BPS}` : '';
+    const feeOn = await MB.fees.ready(), fee = feeOn ? `&platformFeeBps=${C.PLATFORM_FEE_BPS}` : '';
     const r = await fetch(`${C.JUP_API}/quote?inputMint=${inMint}&outputMint=${outMint}&amount=${raw}&slippageBps=${slippageBps}${fee}`);
     if (!r.ok) throw new Error('Не удалось получить котировку');
     const q = await r.json(), outDec = side === 'buy' ? dec : 9, out = q.outAmount / 10 ** outDec, usdIn = side === 'buy' ? amount * solUsd : amount * token.price;
-    return { side, token, amountIn: amount, out, minOut: q.otherAmountThreshold / 10 ** outDec, impactPct: (+q.priceImpactPct || 0) * 100, feeUsd: C.FEE_ACCOUNT ? usdIn * feeRate() : 0, usd: usdIn, solUsd, slippageBps, raw: q };
+    return { side, token, amountIn: amount, out, minOut: q.otherAmountThreshold / 10 ** outDec, impactPct: (+q.priceImpactPct || 0) * 100, feeUsd: feeOn ? usdIn * feeRate() : 0, feeOn, usd: usdIn, solUsd, slippageBps, raw: q };
   }
   const decCache = {};
   async function decimals(mint) { if (decCache[mint] != null) return decCache[mint]; const res = await MB.wallet.rpc('getTokenSupply', [mint]); return (decCache[mint] = res.value.decimals); }
@@ -33,7 +33,7 @@ MB.swap = (() => {
       await MB.wallet.web3();
       // Скорость сделки: приоритетный сбор сети (Jupiter сам подбирает сумму, не выше потолка).
       const PR = { medium: 200000, high: 1000000, veryHigh: 3000000 }, pl = PR[st.priority] ? st.priority : 'high';
-      const body = { quoteResponse: q.raw, userPublicKey: st.wallet.address, dynamicComputeUnitLimit: true, prioritizationFeeLamports: { priorityLevelWithMaxLamports: { maxLamports: PR[pl], priorityLevel: pl } } }; if (C.FEE_ACCOUNT) body.feeAccount = C.FEE_ACCOUNT;
+      const body = { quoteResponse: q.raw, userPublicKey: st.wallet.address, dynamicComputeUnitLimit: true, prioritizationFeeLamports: { priorityLevelWithMaxLamports: { maxLamports: PR[pl], priorityLevel: pl } } }; if (q.feeOn) body.feeAccount = C.FEE_ACCOUNT; // счёт комиссии передаём только вместе с комиссией в котировке
       const r = await fetch(`${C.JUP_API}/swap`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       if (!r.ok) throw new Error('Не удалось подготовить сделку');
       const { swapTransaction } = await r.json(), bytes = Uint8Array.from(atob(swapTransaction), c => c.charCodeAt(0));

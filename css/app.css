@@ -221,3 +221,6 @@ footer .langs{margin-bottom:12px}
 .social{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
 .soc{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);color:var(--text);font-weight:700;font-size:14px}
 .soc:hover{border-color:var(--accent)}
+.recent{margin-bottom:12px}.recent .rrow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px}
+.recent .row{background:none;border:0;padding:8px 0}.recent .x{background:none;border:0;color:var(--muted);font-size:22px;cursor:pointer;padding:4px 8px}
+a.act{color:var(--muted);font-size:14px;font-weight:600}

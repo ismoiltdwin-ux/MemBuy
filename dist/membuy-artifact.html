@@ -497,6 +497,8 @@ MB.i18n = (() => {
     "Установите расширение Phantom для браузера и обновите страницу.": ["Install the Phantom browser extension and reload the page.", ""],
     "Если Phantom не открылся: скопируйте ссылку, откройте приложение Phantom → внизу значок 🔍 (браузер) → вставьте ссылку.": ["If Phantom did not open: copy the link, open the Phantom app → tap 🔍 (browser) at the bottom → paste the link.", ""],
     "Скопируйте ссылку": ["Copy the link", ""],
+    "Создать ещё монету": ["Create another coin", ""],
+    "Отправлено в сеть…": ["Sent to the network…", ""],
     'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
     'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
     'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
@@ -1019,10 +1021,10 @@ MB.adchain = (() => {
 /* Выпуск настоящей монеты на pump.fun (живой режим).
    1. Картинка и описание уходят на наш сервер-посредник (config.UPLOAD_URL), он кладёт их в IPFS и возвращает адрес описания.
    2. PumpPortal собирает транзакцию выпуска (+ первая покупка автором).
-   3. Подписывают двое: пользователь в Phantom и одноразовый ключ адреса новой монеты (создаётся в браузере и сразу забывается).
-   4. Транзакция отправляется в сеть через узел Solana (config.RPC_URL). */
+   3. Подписывают двое: одноразовый ключ адреса новой монеты (создаётся в браузере и сразу забывается) и пользователь в Phantom.
+   4. Phantom сам отправляет транзакцию в сеть. */
 MB.pumpcreate = (() => {
-  const C = MB.config, b64 = bytes => { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); };
+  const C = MB.config;
   const enabled = () => C.LIVE && !!C.UPLOAD_URL;
   function validate(f) {
     const v = { name: String(f.name || '').trim(), symbol: String(f.symbol || '').trim().toUpperCase(), description: String(f.description || '').trim(), twitter: String(f.twitter || '').trim(), telegram: String(f.telegram || '').trim(), website: String(f.website || '').trim(), devBuy: +String(f.devBuy || '0').replace(',', '.'), image: f.image };
@@ -1054,10 +1056,11 @@ MB.pumpcreate = (() => {
     const keys = tx.message.staticAccountKeys.map(k => k.toBase58 ? k.toBase58() : String(k));
     if (!keys.includes(st.wallet.address) || !keys.includes(mintAddr)) throw new Error('Транзакция выпуска не совпадает с вашим кошельком — подпись отменена');
     step('Подтвердите выпуск в Phantom…');
-    let signed; try { signed = await MB.wallet.provider().signTransaction(tx); } catch (e) { throw MB.wallet.rejected(e); }
-    signed.sign([mint]); // вторая подпись — ключ адреса монеты (Phantom подписал первым, поэтому его изменения не ломают подпись)
-    step('Отправляем в сеть…');
-    const sig = await MB.wallet.rpc('sendTransaction', [b64(signed.serialize()), { encoding: 'base64', maxRetries: 3 }]);
+    // Сначала подписывает ключ адреса монеты, затем Phantom подписывает и сам отправляет (signAndSendTransaction) —
+    // это стандартный способ, который рекомендует Phantom; отдельная «только подпись» вызывает у него больше предупреждений.
+    tx.sign([mint]);
+    const { signature: sig } = await MB.wallet.send(tx);
+    step('Отправлено в сеть…');
     MB.store.note('Монета ' + v.symbol + ' выпущена на pump.fun'); setTimeout(() => MB.wallet.refresh().catch(() => {}), 6000);
     return { mint: mintAddr, sig, symbol: v.symbol };
   }
@@ -1574,9 +1577,10 @@ MB.views.create = (() => {
       const val = id => el.querySelector('#' + id).value;
       try { if (!MB.store.get().wallet.connected) await MB.wallet.connect(); b.disabled = true;
         const res = await MB.pumpcreate.create({ image: file, name: val('cname'), symbol: val('csym'), description: val('cdesc'), twitter: val('ctw'), telegram: val('ctg'), website: val('cweb'), devBuy: val('cbuy') }, t => stat(t));
-        stat('Монета выпущена', 'ok'); MB.ui.toast('Монета ' + res.symbol + ' выпущена');
+        stat('', ''); el.querySelector('#lform').hidden = true; el.querySelector('.note').hidden = true; MB.ui.toast('Монета ' + res.symbol + ' выпущена');
         el.querySelector('#cdone').innerHTML = `<div class="card stack"><h2 class="h2">Монета ${esc(res.symbol)} выпущена</h2><p class="hint">Адрес монеты: <code class="addr">${esc(res.mint)}</code>В списках Membuy она появится через несколько минут — когда её увидит DexScreener.</p>
-          <div class="qgrid"><a class="btn accent" href="https://pump.fun/coin/${esc(res.mint)}" target="_blank" rel="noopener">Открыть на pump.fun</a><a class="btn ghost" href="https://solscan.io/tx/${esc(res.sig)}" target="_blank" rel="noopener">Транзакция</a><a class="btn ghost" href="#t-${esc(res.mint)}">Открыть в Membuy</a></div></div>`;
+          <div class="qgrid"><a class="btn accent" href="https://pump.fun/coin/${esc(res.mint)}" target="_blank" rel="noopener">Открыть на pump.fun</a><a class="btn ghost" href="https://solscan.io/tx/${esc(res.sig)}" target="_blank" rel="noopener">Транзакция</a><a class="btn ghost" href="#t-${esc(res.mint)}">Открыть в Membuy</a><button class="btn ghost" id="cagain">Создать ещё монету</button></div></div>`;
+        el.querySelector('#cagain').onclick = () => liveMount(el); window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (err) { stat(err.message, 'err'); MB.ui.toast(err.message, 'err'); } finally { b.disabled = false; } });
   }
   return {

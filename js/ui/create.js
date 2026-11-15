@@ -41,9 +41,10 @@ MB.views.create = (() => {
       const val = id => el.querySelector('#' + id).value;
       try { if (!MB.store.get().wallet.connected) await MB.wallet.connect(); b.disabled = true;
         const res = await MB.pumpcreate.create({ image: file, name: val('cname'), symbol: val('csym'), description: val('cdesc'), twitter: val('ctw'), telegram: val('ctg'), website: val('cweb'), devBuy: val('cbuy') }, t => stat(t));
-        stat('Монета выпущена', 'ok'); MB.ui.toast('Монета ' + res.symbol + ' выпущена');
+        stat('', ''); el.querySelector('#lform').hidden = true; el.querySelector('.note').hidden = true; MB.ui.toast('Монета ' + res.symbol + ' выпущена');
         el.querySelector('#cdone').innerHTML = `<div class="card stack"><h2 class="h2">Монета ${esc(res.symbol)} выпущена</h2><p class="hint">Адрес монеты: <code class="addr">${esc(res.mint)}</code>В списках Membuy она появится через несколько минут — когда её увидит DexScreener.</p>
-          <div class="qgrid"><a class="btn accent" href="https://pump.fun/coin/${esc(res.mint)}" target="_blank" rel="noopener">Открыть на pump.fun</a><a class="btn ghost" href="https://solscan.io/tx/${esc(res.sig)}" target="_blank" rel="noopener">Транзакция</a><a class="btn ghost" href="#t-${esc(res.mint)}">Открыть в Membuy</a></div></div>`;
+          <div class="qgrid"><a class="btn accent" href="https://pump.fun/coin/${esc(res.mint)}" target="_blank" rel="noopener">Открыть на pump.fun</a><a class="btn ghost" href="https://solscan.io/tx/${esc(res.sig)}" target="_blank" rel="noopener">Транзакция</a><a class="btn ghost" href="#t-${esc(res.mint)}">Открыть в Membuy</a><button class="btn ghost" id="cagain">Создать ещё монету</button></div></div>`;
+        el.querySelector('#cagain').onclick = () => liveMount(el); window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (err) { stat(err.message, 'err'); MB.ui.toast(err.message, 'err'); } finally { b.disabled = false; } });
   }
   return {

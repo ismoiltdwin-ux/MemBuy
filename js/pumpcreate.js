@@ -1,10 +1,10 @@
 /* Выпуск настоящей монеты на pump.fun (живой режим).
    1. Картинка и описание уходят на наш сервер-посредник (config.UPLOAD_URL), он кладёт их в IPFS и возвращает адрес описания.
    2. PumpPortal собирает транзакцию выпуска (+ первая покупка автором).
-   3. Подписывают двое: пользователь в Phantom и одноразовый ключ адреса новой монеты (создаётся в браузере и сразу забывается).
-   4. Транзакция отправляется в сеть через узел Solana (config.RPC_URL). */
+   3. Подписывают двое: одноразовый ключ адреса новой монеты (создаётся в браузере и сразу забывается) и пользователь в Phantom.
+   4. Phantom сам отправляет транзакцию в сеть. */
 MB.pumpcreate = (() => {
-  const C = MB.config, b64 = bytes => { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); };
+  const C = MB.config;
   const enabled = () => C.LIVE && !!C.UPLOAD_URL;
   function validate(f) {
     const v = { name: String(f.name || '').trim(), symbol: String(f.symbol || '').trim().toUpperCase(), description: String(f.description || '').trim(), twitter: String(f.twitter || '').trim(), telegram: String(f.telegram || '').trim(), website: String(f.website || '').trim(), devBuy: +String(f.devBuy || '0').replace(',', '.'), image: f.image };
@@ -36,10 +36,11 @@ MB.pumpcreate = (() => {
     const keys = tx.message.staticAccountKeys.map(k => k.toBase58 ? k.toBase58() : String(k));
     if (!keys.includes(st.wallet.address) || !keys.includes(mintAddr)) throw new Error('Транзакция выпуска не совпадает с вашим кошельком — подпись отменена');
     step('Подтвердите выпуск в Phantom…');
-    let signed; try { signed = await MB.wallet.provider().signTransaction(tx); } catch (e) { throw MB.wallet.rejected(e); }
-    signed.sign([mint]); // вторая подпись — ключ адреса монеты (Phantom подписал первым, поэтому его изменения не ломают подпись)
-    step('Отправляем в сеть…');
-    const sig = await MB.wallet.rpc('sendTransaction', [b64(signed.serialize()), { encoding: 'base64', maxRetries: 3 }]);
+    // Сначала подписывает ключ адреса монеты, затем Phantom подписывает и сам отправляет (signAndSendTransaction) —
+    // это стандартный способ, который рекомендует Phantom; отдельная «только подпись» вызывает у него больше предупреждений.
+    tx.sign([mint]);
+    const { signature: sig } = await MB.wallet.send(tx);
+    step('Отправлено в сеть…');
     MB.store.note('Монета ' + v.symbol + ' выпущена на pump.fun'); setTimeout(() => MB.wallet.refresh().catch(() => {}), 6000);
     return { mint: mintAddr, sig, symbol: v.symbol };
   }

@@ -259,7 +259,8 @@ MB.config = {
   GECKO_API: 'https://api.geckoterminal.com/api/v2',
   WEB3_CDN: 'https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js',
   ADS_WALLET: '7gGoEh28GwkDLS8ABbGRpdJkQz78kpRBy3HrzRmBQ8PV',               // live: адрес вашего кошелька Phantom — сюда приходит оплата рекламы, с него вы одобряете объявления (пусто = площадка выключена)
-  ADS_SOL_PER_DAY: 0.05,
+  ADS_SOL_PER_DAY: 0.05,        // старый тариф: нужен только для объявлений, оплаченных до перехода на часы
+  ADS_PLANS: [{ id: '1h', hours: 1, usd: 10 }, { id: '5h', hours: 5, usd: 30 }, { id: '24h', hours: 24, sol: 1 }], // тарифы рекламы: в $ (пересчёт в SOL по курсу при оплате) или в SOL
   UPLOAD_URL: 'https://membuy-upload.ismoiltd-win.workers.dev',               // live: адрес сервера-посредника Cloudflare для картинок монет (пусто = создание монет выключено)
   PUMP_API: 'https://pumpportal.fun/api',
   CREATE_RESERVE_SOL: 0.03,     // live: запас SOL на выпуск монеты и сборы сети        // live: цена рекламы в SOL за один день показа
@@ -518,6 +519,11 @@ MB.i18n = (() => {
     "Добавляем плату Membuy…": ["Adding the Membuy fee…", ""],
     "Не удалось подготовить выпуск: нет данных сети": ["Could not prepare the launch: network data unavailable", ""],
     "Транзакция выпуска слишком большая": ["The launch transaction is too large", ""],
+    "Срок показа": ["Duration", ""],
+    "Выберите срок показа": ["Choose a duration", ""],
+    "24 ч": ["24h", ""],
+    "Покажите свой проект трейдерам Membuy. От $10 в час.": ["Show your project to Membuy traders. From $10 an hour.", ""],
+    "Оплата в SOL уходит напрямую владельцу Membuy. Объявление начинает показываться всем после проверки, оплаченное время считается с момента одобрения. Если объявление отклонят, владелец возвращает оплату.": ["Payment in SOL goes directly to the Membuy owner. The ad is shown to everyone after review; the paid time starts when it is approved. If the ad is rejected, the owner refunds the payment.", ""],
     'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
     'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
     'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
@@ -552,6 +558,7 @@ MB.i18n = (() => {
     [/^Монета (.+) выпущена$/, 'Coin $1 launched', ''], [/^Монета (.+) выпущена на pump\.fun$/, 'Coin $1 launched on pump.fun', ''], [/^Нужно не меньше (.+) SOL: первая покупка и ~(.+) SOL на выпуск и сборы сети$/, 'You need at least $1 SOL: the initial buy plus ~$2 SOL for the launch and network fees', ''],
     [/^Монета выпускается по-настоящему на pump\.fun и навсегда появляется в блокчейне Solana\. Выпуск стоит около (.+) SOL плюс первая покупка\. Данные монеты нельзя изменить после создания\.$/, 'The coin is launched for real on pump.fun and stays on the Solana blockchain forever. Launching costs about $1 SOL plus the initial buy. Coin data cannot be changed after creation.', ''],
     [/^Комиссия со сделок (.+)% включена\. Накоплено: (.+)$/, 'Trading fee $1% is on. Collected: $2', ''], [/^Плата за выпуск монеты \((.+) SOL\) и оплата рекламы приходят прямо на ваш кошелёк\.$/, 'The coin launch fee ($1 SOL) and ad payments go straight to your wallet.', ''],
+    [/^(\d+) ч — (.+)$/, '$1h — $2', ''], [/^(.+) SOL · (\d+) ч · (.+)$/, '$1 SOL · $2h · $3', ''],
     [/^Куплено на (.+) · продано на (.+)$/, 'Bought for $1 · sold for $2', 'Харида шуд ба $1 · фурӯхта шуд ба $2'], [/^МК (.+)$/, 'MC $1', 'КБ $1'], [/^Об\. (.+)$/, 'Vol $1', 'Ҳаҷм $1'], [/^Сделок: (.+)$/, 'Txns: $1', 'Савдоҳо: $1'],
     [/^(\d+) мин$/, '$1m', '$1 дақ'], [/^(\d+) ч$/, '$1h', '$1 с'], [/^В демо пополнять не нужно: на учебном кошельке (\d+) условных SOL\.$/, 'No deposit needed in the demo: the practice wallet holds $1 play SOL.', 'Дар демо пур кардан лозим нест: дар ҳамёни омӯзишӣ $1 SOL-и шартӣ ҳаст.'],
     [/^Куплено (.+) за (.+)$/, 'Bought $1 for $2', 'Харида шуд: $1 ба $2'], [/^Продано (.+) за (.+)$/, 'Sold $1 for $2', 'Фурӯхта шуд: $1 ба $2'],
@@ -871,7 +878,7 @@ MB.ads = (() => {
   const PLACEMENTS = { feed: { name: 'В ленте', day: 5 }, market: { name: 'В списке монет', day: 8 } };
   const house = [
     { id: 'h1', title: 'Исмоил FX — курс Форекс', text: '15 уроков на таджикском: от первой свечи до плана торговли.', link: '', placement: 'any', house: true },
-    { id: 'h2', title: 'Здесь может быть ваша реклама', text: 'Покажите свой проект трейдерам Membuy. От $5 в день.', link: '#ads', placement: 'any', house: true },
+    { id: 'h2', title: 'Здесь может быть ваша реклама', text: (MB.config.LIVE ? 'Покажите свой проект трейдерам Membuy. От $10 в час.' : 'Покажите свой проект трейдерам Membuy. От $5 в день.'), link: '#ads', placement: 'any', house: true },
   ];
   const active = pl => S.get().campaigns.filter(c => c.status === 'active' && c.placement === pl && c.until > Date.now());
   const safe = url => /^https:\/\/[^\s"'<>]+$/i.test(url);
@@ -1008,16 +1015,18 @@ MB.adchain = (() => {
   const save = () => { try { localStorage.setItem(CKEY, JSON.stringify(cache)); } catch (e) { /* нет хранилища */ } };
   let ads = [], loadedAt = 0, loading = null;
   const enabled = () => C.LIVE && !!C.ADS_WALLET;
-  const priceSol = days => Math.round(days * C.ADS_SOL_PER_DAY * 1e9) / 1e9;
+  const planOf = id => (C.ADS_PLANS || []).find(p => p.id === id) || null;
+  /** Цена тарифа в SOL: фиксированная (sol) или пересчёт долларов по курсу SOL, с округлением вверх до 0,001. */
+  const priceSol = (plan, solUsd) => plan.sol ? plan.sol : Math.ceil(plan.usd / (solUsd || 1) * 1000) / 1000;
   const memos = s => String(s || '').split('; ').map(m => m.replace(/^\[\d+\]\s*/, ''));
 
-  function validate({ title, text, link, days }) {
-    title = String(title).trim(); text = String(text).trim(); link = String(link).trim(); days = Math.round(+days);
+  function validate({ title, text, link, plan }) {
+    title = String(title).trim(); text = String(text).trim(); link = String(link).trim();
     if (title.length < 3 || title.length > 40) throw new Error('Заголовок: от 3 до 40 знаков');
     if (text.length < 5 || text.length > 90) throw new Error('Текст: от 5 до 90 знаков');
     if (!MB.ads.safe(link) || link.length > 120) throw new Error('Ссылка должна начинаться с https:// (до 120 знаков)');
-    if (!(days >= 1 && days <= 30)) throw new Error('Срок: от 1 до 30 дней');
-    return { title, text, link, days };
+    const p = typeof plan === 'object' ? plan : planOf(plan); if (!p) throw new Error('Выберите срок показа');
+    return { title, text, link, plan: p };
   }
 
   /** Отправляет транзакцию с переводом (если lamports > 0) и заметкой. Подписывает Phantom. */
@@ -1042,8 +1051,13 @@ MB.adchain = (() => {
     if (kind === 'ad' && memo.startsWith('MB1|')) {
       const pay = ins.find(i => i.program === 'system' && i.parsed && i.parsed.type === 'transfer' && i.parsed.info.destination === C.ADS_WALLET);
       let ad = null; try { ad = JSON.parse(memo.slice(4)); } catch (e) { ad = null; }
-      if (pay && ad) { const v = (() => { try { return validate({ title: ad.t, text: ad.x, link: ad.l, days: ad.d }); } catch (e) { return null; } })();
-        if (v) out = Object.assign(v, { kind: 'ad', sig, payer: pay.parsed.info.source, lamports: pay.parsed.info.lamports, ts: tx.blockTime }); }
+      if (pay && ad) {
+        // Новый формат: тариф p и заявленная сумма s (лампорты). Старый: d дней по ADS_SOL_PER_DAY.
+        const legacy = !ad.p && ad.d >= 1 && ad.d <= 30, plan = legacy ? { id: ad.d + 'd', hours: ad.d * 24, sol: ad.d * C.ADS_SOL_PER_DAY } : planOf(ad.p);
+        const v = (() => { try { return plan && validate({ title: ad.t, text: ad.x, link: ad.l, plan }); } catch (e) { return null; } })();
+        // Для тарифа в $ сумма s не может быть ниже цены при курсе SOL $1000 — отсекает заявки «на 1 лампорт».
+        const need = plan && (plan.sol ? Math.round(plan.sol * 1e9) : Math.max(Math.round(plan.usd / 1000 * 1e9), Math.round(+ad.s || 0)));
+        if (v) out = Object.assign(v, { kind: 'ad', sig, payer: pay.parsed.info.source, lamports: pay.parsed.info.lamports, ts: tx.blockTime, hours: plan.hours, need }); }
     } else if ((kind === 'ok' || kind === 'no') && keys.some(k => k.signer && k.key === C.ADS_WALLET)) {
       out = { kind, target: memo.slice(5), ts: tx.blockTime };
     }
@@ -1062,9 +1076,9 @@ MB.adchain = (() => {
       const recs = []; for (const [sig, k] of found) { const r = await verify(sig, k).catch(() => null); if (r && r.kind !== 'bad') recs.push(r); }
       const decide = {}; recs.filter(r => r.kind !== 'ad').sort((a, b) => a.ts - b.ts).forEach(r => { decide[r.target] = r; });
       const now = Date.now() / 1000;
-      ads = recs.filter(r => r.kind === 'ad').map(a => { const d = decide[a.sig], paidDays = Math.min(a.days, Math.floor(a.lamports / 1e9 / C.ADS_SOL_PER_DAY + 1e-6));
-        const status = !d ? 'pending' : d.kind === 'no' ? 'rejected' : paidDays < 1 ? 'underpaid' : d.ts + paidDays * 86400 > now ? 'active' : 'ended';
-        return Object.assign({}, a, { id: 'ch-' + a.sig.slice(0, 12), status, until: d && d.kind === 'ok' ? (d.ts + paidDays * 86400) * 1000 : 0, paidDays }); })
+      ads = recs.filter(r => r.kind === 'ad').map(a => { const d = decide[a.sig], paid = a.need > 0 && a.lamports >= a.need * 0.999, end = d ? d.ts + a.hours * 3600 : 0;
+        const status = !d ? 'pending' : d.kind === 'no' ? 'rejected' : !paid ? 'underpaid' : end > now ? 'active' : 'ended';
+        return Object.assign({}, a, { id: 'ch-' + a.sig.slice(0, 12), status, until: d && d.kind === 'ok' ? end * 1000 : 0 }); })
         .sort((x, y) => y.ts - x.ts);
       loadedAt = Date.now(); return ads;
     })().finally(() => { loading = null; });
@@ -1072,11 +1086,12 @@ MB.adchain = (() => {
   }
 
   return {
-    enabled, priceSol, validate, load,
+    enabled, priceSol, planOf, validate, load,
     active: () => ads.filter(a => a.status === 'active'),
     /** Рекламодатель: оплатить и отправить объявление на проверку. */
-    async buy(form) { if (!enabled()) throw new Error('Рекламная площадка ещё не настроена'); const v = validate(form); const memo = 'MB1|' + JSON.stringify({ t: v.title, x: v.text, l: v.link, d: v.days });
-      return send(memo, Math.round(priceSol(v.days) * 1e9)); },
+    async buy(form) { if (!enabled()) throw new Error('Рекламная площадка ещё не настроена'); const v = validate(form); const lamports = Math.round(priceSol(v.plan, await MB.data.solUsd()) * 1e9);
+      const memo = 'MB1|' + JSON.stringify({ t: v.title, x: v.text, l: v.link, p: v.plan.id, s: lamports });
+      return send(memo, lamports); },
     /** Владелец: одобрить или отклонить объявление (запись в блокчейне с его подписью). */
     async decide(sig, ok) { if (MB.store.get().wallet.address !== C.ADS_WALLET) throw new Error('Одобрять может только владелец площадки'); return send((ok ? 'MBOK|' : 'MBNO|') + sig, 0); },
     isOwner: () => enabled() && MB.store.get().wallet.connected && MB.store.get().wallet.address === C.ADS_WALLET,
@@ -1707,14 +1722,18 @@ MB.views.ads = (() => {
   }
   /* ---------- Живой режим: оплата SOL на кошелёк площадки, объявления и модерация в блокчейне ---------- */
   const ST = { pending: 'На проверке', active: 'Показывается', ended: 'Срок закончился', rejected: 'Отклонено', underpaid: 'Оплаты не хватает' };
-  async function livePrice() { const d = Math.max(1, Math.min(30, Math.round(+val('adays') || 1))), sol = MB.adchain.priceSol(d), su = await MB.data.solUsd().catch(() => 0); if (!root) return;
+  const hoursTxt = h => h % 24 === 0 && h >= 24 ? (h / 24 === 1 ? '24 ч' : h / 24 + ' дн.') : h + ' ч';
+  const planTxt = p => p.sol ? num(p.sol, 3) + ' SOL' : '$' + p.usd;
+  async function livePrice() { const plan = MB.adchain.planOf(val('aplan')), su = await MB.data.solUsd().catch(() => 0); if (!root || !plan) return; const sol = MB.adchain.priceSol(plan, su);
     root.querySelector('#aprice').textContent = num(sol, 3) + ' SOL' + (su ? ' ≈ ' + usd(sol * su) : '');
     root.querySelector('#aprev').innerHTML = `<div class="row ad"><span class="adtag">Реклама</span><span class="nm"><b>${esc(val('atitle') || 'Заголовок')}</b><small>${esc(val('atext') || 'Текст объявления')}</small></span></div>`; }
-  const adRow = (a, owner) => `<div class="row camp"><span class="nm"><b>${esc(a.title)}</b><small class="ugc">${esc(a.text)}</small><small class="ugc">${esc(a.link)}</small><small>${num(a.lamports / 1e9, 3)} SOL · ${a.days} дн. · ${new Date(a.ts * 1000).toLocaleDateString(MB.i18n.locale())}</small></span>
-    <span class="pr"><span class="tag ${a.status === 'active' ? 'buy' : a.status === 'rejected' ? 'sell' : ''}">${ST[a.status]}</span>${a.status === 'active' ? `<small>до ${new Date(a.until).toLocaleDateString(MB.i18n.locale())}</small>` : ''}
+  let solNow = 0;
+  const adRow = (a, owner) => `<div class="row camp"><span class="nm"><b>${esc(a.title)}</b><small class="ugc">${esc(a.text)}</small><small class="ugc">${esc(a.link)}</small><small>${num(a.lamports / 1e9, 3)} SOL${owner && solNow ? ' ≈ ' + usd(a.lamports / 1e9 * solNow) : ''} · ${hoursTxt(a.hours)} · ${new Date(a.ts * 1000).toLocaleDateString(MB.i18n.locale())}</small></span>
+    <span class="pr"><span class="tag ${a.status === 'active' ? 'buy' : a.status === 'rejected' ? 'sell' : ''}">${ST[a.status]}</span>${a.status === 'active' ? `<small>до ${new Date(a.until).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</small>` : ''}
     ${owner && a.status === 'pending' ? `<button class="btn accent" data-ok="${esc(a.sig)}">Одобрить</button><button class="btn ghost" data-no="${esc(a.sig)}">Отклонить</button>` : ''}</span></div>`;
   async function liveLists(force) {
     const box = root && root.querySelector('#camps'); if (!box) return; const st = MB.store.get(), owner = MB.adchain.isOwner();
+    solNow = await MB.data.solUsd().catch(() => 0);
     let all; try { all = await MB.adchain.load(force); } catch (e) { box.innerHTML = MB.ui.empty('Не удалось загрузить объявления', e.message); return; } if (!root) return;
     const mine = all.filter(a => st.wallet.connected && a.payer === st.wallet.address);
     box.innerHTML = !st.wallet.connected ? MB.ui.empty('Кошелёк не подключён', 'Подключите кошелёк, чтобы видеть свои объявления.') : mine.length ? mine.map(a => adRow(a, false)).join('') : MB.ui.empty('Объявлений пока нет', 'Оплаченные объявления появятся здесь.');
@@ -1727,22 +1746,22 @@ MB.views.ads = (() => {
   function liveMount(el) {
     if (!MB.adchain.enabled()) { el.innerHTML = '<a class="back" href="#profile">← Профиль</a><h1 class="pt">Реклама</h1>' + MB.ui.empty('Рекламная площадка ещё не настроена', 'Владелец сайта должен указать свой кошелёк для оплаты рекламы.'); return; }
     el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Реклама</h1>
-      <div class="note">Оплата в SOL уходит напрямую владельцу Membuy. Объявление начинает показываться всем после проверки, срок считается с момента одобрения. Если объявление отклонят, владелец возвращает оплату.</div>
-      <dl class="stats"><div><dt>Место показа</dt><dd>В списке монет</dd></div><div><dt>Цена за день</dt><dd>${num(MB.config.ADS_SOL_PER_DAY, 3)} SOL</dd></div></dl>
+      <div class="note">Оплата в SOL уходит напрямую владельцу Membuy. Объявление начинает показываться всем после проверки, оплаченное время считается с момента одобрения. Если объявление отклонят, владелец возвращает оплату.</div>
+      <dl class="stats"><div><dt>Место показа</dt><dd>В списке монет</dd></div>${MB.config.ADS_PLANS.map(p => `<div><dt>${hoursTxt(p.hours)}</dt><dd>${planTxt(p)}</dd></div>`).join('')}</dl>
       <form class="card form" id="aform" novalidate><h2 class="h2">Новое объявление</h2>
         <label class="fld"><span>Заголовок (до 40 знаков)</span><input id="atitle" maxlength="40" autocomplete="off"></label>
         <label class="fld"><span>Текст (до 90 знаков)</span><input id="atext" maxlength="90" autocomplete="off"></label>
         <label class="fld"><span>Ссылка</span><input id="alink" maxlength="120" placeholder="https://..." autocomplete="off"></label>
-        <label class="fld"><span>Дней (1–30)</span><input id="adays" inputmode="numeric" value="3" autocomplete="off"></label>
+        <label class="fld"><span>Срок показа</span><select id="aplan">${MB.config.ADS_PLANS.map((p, i) => `<option value="${p.id}" ${i === 0 ? 'selected' : ''}>${hoursTxt(p.hours)} — ${planTxt(p)}</option>`).join('')}</select></label>
         <div class="fld"><span>Так объявление увидят пользователи</span><div id="aprev"></div></div>
         <div class="quote"><div><dt>К оплате</dt><dd><b id="aprice">—</b></dd></div></div>
         <button class="btn big accent" type="submit" id="apay">Оплатить и отправить на проверку</button>
         <p class="fine">Текст объявления записывается в блокчейн Solana вместе с оплатой и виден всем. Запрещены обещания дохода, обман, чужие товарные знаки и ссылки на сбор ключей или «удвоение» монет.</p></form>
       <div class="card" id="mod" hidden></div>
       <h2 class="h2">Мои объявления</h2><div class="list" id="camps"></div>`;
-    ['atitle', 'atext', 'adays'].forEach(id => el.querySelector('#' + id).addEventListener('input', livePrice));
+    ['atitle', 'atext', 'aplan'].forEach(id => el.querySelector('#' + id).addEventListener(id === 'aplan' ? 'change' : 'input', livePrice));
     el.querySelector('#aform').addEventListener('submit', async e => { e.preventDefault(); const b = el.querySelector('#apay'); if (b.disabled) return;
-      try { if (!MB.store.get().wallet.connected) await MB.wallet.connect(); b.disabled = true; await MB.adchain.buy({ title: val('atitle'), text: val('atext'), link: val('alink'), days: val('adays') });
+      try { if (!MB.store.get().wallet.connected) await MB.wallet.connect(); b.disabled = true; await MB.adchain.buy({ title: val('atitle'), text: val('atext'), link: val('alink'), plan: val('aplan') });
         MB.ui.toast('Оплачено. Объявление отправлено на проверку'); ['atitle', 'atext', 'alink'].forEach(id => { el.querySelector('#' + id).value = ''; }); livePrice(); setTimeout(() => liveLists(true), 4000); }
       catch (err) { MB.ui.toast(err.message, 'err'); } finally { if (root) b.disabled = false; } });
     el.addEventListener('click', async e => { const b = e.target.closest('[data-ok],[data-no]'); if (!b || b.disabled) return; b.disabled = true;

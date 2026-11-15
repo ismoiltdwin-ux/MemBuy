@@ -9,16 +9,18 @@ MB.adchain = (() => {
   const save = () => { try { localStorage.setItem(CKEY, JSON.stringify(cache)); } catch (e) { /* нет хранилища */ } };
   let ads = [], loadedAt = 0, loading = null;
   const enabled = () => C.LIVE && !!C.ADS_WALLET;
-  const priceSol = days => Math.round(days * C.ADS_SOL_PER_DAY * 1e9) / 1e9;
+  const planOf = id => (C.ADS_PLANS || []).find(p => p.id === id) || null;
+  /** Цена тарифа в SOL: фиксированная (sol) или пересчёт долларов по курсу SOL, с округлением вверх до 0,001. */
+  const priceSol = (plan, solUsd) => plan.sol ? plan.sol : Math.ceil(plan.usd / (solUsd || 1) * 1000) / 1000;
   const memos = s => String(s || '').split('; ').map(m => m.replace(/^\[\d+\]\s*/, ''));
 
-  function validate({ title, text, link, days }) {
-    title = String(title).trim(); text = String(text).trim(); link = String(link).trim(); days = Math.round(+days);
+  function validate({ title, text, link, plan }) {
+    title = String(title).trim(); text = String(text).trim(); link = String(link).trim();
     if (title.length < 3 || title.length > 40) throw new Error('Заголовок: от 3 до 40 знаков');
     if (text.length < 5 || text.length > 90) throw new Error('Текст: от 5 до 90 знаков');
     if (!MB.ads.safe(link) || link.length > 120) throw new Error('Ссылка должна начинаться с https:// (до 120 знаков)');
-    if (!(days >= 1 && days <= 30)) throw new Error('Срок: от 1 до 30 дней');
-    return { title, text, link, days };
+    const p = typeof plan === 'object' ? plan : planOf(plan); if (!p) throw new Error('Выберите срок показа');
+    return { title, text, link, plan: p };
   }
 
   /** Отправляет транзакцию с переводом (если lamports > 0) и заметкой. Подписывает Phantom. */
@@ -43,8 +45,13 @@ MB.adchain = (() => {
     if (kind === 'ad' && memo.startsWith('MB1|')) {
       const pay = ins.find(i => i.program === 'system' && i.parsed && i.parsed.type === 'transfer' && i.parsed.info.destination === C.ADS_WALLET);
       let ad = null; try { ad = JSON.parse(memo.slice(4)); } catch (e) { ad = null; }
-      if (pay && ad) { const v = (() => { try { return validate({ title: ad.t, text: ad.x, link: ad.l, days: ad.d }); } catch (e) { return null; } })();
-        if (v) out = Object.assign(v, { kind: 'ad', sig, payer: pay.parsed.info.source, lamports: pay.parsed.info.lamports, ts: tx.blockTime }); }
+      if (pay && ad) {
+        // Новый формат: тариф p и заявленная сумма s (лампорты). Старый: d дней по ADS_SOL_PER_DAY.
+        const legacy = !ad.p && ad.d >= 1 && ad.d <= 30, plan = legacy ? { id: ad.d + 'd', hours: ad.d * 24, sol: ad.d * C.ADS_SOL_PER_DAY } : planOf(ad.p);
+        const v = (() => { try { return plan && validate({ title: ad.t, text: ad.x, link: ad.l, plan }); } catch (e) { return null; } })();
+        // Для тарифа в $ сумма s не может быть ниже цены при курсе SOL $1000 — отсекает заявки «на 1 лампорт».
+        const need = plan && (plan.sol ? Math.round(plan.sol * 1e9) : Math.max(Math.round(plan.usd / 1000 * 1e9), Math.round(+ad.s || 0)));
+        if (v) out = Object.assign(v, { kind: 'ad', sig, payer: pay.parsed.info.source, lamports: pay.parsed.info.lamports, ts: tx.blockTime, hours: plan.hours, need }); }
     } else if ((kind === 'ok' || kind === 'no') && keys.some(k => k.signer && k.key === C.ADS_WALLET)) {
       out = { kind, target: memo.slice(5), ts: tx.blockTime };
     }
@@ -63,9 +70,9 @@ MB.adchain = (() => {
       const recs = []; for (const [sig, k] of found) { const r = await verify(sig, k).catch(() => null); if (r && r.kind !== 'bad') recs.push(r); }
       const decide = {}; recs.filter(r => r.kind !== 'ad').sort((a, b) => a.ts - b.ts).forEach(r => { decide[r.target] = r; });
       const now = Date.now() / 1000;
-      ads = recs.filter(r => r.kind === 'ad').map(a => { const d = decide[a.sig], paidDays = Math.min(a.days, Math.floor(a.lamports / 1e9 / C.ADS_SOL_PER_DAY + 1e-6));
-        const status = !d ? 'pending' : d.kind === 'no' ? 'rejected' : paidDays < 1 ? 'underpaid' : d.ts + paidDays * 86400 > now ? 'active' : 'ended';
-        return Object.assign({}, a, { id: 'ch-' + a.sig.slice(0, 12), status, until: d && d.kind === 'ok' ? (d.ts + paidDays * 86400) * 1000 : 0, paidDays }); })
+      ads = recs.filter(r => r.kind === 'ad').map(a => { const d = decide[a.sig], paid = a.need > 0 && a.lamports >= a.need * 0.999, end = d ? d.ts + a.hours * 3600 : 0;
+        const status = !d ? 'pending' : d.kind === 'no' ? 'rejected' : !paid ? 'underpaid' : end > now ? 'active' : 'ended';
+        return Object.assign({}, a, { id: 'ch-' + a.sig.slice(0, 12), status, until: d && d.kind === 'ok' ? end * 1000 : 0 }); })
         .sort((x, y) => y.ts - x.ts);
       loadedAt = Date.now(); return ads;
     })().finally(() => { loading = null; });
@@ -73,11 +80,12 @@ MB.adchain = (() => {
   }
 
   return {
-    enabled, priceSol, validate, load,
+    enabled, priceSol, planOf, validate, load,
     active: () => ads.filter(a => a.status === 'active'),
     /** Рекламодатель: оплатить и отправить объявление на проверку. */
-    async buy(form) { if (!enabled()) throw new Error('Рекламная площадка ещё не настроена'); const v = validate(form); const memo = 'MB1|' + JSON.stringify({ t: v.title, x: v.text, l: v.link, d: v.days });
-      return send(memo, Math.round(priceSol(v.days) * 1e9)); },
+    async buy(form) { if (!enabled()) throw new Error('Рекламная площадка ещё не настроена'); const v = validate(form); const lamports = Math.round(priceSol(v.plan, await MB.data.solUsd()) * 1e9);
+      const memo = 'MB1|' + JSON.stringify({ t: v.title, x: v.text, l: v.link, p: v.plan.id, s: lamports });
+      return send(memo, lamports); },
     /** Владелец: одобрить или отклонить объявление (запись в блокчейне с его подписью). */
     async decide(sig, ok) { if (MB.store.get().wallet.address !== C.ADS_WALLET) throw new Error('Одобрять может только владелец площадки'); return send((ok ? 'MBOK|' : 'MBNO|') + sig, 0); },
     isOwner: () => enabled() && MB.store.get().wallet.connected && MB.store.get().wallet.address === C.ADS_WALLET,

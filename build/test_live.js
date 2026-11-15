@@ -66,11 +66,13 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   const setOwner = () => p.evaluate(o => { MB.config.ADS_WALLET = o; }, OWNER);
   await p.goto(URL + '#profile'); await p.waitForTimeout(500); await p.evaluate(() => { MB.config.ADS_WALLET = ''; location.hash = 'ads'; }); await p.waitForTimeout(600); ok('реклама без кошелька площадки: «не настроена»', (await p.textContent('#view')).includes('не настроена'));
   await setOwner(); await p.evaluate(() => { location.hash = 'profile'; }); await p.waitForTimeout(300); await p.evaluate(() => { location.hash = 'ads'; }); await p.waitForTimeout(700);
-  ok('цена рекламы в SOL', (await p.textContent('#aprice')).includes('0,15') || (await p.textContent('#aprice')).includes('0.15'));
+  ok('тарифы: 1 ч — $10, 5 ч — $30, 24 ч — 1 SOL', await p.evaluate(() => [...document.querySelectorAll('#aplan option')].map(o => o.textContent).join('|')) === '1 ч — $10|5 ч — $30|24 ч — 1 SOL');
+  ok('цена 1 ч = $10 по курсу SOL $150 → 0,067 SOL', /0[,.]067 SOL/.test(await p.textContent('#aprice')));
+  await p.selectOption('#aplan', '24h'); await p.waitForTimeout(300); ok('цена 24 ч = 1 SOL', /^1 SOL/.test(await p.textContent('#aprice'))); await p.selectOption('#aplan', '1h'); await p.waitForTimeout(200);
   await p.fill('#atitle', 'Мой проект'); await p.fill('#atext', 'Лучший мемкоин недели на Solana'); await p.fill('#alink', 'javascript:alert(1)'); await p.click('#apay'); await p.waitForTimeout(400);
   ok('опасная ссылка не принимается', chain.length === 0);
   await p.fill('#alink', 'https://example.com/coin'); await p.click('#apay'); await p.waitForTimeout(600);
-  ok('оплата: перевод 0.15 SOL на кошелёк площадки + текст в заметке', chain.length === 1 && chain[0].lamports === 150000000 && chain[0].to === OWNER && chain[0].memo.startsWith('MB1|') && chain[0].memo.includes('example.com'));
+  ok('оплата: перевод 0.067 SOL ($10 за 1 ч) на кошелёк площадки + текст в заметке', chain.length === 1 && chain[0].lamports === 67000000 && chain[0].memo.includes('"p":"1h"') && chain[0].memo.includes('"s":67000000') && chain[0].to === OWNER && chain[0].memo.startsWith('MB1|') && chain[0].memo.includes('example.com'));
   chain.push({ sig: 'FAKEOK' + 'Y'.repeat(20), memo: 'MBOK|' + chain[0].sig, payer: 'Attacker1111111111111111111111111111111111', lamports: 1, time: Math.floor(Date.now() / 1000) });
   await p.evaluate(() => MB.adchain.load(true)); await p.waitForTimeout(300); await p.evaluate(() => { location.hash = 'profile'; }); await p.waitForTimeout(200); await p.evaluate(() => { location.hash = 'ads'; }); await p.waitForTimeout(700);
   ok('моё объявление «На проверке»', (await p.textContent('#camps')).includes('На проверке'));

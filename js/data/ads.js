@@ -4,7 +4,7 @@ MB.ads = (() => {
   const PLACEMENTS = { feed: { name: 'В ленте', day: 5 }, market: { name: 'В списке монет', day: 8 } };
   const house = [
     { id: 'h1', title: 'Исмоил FX — курс Форекс', text: '15 уроков на таджикском: от первой свечи до плана торговли.', link: '', placement: 'any', house: true },
-    { id: 'h2', title: 'Здесь может быть ваша реклама', text: 'Покажите свой проект трейдерам Membuy. От $5 в день.', link: '#ads', placement: 'any', house: true },
+    { id: 'h2', title: 'Здесь может быть ваша реклама', text: (MB.config.LIVE ? 'Покажите свой проект трейдерам Membuy. От $10 в час.' : 'Покажите свой проект трейдерам Membuy. От $5 в день.'), link: '#ads', placement: 'any', house: true },
   ];
   const active = pl => S.get().campaigns.filter(c => c.status === 'active' && c.placement === pl && c.until > Date.now());
   const safe = url => /^https:\/\/[^\s"'<>]+$/i.test(url);

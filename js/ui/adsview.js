@@ -11,14 +11,18 @@ MB.views.ads = (() => {
   }
   /* ---------- Живой режим: оплата SOL на кошелёк площадки, объявления и модерация в блокчейне ---------- */
   const ST = { pending: 'На проверке', active: 'Показывается', ended: 'Срок закончился', rejected: 'Отклонено', underpaid: 'Оплаты не хватает' };
-  async function livePrice() { const d = Math.max(1, Math.min(30, Math.round(+val('adays') || 1))), sol = MB.adchain.priceSol(d), su = await MB.data.solUsd().catch(() => 0); if (!root) return;
+  const hoursTxt = h => h % 24 === 0 && h >= 24 ? (h / 24 === 1 ? '24 ч' : h / 24 + ' дн.') : h + ' ч';
+  const planTxt = p => p.sol ? num(p.sol, 3) + ' SOL' : '$' + p.usd;
+  async function livePrice() { const plan = MB.adchain.planOf(val('aplan')), su = await MB.data.solUsd().catch(() => 0); if (!root || !plan) return; const sol = MB.adchain.priceSol(plan, su);
     root.querySelector('#aprice').textContent = num(sol, 3) + ' SOL' + (su ? ' ≈ ' + usd(sol * su) : '');
     root.querySelector('#aprev').innerHTML = `<div class="row ad"><span class="adtag">Реклама</span><span class="nm"><b>${esc(val('atitle') || 'Заголовок')}</b><small>${esc(val('atext') || 'Текст объявления')}</small></span></div>`; }
-  const adRow = (a, owner) => `<div class="row camp"><span class="nm"><b>${esc(a.title)}</b><small class="ugc">${esc(a.text)}</small><small class="ugc">${esc(a.link)}</small><small>${num(a.lamports / 1e9, 3)} SOL · ${a.days} дн. · ${new Date(a.ts * 1000).toLocaleDateString(MB.i18n.locale())}</small></span>
-    <span class="pr"><span class="tag ${a.status === 'active' ? 'buy' : a.status === 'rejected' ? 'sell' : ''}">${ST[a.status]}</span>${a.status === 'active' ? `<small>до ${new Date(a.until).toLocaleDateString(MB.i18n.locale())}</small>` : ''}
+  let solNow = 0;
+  const adRow = (a, owner) => `<div class="row camp"><span class="nm"><b>${esc(a.title)}</b><small class="ugc">${esc(a.text)}</small><small class="ugc">${esc(a.link)}</small><small>${num(a.lamports / 1e9, 3)} SOL${owner && solNow ? ' ≈ ' + usd(a.lamports / 1e9 * solNow) : ''} · ${hoursTxt(a.hours)} · ${new Date(a.ts * 1000).toLocaleDateString(MB.i18n.locale())}</small></span>
+    <span class="pr"><span class="tag ${a.status === 'active' ? 'buy' : a.status === 'rejected' ? 'sell' : ''}">${ST[a.status]}</span>${a.status === 'active' ? `<small>до ${new Date(a.until).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</small>` : ''}
     ${owner && a.status === 'pending' ? `<button class="btn accent" data-ok="${esc(a.sig)}">Одобрить</button><button class="btn ghost" data-no="${esc(a.sig)}">Отклонить</button>` : ''}</span></div>`;
   async function liveLists(force) {
     const box = root && root.querySelector('#camps'); if (!box) return; const st = MB.store.get(), owner = MB.adchain.isOwner();
+    solNow = await MB.data.solUsd().catch(() => 0);
     let all; try { all = await MB.adchain.load(force); } catch (e) { box.innerHTML = MB.ui.empty('Не удалось загрузить объявления', e.message); return; } if (!root) return;
     const mine = all.filter(a => st.wallet.connected && a.payer === st.wallet.address);
     box.innerHTML = !st.wallet.connected ? MB.ui.empty('Кошелёк не подключён', 'Подключите кошелёк, чтобы видеть свои объявления.') : mine.length ? mine.map(a => adRow(a, false)).join('') : MB.ui.empty('Объявлений пока нет', 'Оплаченные объявления появятся здесь.');
@@ -31,22 +35,22 @@ MB.views.ads = (() => {
   function liveMount(el) {
     if (!MB.adchain.enabled()) { el.innerHTML = '<a class="back" href="#profile">← Профиль</a><h1 class="pt">Реклама</h1>' + MB.ui.empty('Рекламная площадка ещё не настроена', 'Владелец сайта должен указать свой кошелёк для оплаты рекламы.'); return; }
     el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Реклама</h1>
-      <div class="note">Оплата в SOL уходит напрямую владельцу Membuy. Объявление начинает показываться всем после проверки, срок считается с момента одобрения. Если объявление отклонят, владелец возвращает оплату.</div>
-      <dl class="stats"><div><dt>Место показа</dt><dd>В списке монет</dd></div><div><dt>Цена за день</dt><dd>${num(MB.config.ADS_SOL_PER_DAY, 3)} SOL</dd></div></dl>
+      <div class="note">Оплата в SOL уходит напрямую владельцу Membuy. Объявление начинает показываться всем после проверки, оплаченное время считается с момента одобрения. Если объявление отклонят, владелец возвращает оплату.</div>
+      <dl class="stats"><div><dt>Место показа</dt><dd>В списке монет</dd></div>${MB.config.ADS_PLANS.map(p => `<div><dt>${hoursTxt(p.hours)}</dt><dd>${planTxt(p)}</dd></div>`).join('')}</dl>
       <form class="card form" id="aform" novalidate><h2 class="h2">Новое объявление</h2>
         <label class="fld"><span>Заголовок (до 40 знаков)</span><input id="atitle" maxlength="40" autocomplete="off"></label>
         <label class="fld"><span>Текст (до 90 знаков)</span><input id="atext" maxlength="90" autocomplete="off"></label>
         <label class="fld"><span>Ссылка</span><input id="alink" maxlength="120" placeholder="https://..." autocomplete="off"></label>
-        <label class="fld"><span>Дней (1–30)</span><input id="adays" inputmode="numeric" value="3" autocomplete="off"></label>
+        <label class="fld"><span>Срок показа</span><select id="aplan">${MB.config.ADS_PLANS.map((p, i) => `<option value="${p.id}" ${i === 0 ? 'selected' : ''}>${hoursTxt(p.hours)} — ${planTxt(p)}</option>`).join('')}</select></label>
         <div class="fld"><span>Так объявление увидят пользователи</span><div id="aprev"></div></div>
         <div class="quote"><div><dt>К оплате</dt><dd><b id="aprice">—</b></dd></div></div>
         <button class="btn big accent" type="submit" id="apay">Оплатить и отправить на проверку</button>
         <p class="fine">Текст объявления записывается в блокчейн Solana вместе с оплатой и виден всем. Запрещены обещания дохода, обман, чужие товарные знаки и ссылки на сбор ключей или «удвоение» монет.</p></form>
       <div class="card" id="mod" hidden></div>
       <h2 class="h2">Мои объявления</h2><div class="list" id="camps"></div>`;
-    ['atitle', 'atext', 'adays'].forEach(id => el.querySelector('#' + id).addEventListener('input', livePrice));
+    ['atitle', 'atext', 'aplan'].forEach(id => el.querySelector('#' + id).addEventListener(id === 'aplan' ? 'change' : 'input', livePrice));
     el.querySelector('#aform').addEventListener('submit', async e => { e.preventDefault(); const b = el.querySelector('#apay'); if (b.disabled) return;
-      try { if (!MB.store.get().wallet.connected) await MB.wallet.connect(); b.disabled = true; await MB.adchain.buy({ title: val('atitle'), text: val('atext'), link: val('alink'), days: val('adays') });
+      try { if (!MB.store.get().wallet.connected) await MB.wallet.connect(); b.disabled = true; await MB.adchain.buy({ title: val('atitle'), text: val('atext'), link: val('alink'), plan: val('aplan') });
         MB.ui.toast('Оплачено. Объявление отправлено на проверку'); ['atitle', 'atext', 'alink'].forEach(id => { el.querySelector('#' + id).value = ''; }); livePrice(); setTimeout(() => liveLists(true), 4000); }
       catch (err) { MB.ui.toast(err.message, 'err'); } finally { if (root) b.disabled = false; } });
     el.addEventListener('click', async e => { const b = e.target.closest('[data-ok],[data-no]'); if (!b || b.disabled) return; b.disabled = true;

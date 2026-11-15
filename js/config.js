@@ -16,7 +16,8 @@ MB.config = {
   GECKO_API: 'https://api.geckoterminal.com/api/v2',
   WEB3_CDN: 'https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js',
   ADS_WALLET: '7gGoEh28GwkDLS8ABbGRpdJkQz78kpRBy3HrzRmBQ8PV',               // live: адрес вашего кошелька Phantom — сюда приходит оплата рекламы, с него вы одобряете объявления (пусто = площадка выключена)
-  ADS_SOL_PER_DAY: 0.05,
+  ADS_SOL_PER_DAY: 0.05,        // старый тариф: нужен только для объявлений, оплаченных до перехода на часы
+  ADS_PLANS: [{ id: '1h', hours: 1, usd: 10 }, { id: '5h', hours: 5, usd: 30 }, { id: '24h', hours: 24, sol: 1 }], // тарифы рекламы: в $ (пересчёт в SOL по курсу при оплате) или в SOL
   UPLOAD_URL: 'https://membuy-upload.ismoiltd-win.workers.dev',               // live: адрес сервера-посредника Cloudflare для картинок монет (пусто = создание монет выключено)
   PUMP_API: 'https://pumpportal.fun/api',
   CREATE_RESERVE_SOL: 0.03,     // live: запас SOL на выпуск монеты и сборы сети        // live: цена рекламы в SOL за один день показа

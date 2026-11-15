@@ -260,6 +260,7 @@ MB.config = {
   WEB3_CDN: 'https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js',
   ADS_WALLET: '7gGoEh28GwkDLS8ABbGRpdJkQz78kpRBy3HrzRmBQ8PV',               // live: адрес вашего кошелька Phantom — сюда приходит оплата рекламы, с него вы одобряете объявления (пусто = площадка выключена)
   ADS_SOL_PER_DAY: 0.05,        // старый тариф: нужен только для объявлений, оплаченных до перехода на часы
+  ADS_AUTO_APPROVE: true,       // live: объявление включается сразу после оплаты, если проходит автопроверку (подозрительные ждут владельца)
   ADS_PLANS: [{ id: '1h', hours: 1, usd: 10 }, { id: '5h', hours: 5, usd: 30 }, { id: '24h', hours: 24, sol: 1 }], // тарифы рекламы: в $ (пересчёт в SOL по курсу при оплате) или в SOL
   UPLOAD_URL: 'https://membuy-upload.ismoiltd-win.workers.dev',               // live: адрес сервера-посредника Cloudflare для картинок монет (пусто = создание монет выключено)
   PUMP_API: 'https://pumpportal.fun/api',
@@ -524,6 +525,12 @@ MB.i18n = (() => {
     "24 ч": ["24h", ""],
     "Покажите свой проект трейдерам Membuy. От $10 в час.": ["Show your project to Membuy traders. From $10 an hour.", ""],
     "Оплата в SOL уходит напрямую владельцу Membuy. Объявление начинает показываться всем после проверки, оплаченное время считается с момента одобрения. Если объявление отклонят, владелец возвращает оплату.": ["Payment in SOL goes directly to the Membuy owner. The ad is shown to everyone after review; the paid time starts when it is approved. If the ad is rejected, the owner refunds the payment.", ""],
+    "Похоже на ловушку — проверьте ссылку": ["Looks like a scam — check the link", ""],
+    "Остановить": ["Stop", ""],
+    "Оплачено. Объявление скоро появится": ["Paid. Your ad will appear shortly", ""],
+    "Оплатить и запустить": ["Pay and launch", ""],
+    "Объявление остановлено": ["Ad stopped", ""],
+    "Оплата в SOL уходит напрямую владельцу Membuy. Объявление включается сразу после оплаты и показывается оплаченное время. Если автопроверка сочтёт ссылку подозрительной, объявление включится после проверки владельцем; при отказе владелец возвращает оплату.": ["Payment in SOL goes directly to the Membuy owner. The ad goes live right after payment for the paid time. If the automatic check finds the link suspicious, the ad goes live after the owner reviews it; if rejected, the owner refunds the payment.", ""],
     'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
     'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
     'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
@@ -1015,6 +1022,15 @@ MB.adchain = (() => {
   const save = () => { try { localStorage.setItem(CKEY, JSON.stringify(cache)); } catch (e) { /* нет хранилища */ } };
   let ads = [], loadedAt = 0, loading = null;
   const enabled = () => C.LIVE && !!C.ADS_WALLET;
+  /** Автопроверка объявления. Ссылки и слова, типичные для ловушек (поддельные кошельки, «раздачи»), не включаются сами — их смотрит владелец. */
+  const SAFE_HOSTS = ['x.com', 'twitter.com', 't.me', 'pump.fun', 'dexscreener.com', 'youtube.com', 'youtu.be', 'instagram.com', 'tiktok.com', 'discord.gg', 'ismoiltdwin-ux.github.io'];
+  const BAD_HOST = /(phantom|solana|solflare|jup(iter)?|raydium|pump|metamask|binance|bybit|okx|coinbase|wallet|airdrop|claim|drop|reward|bonus|free|gift|connect|verify|support|recover)/i;
+  const BAD_TEXT = /(airdrop|free\s*sol|claim|seed|private\s*key|secret\s*(phrase|words)|guarantee|гарант|x\s*100|100\s*x|1000\s*x|double|giveaway|раздач|бесплатн|connect\s*wallet|подключите\s*кошел)/i;
+  function autoOk(a) {
+    let host = ''; try { host = new URL(a.link).hostname.toLowerCase().replace(/^www\./, ''); } catch (e) { return false; }
+    const safe = SAFE_HOSTS.some(h => host === h || host.endsWith('.' + h));
+    return (safe || !BAD_HOST.test(host)) && !BAD_TEXT.test(a.title + ' ' + a.text) && !/xn--/.test(host); // xn-- — домены с похожими буквами
+  }
   const planOf = id => (C.ADS_PLANS || []).find(p => p.id === id) || null;
   /** Цена тарифа в SOL: фиксированная (sol) или пересчёт долларов по курсу SOL, с округлением вверх до 0,001. */
   const priceSol = (plan, solUsd) => plan.sol ? plan.sol : Math.ceil(plan.usd / (solUsd || 1) * 1000) / 1000;
@@ -1076,9 +1092,12 @@ MB.adchain = (() => {
       const recs = []; for (const [sig, k] of found) { const r = await verify(sig, k).catch(() => null); if (r && r.kind !== 'bad') recs.push(r); }
       const decide = {}; recs.filter(r => r.kind !== 'ad').sort((a, b) => a.ts - b.ts).forEach(r => { decide[r.target] = r; });
       const now = Date.now() / 1000;
-      ads = recs.filter(r => r.kind === 'ad').map(a => { const d = decide[a.sig], paid = a.need > 0 && a.lamports >= a.need * 0.999, end = d ? d.ts + a.hours * 3600 : 0;
+      ads = recs.filter(r => r.kind === 'ad').map(a => {
+        const paid = a.need > 0 && a.lamports >= a.need * 0.999, auto = !decide[a.sig] && C.ADS_AUTO_APPROVE && paid && autoOk(a);
+        // Решение владельца главнее; без решения оплаченное и чистое объявление включается само с момента оплаты.
+        const d = decide[a.sig] || (auto ? { kind: 'ok', ts: a.ts, auto: true } : null), end = d ? d.ts + a.hours * 3600 : 0;
         const status = !d ? 'pending' : d.kind === 'no' ? 'rejected' : !paid ? 'underpaid' : end > now ? 'active' : 'ended';
-        return Object.assign({}, a, { id: 'ch-' + a.sig.slice(0, 12), status, until: d && d.kind === 'ok' ? end * 1000 : 0 }); })
+        return Object.assign({}, a, { id: 'ch-' + a.sig.slice(0, 12), status, auto: !!(d && d.auto), flagged: !autoOk(a), until: d && d.kind === 'ok' ? end * 1000 : 0 }); })
         .sort((x, y) => y.ts - x.ts);
       loadedAt = Date.now(); return ads;
     })().finally(() => { loading = null; });
@@ -1730,7 +1749,7 @@ MB.views.ads = (() => {
   let solNow = 0;
   const adRow = (a, owner) => `<div class="row camp"><span class="nm"><b>${esc(a.title)}</b><small class="ugc">${esc(a.text)}</small><small class="ugc">${esc(a.link)}</small><small>${num(a.lamports / 1e9, 3)} SOL${owner && solNow ? ' ≈ ' + usd(a.lamports / 1e9 * solNow) : ''} · ${hoursTxt(a.hours)} · ${new Date(a.ts * 1000).toLocaleDateString(MB.i18n.locale())}</small></span>
     <span class="pr"><span class="tag ${a.status === 'active' ? 'buy' : a.status === 'rejected' ? 'sell' : ''}">${ST[a.status]}</span>${a.status === 'active' ? `<small>до ${new Date(a.until).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</small>` : ''}
-    ${owner && a.status === 'pending' ? `<button class="btn accent" data-ok="${esc(a.sig)}">Одобрить</button><button class="btn ghost" data-no="${esc(a.sig)}">Отклонить</button>` : ''}</span></div>`;
+    ${owner && a.status === 'pending' ? `${a.flagged ? '<small class="down">Похоже на ловушку — проверьте ссылку</small>' : ''}<button class="btn accent" data-ok="${esc(a.sig)}">Одобрить</button><button class="btn ghost" data-no="${esc(a.sig)}">Отклонить</button>` : ''}${owner && a.status === 'active' ? `<button class="btn ghost" data-no="${esc(a.sig)}">Остановить</button>` : ''}</span></div>`;
   async function liveLists(force) {
     const box = root && root.querySelector('#camps'); if (!box) return; const st = MB.store.get(), owner = MB.adchain.isOwner();
     solNow = await MB.data.solUsd().catch(() => 0);
@@ -1741,12 +1760,12 @@ MB.views.ads = (() => {
     if (owner) { const pend = all.filter(a => a.status === 'pending'), income = all.filter(a => a.status !== 'rejected').reduce((t, a) => t + a.lamports, 0) / 1e9;
       mod.innerHTML = `<h2 class="h2">Модерация (вы владелец площадки)</h2><p class="fine">Получено за рекламу: <b>${num(income, 3)} SOL</b>. Отклонённым рекламодателям верните оплату вручную из Phantom.</p>
         <div class="list">${pend.length ? pend.map(a => adRow(a, true)).join('') : MB.ui.empty('Новых объявлений нет', 'Здесь появятся оплаченные объявления, которые ждут проверки.')}</div>
-        <h2 class="h2">Все объявления</h2><div class="list">${all.filter(a => a.status !== 'pending').map(a => adRow(a, false)).join('') || MB.ui.empty('Пока пусто', '')}</div>`; }
+        <h2 class="h2">Все объявления</h2><div class="list">${all.filter(a => a.status !== 'pending').map(a => adRow(a, true)).join('') || MB.ui.empty('Пока пусто', '')}</div>`; }
   }
   function liveMount(el) {
     if (!MB.adchain.enabled()) { el.innerHTML = '<a class="back" href="#profile">← Профиль</a><h1 class="pt">Реклама</h1>' + MB.ui.empty('Рекламная площадка ещё не настроена', 'Владелец сайта должен указать свой кошелёк для оплаты рекламы.'); return; }
     el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Реклама</h1>
-      <div class="note">Оплата в SOL уходит напрямую владельцу Membuy. Объявление начинает показываться всем после проверки, оплаченное время считается с момента одобрения. Если объявление отклонят, владелец возвращает оплату.</div>
+      <div class="note">Оплата в SOL уходит напрямую владельцу Membuy. Объявление включается сразу после оплаты и показывается оплаченное время. Если автопроверка сочтёт ссылку подозрительной, объявление включится после проверки владельцем; при отказе владелец возвращает оплату.</div>
       <dl class="stats"><div><dt>Место показа</dt><dd>В списке монет</dd></div>${MB.config.ADS_PLANS.map(p => `<div><dt>${hoursTxt(p.hours)}</dt><dd>${planTxt(p)}</dd></div>`).join('')}</dl>
       <form class="card form" id="aform" novalidate><h2 class="h2">Новое объявление</h2>
         <label class="fld"><span>Заголовок (до 40 знаков)</span><input id="atitle" maxlength="40" autocomplete="off"></label>
@@ -1755,17 +1774,17 @@ MB.views.ads = (() => {
         <label class="fld"><span>Срок показа</span><select id="aplan">${MB.config.ADS_PLANS.map((p, i) => `<option value="${p.id}" ${i === 0 ? 'selected' : ''}>${hoursTxt(p.hours)} — ${planTxt(p)}</option>`).join('')}</select></label>
         <div class="fld"><span>Так объявление увидят пользователи</span><div id="aprev"></div></div>
         <div class="quote"><div><dt>К оплате</dt><dd><b id="aprice">—</b></dd></div></div>
-        <button class="btn big accent" type="submit" id="apay">Оплатить и отправить на проверку</button>
+        <button class="btn big accent" type="submit" id="apay">Оплатить и запустить</button>
         <p class="fine">Текст объявления записывается в блокчейн Solana вместе с оплатой и виден всем. Запрещены обещания дохода, обман, чужие товарные знаки и ссылки на сбор ключей или «удвоение» монет.</p></form>
       <div class="card" id="mod" hidden></div>
       <h2 class="h2">Мои объявления</h2><div class="list" id="camps"></div>`;
     ['atitle', 'atext', 'aplan'].forEach(id => el.querySelector('#' + id).addEventListener(id === 'aplan' ? 'change' : 'input', livePrice));
     el.querySelector('#aform').addEventListener('submit', async e => { e.preventDefault(); const b = el.querySelector('#apay'); if (b.disabled) return;
       try { if (!MB.store.get().wallet.connected) await MB.wallet.connect(); b.disabled = true; await MB.adchain.buy({ title: val('atitle'), text: val('atext'), link: val('alink'), plan: val('aplan') });
-        MB.ui.toast('Оплачено. Объявление отправлено на проверку'); ['atitle', 'atext', 'alink'].forEach(id => { el.querySelector('#' + id).value = ''; }); livePrice(); setTimeout(() => liveLists(true), 4000); }
+        MB.ui.toast('Оплачено. Объявление скоро появится'); ['atitle', 'atext', 'alink'].forEach(id => { el.querySelector('#' + id).value = ''; }); livePrice(); setTimeout(() => liveLists(true), 4000); }
       catch (err) { MB.ui.toast(err.message, 'err'); } finally { if (root) b.disabled = false; } });
     el.addEventListener('click', async e => { const b = e.target.closest('[data-ok],[data-no]'); if (!b || b.disabled) return; b.disabled = true;
-      try { await MB.adchain.decide(b.dataset.ok || b.dataset.no, !!b.dataset.ok); MB.ui.toast(b.dataset.ok ? 'Объявление одобрено' : 'Объявление отклонено'); setTimeout(() => liveLists(true), 4000); } catch (err) { MB.ui.toast(err.message, 'err'); b.disabled = false; } });
+      try { await MB.adchain.decide(b.dataset.ok || b.dataset.no, !!b.dataset.ok); MB.ui.toast(b.dataset.ok ? 'Объявление одобрено' : 'Объявление остановлено'); setTimeout(() => liveLists(true), 4000); } catch (err) { MB.ui.toast(err.message, 'err'); b.disabled = false; } });
     livePrice(); liveLists();
   }
   return {

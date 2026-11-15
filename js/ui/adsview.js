@@ -19,7 +19,7 @@ MB.views.ads = (() => {
   let solNow = 0;
   const adRow = (a, owner) => `<div class="row camp"><span class="nm"><b>${esc(a.title)}</b><small class="ugc">${esc(a.text)}</small><small class="ugc">${esc(a.link)}</small><small>${num(a.lamports / 1e9, 3)} SOL${owner && solNow ? ' ≈ ' + usd(a.lamports / 1e9 * solNow) : ''} · ${hoursTxt(a.hours)} · ${new Date(a.ts * 1000).toLocaleDateString(MB.i18n.locale())}</small></span>
     <span class="pr"><span class="tag ${a.status === 'active' ? 'buy' : a.status === 'rejected' ? 'sell' : ''}">${ST[a.status]}</span>${a.status === 'active' ? `<small>до ${new Date(a.until).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</small>` : ''}
-    ${owner && a.status === 'pending' ? `<button class="btn accent" data-ok="${esc(a.sig)}">Одобрить</button><button class="btn ghost" data-no="${esc(a.sig)}">Отклонить</button>` : ''}</span></div>`;
+    ${owner && a.status === 'pending' ? `${a.flagged ? '<small class="down">Похоже на ловушку — проверьте ссылку</small>' : ''}<button class="btn accent" data-ok="${esc(a.sig)}">Одобрить</button><button class="btn ghost" data-no="${esc(a.sig)}">Отклонить</button>` : ''}${owner && a.status === 'active' ? `<button class="btn ghost" data-no="${esc(a.sig)}">Остановить</button>` : ''}</span></div>`;
   async function liveLists(force) {
     const box = root && root.querySelector('#camps'); if (!box) return; const st = MB.store.get(), owner = MB.adchain.isOwner();
     solNow = await MB.data.solUsd().catch(() => 0);
@@ -30,12 +30,12 @@ MB.views.ads = (() => {
     if (owner) { const pend = all.filter(a => a.status === 'pending'), income = all.filter(a => a.status !== 'rejected').reduce((t, a) => t + a.lamports, 0) / 1e9;
       mod.innerHTML = `<h2 class="h2">Модерация (вы владелец площадки)</h2><p class="fine">Получено за рекламу: <b>${num(income, 3)} SOL</b>. Отклонённым рекламодателям верните оплату вручную из Phantom.</p>
         <div class="list">${pend.length ? pend.map(a => adRow(a, true)).join('') : MB.ui.empty('Новых объявлений нет', 'Здесь появятся оплаченные объявления, которые ждут проверки.')}</div>
-        <h2 class="h2">Все объявления</h2><div class="list">${all.filter(a => a.status !== 'pending').map(a => adRow(a, false)).join('') || MB.ui.empty('Пока пусто', '')}</div>`; }
+        <h2 class="h2">Все объявления</h2><div class="list">${all.filter(a => a.status !== 'pending').map(a => adRow(a, true)).join('') || MB.ui.empty('Пока пусто', '')}</div>`; }
   }
   function liveMount(el) {
     if (!MB.adchain.enabled()) { el.innerHTML = '<a class="back" href="#profile">← Профиль</a><h1 class="pt">Реклама</h1>' + MB.ui.empty('Рекламная площадка ещё не настроена', 'Владелец сайта должен указать свой кошелёк для оплаты рекламы.'); return; }
     el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Реклама</h1>
-      <div class="note">Оплата в SOL уходит напрямую владельцу Membuy. Объявление начинает показываться всем после проверки, оплаченное время считается с момента одобрения. Если объявление отклонят, владелец возвращает оплату.</div>
+      <div class="note">Оплата в SOL уходит напрямую владельцу Membuy. Объявление включается сразу после оплаты и показывается оплаченное время. Если автопроверка сочтёт ссылку подозрительной, объявление включится после проверки владельцем; при отказе владелец возвращает оплату.</div>
       <dl class="stats"><div><dt>Место показа</dt><dd>В списке монет</dd></div>${MB.config.ADS_PLANS.map(p => `<div><dt>${hoursTxt(p.hours)}</dt><dd>${planTxt(p)}</dd></div>`).join('')}</dl>
       <form class="card form" id="aform" novalidate><h2 class="h2">Новое объявление</h2>
         <label class="fld"><span>Заголовок (до 40 знаков)</span><input id="atitle" maxlength="40" autocomplete="off"></label>
@@ -44,17 +44,17 @@ MB.views.ads = (() => {
         <label class="fld"><span>Срок показа</span><select id="aplan">${MB.config.ADS_PLANS.map((p, i) => `<option value="${p.id}" ${i === 0 ? 'selected' : ''}>${hoursTxt(p.hours)} — ${planTxt(p)}</option>`).join('')}</select></label>
         <div class="fld"><span>Так объявление увидят пользователи</span><div id="aprev"></div></div>
         <div class="quote"><div><dt>К оплате</dt><dd><b id="aprice">—</b></dd></div></div>
-        <button class="btn big accent" type="submit" id="apay">Оплатить и отправить на проверку</button>
+        <button class="btn big accent" type="submit" id="apay">Оплатить и запустить</button>
         <p class="fine">Текст объявления записывается в блокчейн Solana вместе с оплатой и виден всем. Запрещены обещания дохода, обман, чужие товарные знаки и ссылки на сбор ключей или «удвоение» монет.</p></form>
       <div class="card" id="mod" hidden></div>
       <h2 class="h2">Мои объявления</h2><div class="list" id="camps"></div>`;
     ['atitle', 'atext', 'aplan'].forEach(id => el.querySelector('#' + id).addEventListener(id === 'aplan' ? 'change' : 'input', livePrice));
     el.querySelector('#aform').addEventListener('submit', async e => { e.preventDefault(); const b = el.querySelector('#apay'); if (b.disabled) return;
       try { if (!MB.store.get().wallet.connected) await MB.wallet.connect(); b.disabled = true; await MB.adchain.buy({ title: val('atitle'), text: val('atext'), link: val('alink'), plan: val('aplan') });
-        MB.ui.toast('Оплачено. Объявление отправлено на проверку'); ['atitle', 'atext', 'alink'].forEach(id => { el.querySelector('#' + id).value = ''; }); livePrice(); setTimeout(() => liveLists(true), 4000); }
+        MB.ui.toast('Оплачено. Объявление скоро появится'); ['atitle', 'atext', 'alink'].forEach(id => { el.querySelector('#' + id).value = ''; }); livePrice(); setTimeout(() => liveLists(true), 4000); }
       catch (err) { MB.ui.toast(err.message, 'err'); } finally { if (root) b.disabled = false; } });
     el.addEventListener('click', async e => { const b = e.target.closest('[data-ok],[data-no]'); if (!b || b.disabled) return; b.disabled = true;
-      try { await MB.adchain.decide(b.dataset.ok || b.dataset.no, !!b.dataset.ok); MB.ui.toast(b.dataset.ok ? 'Объявление одобрено' : 'Объявление отклонено'); setTimeout(() => liveLists(true), 4000); } catch (err) { MB.ui.toast(err.message, 'err'); b.disabled = false; } });
+      try { await MB.adchain.decide(b.dataset.ok || b.dataset.no, !!b.dataset.ok); MB.ui.toast(b.dataset.ok ? 'Объявление одобрено' : 'Объявление остановлено'); setTimeout(() => liveLists(true), 4000); } catch (err) { MB.ui.toast(err.message, 'err'); b.disabled = false; } });
     livePrice(); liveLists();
   }
   return {

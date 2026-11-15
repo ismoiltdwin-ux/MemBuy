@@ -9,6 +9,15 @@ MB.adchain = (() => {
   const save = () => { try { localStorage.setItem(CKEY, JSON.stringify(cache)); } catch (e) { /* нет хранилища */ } };
   let ads = [], loadedAt = 0, loading = null;
   const enabled = () => C.LIVE && !!C.ADS_WALLET;
+  /** Автопроверка объявления. Ссылки и слова, типичные для ловушек (поддельные кошельки, «раздачи»), не включаются сами — их смотрит владелец. */
+  const SAFE_HOSTS = ['x.com', 'twitter.com', 't.me', 'pump.fun', 'dexscreener.com', 'youtube.com', 'youtu.be', 'instagram.com', 'tiktok.com', 'discord.gg', 'ismoiltdwin-ux.github.io'];
+  const BAD_HOST = /(phantom|solana|solflare|jup(iter)?|raydium|pump|metamask|binance|bybit|okx|coinbase|wallet|airdrop|claim|drop|reward|bonus|free|gift|connect|verify|support|recover)/i;
+  const BAD_TEXT = /(airdrop|free\s*sol|claim|seed|private\s*key|secret\s*(phrase|words)|guarantee|гарант|x\s*100|100\s*x|1000\s*x|double|giveaway|раздач|бесплатн|connect\s*wallet|подключите\s*кошел)/i;
+  function autoOk(a) {
+    let host = ''; try { host = new URL(a.link).hostname.toLowerCase().replace(/^www\./, ''); } catch (e) { return false; }
+    const safe = SAFE_HOSTS.some(h => host === h || host.endsWith('.' + h));
+    return (safe || !BAD_HOST.test(host)) && !BAD_TEXT.test(a.title + ' ' + a.text) && !/xn--/.test(host); // xn-- — домены с похожими буквами
+  }
   const planOf = id => (C.ADS_PLANS || []).find(p => p.id === id) || null;
   /** Цена тарифа в SOL: фиксированная (sol) или пересчёт долларов по курсу SOL, с округлением вверх до 0,001. */
   const priceSol = (plan, solUsd) => plan.sol ? plan.sol : Math.ceil(plan.usd / (solUsd || 1) * 1000) / 1000;
@@ -70,9 +79,12 @@ MB.adchain = (() => {
       const recs = []; for (const [sig, k] of found) { const r = await verify(sig, k).catch(() => null); if (r && r.kind !== 'bad') recs.push(r); }
       const decide = {}; recs.filter(r => r.kind !== 'ad').sort((a, b) => a.ts - b.ts).forEach(r => { decide[r.target] = r; });
       const now = Date.now() / 1000;
-      ads = recs.filter(r => r.kind === 'ad').map(a => { const d = decide[a.sig], paid = a.need > 0 && a.lamports >= a.need * 0.999, end = d ? d.ts + a.hours * 3600 : 0;
+      ads = recs.filter(r => r.kind === 'ad').map(a => {
+        const paid = a.need > 0 && a.lamports >= a.need * 0.999, auto = !decide[a.sig] && C.ADS_AUTO_APPROVE && paid && autoOk(a);
+        // Решение владельца главнее; без решения оплаченное и чистое объявление включается само с момента оплаты.
+        const d = decide[a.sig] || (auto ? { kind: 'ok', ts: a.ts, auto: true } : null), end = d ? d.ts + a.hours * 3600 : 0;
         const status = !d ? 'pending' : d.kind === 'no' ? 'rejected' : !paid ? 'underpaid' : end > now ? 'active' : 'ended';
-        return Object.assign({}, a, { id: 'ch-' + a.sig.slice(0, 12), status, until: d && d.kind === 'ok' ? end * 1000 : 0 }); })
+        return Object.assign({}, a, { id: 'ch-' + a.sig.slice(0, 12), status, auto: !!(d && d.auto), flagged: !autoOk(a), until: d && d.kind === 'ok' ? end * 1000 : 0 }); })
         .sort((x, y) => y.ts - x.ts);
       loadedAt = Date.now(); return ads;
     })().finally(() => { loading = null; });

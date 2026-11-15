@@ -71,11 +71,11 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   await p.selectOption('#aplan', '24h'); await p.waitForTimeout(300); ok('цена 24 ч = 1 SOL', /^1 SOL/.test(await p.textContent('#aprice'))); await p.selectOption('#aplan', '1h'); await p.waitForTimeout(200);
   await p.fill('#atitle', 'Мой проект'); await p.fill('#atext', 'Лучший мемкоин недели на Solana'); await p.fill('#alink', 'javascript:alert(1)'); await p.click('#apay'); await p.waitForTimeout(400);
   ok('опасная ссылка не принимается', chain.length === 0);
-  await p.fill('#alink', 'https://example.com/coin'); await p.click('#apay'); await p.waitForTimeout(600);
-  ok('оплата: перевод 0.067 SOL ($10 за 1 ч) на кошелёк площадки + текст в заметке', chain.length === 1 && chain[0].lamports === 67000000 && chain[0].memo.includes('"p":"1h"') && chain[0].memo.includes('"s":67000000') && chain[0].to === OWNER && chain[0].memo.startsWith('MB1|') && chain[0].memo.includes('example.com'));
+  await p.fill('#alink', 'https://phantom-claim.example/coin'); await p.click('#apay'); await p.waitForTimeout(600);
+  ok('оплата: перевод 0.067 SOL ($10 за 1 ч) на кошелёк площадки + текст в заметке', chain.length === 1 && chain[0].lamports === 67000000 && chain[0].memo.includes('"p":"1h"') && chain[0].memo.includes('"s":67000000') && chain[0].to === OWNER && chain[0].memo.startsWith('MB1|') && chain[0].memo.includes('phantom-claim.example'));
   chain.push({ sig: 'FAKEOK' + 'Y'.repeat(20), memo: 'MBOK|' + chain[0].sig, payer: 'Attacker1111111111111111111111111111111111', lamports: 1, time: Math.floor(Date.now() / 1000) });
   await p.evaluate(() => MB.adchain.load(true)); await p.waitForTimeout(300); await p.evaluate(() => { location.hash = 'profile'; }); await p.waitForTimeout(200); await p.evaluate(() => { location.hash = 'ads'; }); await p.waitForTimeout(700);
-  ok('моё объявление «На проверке»', (await p.textContent('#camps')).includes('На проверке'));
+  ok('подозрительная ссылка (phantom-claim) не включается сама: «На проверке»', (await p.textContent('#camps')).includes('На проверке'));
   ok('«одобрение» с чужого кошелька не действует', await p.evaluate(() => MB.adchain.active().length === 0));
   ok('раздел модерации скрыт от рекламодателя', await p.locator('#mod').isHidden());
   await p.evaluate(o => MB.store.set({ wallet: { connected: true, address: o, sol: 1 } }), OWNER); await p.waitForTimeout(700);
@@ -83,7 +83,15 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   await p.click('[data-ok]'); await p.waitForTimeout(500);
   ok('одобрение — заметка с подписью владельца, без перевода', chain.length === 3 && chain[2].memo === 'MBOK|' + chain[0].sig && chain[2].payer === OWNER && !chain[2].lamports);
   await p.evaluate(() => MB.adchain.load(true)); ok('объявление показывается', await p.evaluate(() => MB.adchain.active().length === 1));
-  await p.evaluate(() => { location.hash = 'market'; }); await p.waitForTimeout(700); ok('объявление в списке монет', await p.evaluate(() => { const a = document.querySelector('#list .row.ad'); return !!a && a.textContent.includes('Мой проект') && a.getAttribute('href') === 'https://example.com/coin'; }));
+  await p.evaluate(() => { location.hash = 'market'; }); await p.waitForTimeout(700); ok('объявление в списке монет', await p.evaluate(() => { const a = document.querySelector('#list .row.ad'); return !!a && a.textContent.includes('Мой проект') && a.getAttribute('href') === 'https://phantom-claim.example/coin'; }));
+  // ---- Автовключение чистого объявления после оплаты ----
+  await p.evaluate(() => { location.hash = 'profile'; }); await p.waitForTimeout(200); await p.evaluate(() => { location.hash = 'ads'; }); await p.waitForTimeout(600);
+  await p.fill('#atitle', 'Чистый проект'); await p.fill('#atext', 'Новый мемкоин сообщества'); await p.fill('#alink', 'https://example.com/clean'); await p.click('#apay'); await p.waitForTimeout(600);
+  const cleanSig = chain[chain.length - 1].sig; await p.evaluate(() => MB.adchain.load(true));
+  ok('чистое объявление включилось сразу после оплаты, без владельца', await p.evaluate(s => MB.adchain.active().some(a => a.sig === s && a.auto), cleanSig) && !chain.some(t => t.memo === 'MBOK|' + cleanSig));
+  await p.evaluate(() => { location.hash = 'profile'; }); await p.waitForTimeout(200); await p.evaluate(() => { location.hash = 'ads'; }); await p.waitForTimeout(700);
+  await p.click(`#mod [data-no="${cleanSig}"]`); await p.waitForTimeout(500); await p.evaluate(() => MB.adchain.load(true));
+  ok('владелец может остановить включённое объявление', chain[chain.length - 1].memo === 'MBNO|' + cleanSig && await p.evaluate(s => !MB.adchain.active().some(a => a.sig === s), cleanSig));
   ok('скорость сделки: приоритетный сбор передаётся Jupiter', /"priorityLevel":"high"/.test(global.__swapBody || ''));
   // ---- Выпуск монеты на pump.fun ----
   await p.evaluate(() => { MB.config.CREATE_FEE_SOL = 0; }); // перевод платы проверяется отдельно на настоящей транзакции (build/test_createfee.js)

@@ -2,6 +2,8 @@
 const fs = require('fs'), path = require('path'), R = path.join(__dirname, '..');
 const JS = ['config', 'i18n', 'util', 'store', 'data/demo', 'data/live', 'data/social', 'data/ads', 'wallet', 'adchain', 'pumpcreate', 'swap', 'chart', 'ui/components', 'ui/market', 'ui/token', 'ui/feed', 'ui/leaders', 'ui/portfolio', 'ui/create', 'ui/adsview', 'ui/more', 'ui/info', 'app'];
 const body = fs.readFileSync(path.join(__dirname, 'body.html'), 'utf8');
+// Метка версии по содержимому файла: после обновления браузеры (в том числе Telegram) берут свежий файл, а не старую копию.
+const ver = f => require('crypto').createHash('sha1').update(fs.readFileSync(path.join(R, f))).digest('hex').slice(0, 8);
 const fonts = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">';
 fs.writeFileSync(path.join(R, 'index.html'), `<!doctype html>
 <html lang="ru">
@@ -15,10 +17,10 @@ fs.writeFileSync(path.join(R, 'index.html'), `<!doctype html>
 <link rel="icon" type="image/png" href="img/logo-32.png">
 <link rel="apple-touch-icon" href="img/icon-180.png">
 ${fonts}
-<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/app.css?v=${ver('css/app.css')}">
 </head>
 <body>
-${body}${JS.map(f => `<script src="js/${f}.js"></script>`).join('\n')}
+${body}${JS.map(f => `<script src="js/${f}.js?v=${ver('js/' + f + '.js')}"></script>`).join('\n')}
 </body>
 </html>
 `);

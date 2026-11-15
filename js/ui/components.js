@@ -20,9 +20,11 @@ MB.ui = MB.ui || {};
     box.hidden = false;
     box.innerHTML = `<div class="onb" role="dialog" aria-modal="true" aria-labelledby="nwt"><div class="card"><h2 id="nwt">Откройте Membuy в Phantom</h2>
       <p class="hint">${mobile ? (inApp ? 'Этот браузер (например, внутри Telegram) не видит кошелёк.' : 'В обычном браузере телефона кошелёк не подключается.') + ' Нажмите кнопку — Membuy откроется прямо в приложении Phantom, там можно подключить кошелёк и торговать.' : 'Установите расширение Phantom для браузера и обновите страницу.'}</p>
-      <div class="stack">${mobile ? `<a class="btn big accent" href="${MB.util.esc(open)}">Открыть в Phantom</a>` : ''}<a class="btn ghost" href="https://phantom.com/download" target="_blank" rel="noopener">Установить Phantom</a><button class="btn ghost" id="nwx">Позже</button></div>
+      <div class="stack">${mobile ? `<a class="btn big accent" href="${MB.util.esc(open)}">Открыть в Phantom</a>` : ''}<a class="btn ghost" href="https://phantom.com/download" target="_blank" rel="noopener">Установить Phantom</a>${mobile ? '<button class="btn ghost" id="nwcopy">Скопировать ссылку</button>' : ''}<button class="btn ghost" id="nwx">Позже</button></div>
+      ${mobile ? '<p class="hint">Если Phantom не открылся: скопируйте ссылку, откройте приложение Phantom → внизу значок 🔍 (браузер) → вставьте ссылку.</p>' : ''}
       <p class="fine">Phantom — бесплатный кошелёк Solana. Ключи хранятся только у вас.</p></div></div>`;
     const close = () => { box.hidden = true; box.innerHTML = ''; };
+    const cp = box.querySelector('#nwcopy'); if (cp) cp.onclick = () => { const link = url.toString(); (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => MB.ui.toast('Ссылка скопирована'), () => prompt('Скопируйте ссылку', link)); };
     box.querySelector('#nwx').onclick = close; box.querySelector('.onb').addEventListener('click', e => { if (e.target.classList.contains('onb')) close(); });
   };
   MB.ui.toast = (msg, kind = 'ok') => {

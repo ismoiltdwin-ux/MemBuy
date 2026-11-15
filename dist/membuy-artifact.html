@@ -249,7 +249,7 @@ window.MB = window.MB || {};
 MB.config = {
   MODE: 'demo',                 // 'demo' — учебные данные и сделки; 'live' — Phantom + Jupiter + DexScreener
   APP_NAME: 'Membuy',
-  PLATFORM_FEE_BPS: 50,         // комиссия площадки: 50 = 0.5%
+  PLATFORM_FEE_BPS: 100,        // комиссия площадки со сделок: 100 = 1% (как у торговых терминалов; плюс собственные сборы pump.fun/бирж)
   FEE_WALLET: '7gGoEh28GwkDLS8ABbGRpdJkQz78kpRBy3HrzRmBQ8PV',   // live: ваш кошелёк — сюда идёт доход площадки
   FEE_ACCOUNT: 'DcjUUcAhier4oqAM7uMv3K23YQRzjyF1t38MgXifuiJW',  // live: wSOL-счёт этого кошелька для комиссии со сделок (Jupiter)
   CREATE_FEE_SOL: 0.01,         // live: плата Membuy за выпуск монеты, SOL (0 = без платы)
@@ -412,7 +412,7 @@ MB.i18n = (() => {
     'Это безопасно?': ["Is it safe?", "Оё ин бехатар аст?"],
     'Ключи не покидают ваш кошелёк. Но мемкоины — крайне рискованный актив: цена может упасть до нуля. Никогда не вкладывайте больше, чем готовы потерять. Никому не сообщайте 12 секретных слов от кошелька.': ["Your keys never leave your wallet. But memecoins are an extremely risky asset: the price can fall to zero. Never invest more than you can afford to lose. Never share your wallet’s 12 secret words.", "Калидҳо ҳамёни шуморо тарк намекунанд. Аммо мемкоинҳо дороии хеле хатарноканд: нарх метавонад то сифр афтад. Ҳеҷ гоҳ бештар аз он ки гум карда метавонед, сармоягузорӣ накунед. 12 калимаи махфии ҳамёнро ба касе нагӯед."],
     'Есть ли комиссия?': ["Is there a fee?", "Комиссия ҳаст?"],
-    'Комиссия площадки — не больше 0,5% от суммы сделки. Её точный размер показывается в расчёте перед каждой сделкой. Сеть Solana дополнительно берёт небольшой сетевой сбор.': ["The platform fee is at most 0.5% of the trade. The exact amount is shown in the quote before every trade. The Solana network also charges a small network fee.", "Комиссияи платформа на бештар аз 0,5% аз маблағи савдо. Андозаи дақиқи он пеш аз ҳар савдо дар ҳисоб нишон дода мешавад. Шабакаи Solana боз ҳаққи хурди шабака мегирад."],
+    'Комиссия площадки — 1% от суммы сделки. Её точный размер показывается в расчёте перед каждой сделкой. Сеть Solana дополнительно берёт небольшой сетевой сбор.': ["The platform fee is 1% of the trade. The exact amount is shown in the quote before every trade. The Solana network also charges a small network fee.", "Комиссияи платформа 1% аз маблағи савдо. Андозаи дақиқи он пеш аз ҳар савдо дар ҳисоб нишон дода мешавад. Шабакаи Solana боз ҳаққи хурди шабака мегирад."],
     'Как пополнить и вывести деньги?': ["How do I deposit and withdraw?", "Чӣ тавр пул гузоштан ва баровардан мумкин аст?"],
     'Пополнить: Профиль → «Скопировать адрес» и отправьте SOL в сети Solana с биржи или другого кошелька. Вывести: отправьте SOL из Phantom на биржу.': ["Deposit: Profile → “Copy address” and send SOL on the Solana network from an exchange or another wallet. Withdraw: send SOL from Phantom to an exchange.", "Гузоштан: Профил → «Нусха бардоштани суроға» ва SOL-ро дар шабакаи Solana аз биржа ё ҳамёни дигар фиристед. Баровардан: SOL-ро аз Phantom ба биржа фиристед."],
     'Как разместить рекламу?': ["How do I place an ad?", "Чӣ тавр реклама гузоштан мумкин аст?"],
@@ -420,7 +420,7 @@ MB.i18n = (() => {
     'Membuy — интерфейс для обмена мемкоинов. Мы не храним ваши средства и не даём инвестиционных рекомендаций.': ["Membuy is an interface for swapping memecoins. We do not hold your funds and do not give investment advice.", "Membuy — интерфейс барои иваз кардани мемкоинҳо. Мо маблағҳои шуморо нигоҳ намедорем ва маслиҳати сармоягузорӣ намедиҳем."],
     'Мемкоины крайне рискованны: цена может упасть до нуля. Вы пользуетесь сервисом на свой риск.': ["Memecoins are extremely risky: the price can fall to zero. You use the service at your own risk.", "Мемкоинҳо хеле хатарноканд: нарх метавонад то сифр афтад. Шумо хизматро бо хатари худ истифода мебаред."],
     'Демо-режим: все монеты и сделки учебные, настоящие деньги не используются.': ["Demo mode: all coins and trades are for practice, no real money is used.", "Реҷаи демо: ҳамаи тангаҳо ва савдоҳо омӯзишӣ мебошанд, пули воқеӣ истифода намешавад."],
-    'Режим с настоящими деньгами: сделки проходят в блокчейне Solana и не отменяются. Комиссия площадки — не больше 0,5%, точная сумма видна перед сделкой.': ["Real-money mode: trades happen on the Solana blockchain and cannot be reversed. The platform fee is at most 0.5%; the exact amount is shown before the trade.", "Реҷаи пули воқеӣ: савдоҳо дар блокчейни Solana мегузаранд ва бекор карда намешаванд. Комиссияи платформа на бештар аз 0,5%, маблағи дақиқ пеш аз савдо намоён аст."],
+    'Режим с настоящими деньгами: сделки проходят в блокчейне Solana и не отменяются. Комиссия площадки — 1%, точная сумма видна перед сделкой.': ["Real-money mode: trades happen on the Solana blockchain and cannot be reversed. The platform fee is 1%; the exact amount is shown before the trade.", "Реҷаи пули воқеӣ: савдоҳо дар блокчейни Solana мегузаранд ва бекор карда намешаванд. Комиссияи платформа 1%, маблағи дақиқ пеш аз савдо намоён аст."],
     'Реклама: объявления проверяет владелец площадки. Запрещены обещания дохода, обман, чужие товарные знаки и ссылки на сбор ключей.': ["Ads: the platform owner reviews ads. Promises of income, deception, other people’s trademarks and links that collect keys are prohibited.", "Реклама: эълонҳоро соҳиби платформа месанҷад. Ваъдаи даромад, фиреб, тамғаҳои молии бегона ва пайвандҳо барои ҷамъ кардани калидҳо манъ аст."],
     'Профиль, сделки, фото и настройки хранятся только в вашем браузере. У Membuy нет своего сервера, и мы их не получаем.': ["Your profile, trades, photo and settings are stored only in your browser. Membuy has no server of its own and does not receive them.", "Профил, савдоҳо, акс ва танзимот танҳо дар браузери шумо нигоҳ дошта мешаванд. Membuy сервери худро надорад ва онҳоро намегирад."],
     'В режиме с настоящими деньгами сайт обращается к DexScreener и GeckoTerminal (цены и графики), Jupiter (расчёт и подготовка сделки) и узлу сети Solana (балансы). Им передаются ваш IP-адрес, а Jupiter и узлу Solana — ещё и адрес кошелька, без него нельзя посчитать сделку и баланс.': ["In real-money mode the site calls DexScreener and GeckoTerminal (prices and charts), Jupiter (quotes and trade preparation) and a Solana network node (balances). They receive your IP address, and Jupiter and the Solana node also receive your wallet address — trades and balances cannot be calculated without it.", "Дар реҷаи пули воқеӣ сайт ба DexScreener ва GeckoTerminal (нархҳо ва графикҳо), Jupiter (ҳисоб ва омодасозии савдо) ва гиреҳи шабакаи Solana (балансҳо) муроҷиат мекунад. Ба онҳо IP-суроғаи шумо, ба Jupiter ва гиреҳи Solana инчунин суроғаи ҳамён фиристода мешавад — бе он савдо ва балансро ҳисоб кардан мумкин нест."],
@@ -553,6 +553,11 @@ MB.i18n = (() => {
     "Ссылки в постах запрещены": ["Links are not allowed in posts", ""],
     "Посты ещё не настроены": ["Posts are not set up yet", ""],
     "Скрывать посты может только владелец площадки": ["Only the platform owner can hide posts", ""],
+    "Награды автора монет": ["Coin creator rewards", ""],
+    "Если вы создали монету на pump.fun (в том числе через Membuy), вам идёт доля с каждой сделки этой монетой. Заберите её на свой кошелёк.": ["If you created a coin on pump.fun (including via Membuy), you earn a share of every trade in it. Claim it to your wallet.", ""],
+    "Забрать награды": ["Claim rewards", ""],
+    "Награды отправлены на ваш кошелёк": ["Rewards sent to your wallet", ""],
+    "Наград автора пока нет": ["No creator rewards yet", ""],
     'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
     'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
     'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
@@ -1276,7 +1281,18 @@ MB.pumpcreate = (() => {
     MB.store.note('Монета ' + v.symbol + ' выпущена на pump.fun'); setTimeout(() => MB.wallet.refresh().catch(() => {}), 6000);
     return { mint: mintAddr, sig, symbol: v.symbol };
   }
-  return { enabled, validate, create, withFee };
+  /** Награды автора: pump.fun платит создателю монеты долю с каждой сделки. Забираются все сразу одной транзакцией. */
+  async function claimCreatorFees() {
+    const st = MB.store.get(); if (!st.wallet.connected) throw new Error('Сначала подключите кошелёк');
+    await MB.wallet.web3(); const W = window.solanaWeb3;
+    const r = await fetch(C.PUMP_API + '/trade-local', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ publicKey: st.wallet.address, action: 'collectCreatorFee', priorityFee: 0.000001, pool: 'pump' }) }).catch(() => null);
+    if (!r || !r.ok) throw new Error('Наград автора пока нет');
+    const tx = W.VersionedTransaction.deserialize(new Uint8Array(await r.arrayBuffer()));
+    const keys = tx.message.staticAccountKeys.map(k => k.toBase58 ? k.toBase58() : String(k));
+    if (!keys.includes(st.wallet.address)) throw new Error('Транзакция не адресована вашему кошельку — подпись отменена');
+    const { signature } = await MB.wallet.send(tx); setTimeout(() => MB.wallet.refresh().catch(() => {}), 6000); return signature;
+  }
+  return { enabled, validate, create, withFee, claimCreatorFees };
 })();
 
 /* Обмен. quote() считает, сколько получит пользователь; execute() исполняет сделку.
@@ -1802,13 +1818,15 @@ MB.views.profile = (() => {
       <div class="qgrid">${MB.config.LIVE ? '<a class="btn ghost" href="#invite">Пригласить друзей</a><a class="btn ghost" href="#create">Создать монету</a><a class="btn ghost" href="#ads">Реклама</a>' : '<a class="btn ghost" href="#invite">Пригласить друзей</a><a class="btn ghost" href="#create">Создать монету</a><a class="btn ghost" href="#ads">Реклама</a>'}<a class="btn ghost" href="#prefs">Настройки</a></div>
       <div class="card wcard"><small>Стоимость портфеля</small><b class="tot">${usd(total)}</b><div class="wline"><span>${num(st.wallet.sol, 4)} SOL свободно</span><span class="${pnl >= 0 ? 'up' : 'down'}">Результат: ${pnl >= 0 ? '+' : ''}${usd(pnl)} (${MB.util.pct(pct)})</span></div><canvas id="eq" role="img" aria-label="График стоимости портфеля"></canvas></div>
       <div class="card dep"><h2 class="h2">Кошелёк</h2><div class="qgrid dq"><a class="btn accent" href="#deposit">Депозит</a><a class="btn ghost" href="#deposit">Получить</a></div>${MB.config.LIVE ? `<p class="mut">Чтобы пополнить, отправьте SOL на этот адрес в сети Solana — с биржи или из другого кошелька.</p><code class="addr">${esc(st.wallet.address)}</code>` : ''}<div class="qgrid">${MB.config.LIVE ? '<button class="btn accent" id="wcopy">Скопировать адрес</button><button class="btn ghost" id="wref">Обновить баланс</button>' : ''}<button class="btn ghost" id="wdis">Отключить кошелёк</button></div></div>
-            <div id="income"></div>
+            ${MB.config.LIVE ? '<div class="card stack creator"><h2 class="h2">Награды автора монет</h2><p class="hint">Если вы создали монету на pump.fun (в том числе через Membuy), вам идёт доля с каждой сделки этой монетой. Заберите её на свой кошелёк.</p><div class="qgrid"><button class="btn accent" id="cclaim">Забрать награды</button></div></div>' : ''}
+      <div id="income"></div>
       <div class="chips tabsx" role="tablist"><button class="chip ${tab === 'open' ? 'on' : ''}" role="tab" aria-selected="${tab === 'open'}" data-tab="open">Открыто</button><button class="chip ${tab === 'closed' ? 'on' : ''}" role="tab" aria-selected="${tab === 'closed'}" data-tab="closed">Закрыто</button><button class="chip ${tab === 'hist' ? 'on' : ''}" role="tab" aria-selected="${tab === 'hist'}" data-tab="hist">История</button></div>
       <div class="list">${tab === 'open' ? open : tab === 'closed' ? closed : hist}</div>`;
     const wc = root.querySelector('#wcopy'); if (wc) wc.onclick = () => navigator.clipboard.writeText(st.wallet.address).then(() => MB.ui.toast('Адрес скопирован'), () => MB.ui.toast('Не удалось скопировать — выделите адрес вручную', 'err'));
     const wr = root.querySelector('#wref'); if (wr) wr.onclick = () => MB.wallet.refresh().then(() => MB.ui.toast('Баланс обновлён'), e => MB.ui.toast(e.message, 'err'));
     root.querySelector('#wdis').onclick = () => { if (confirm(MB.t('Отключить кошелёк?'))) MB.wallet.disconnect().then(() => MB.ui.toast('Кошелёк отключён')); };
     income();
+    const cc = root.querySelector('#cclaim'); if (cc) cc.onclick = async () => { if (cc.disabled) return; cc.disabled = true; try { await MB.pumpcreate.claimCreatorFees(); MB.ui.toast('Награды отправлены на ваш кошелёк'); } catch (e) { MB.ui.toast(e.message, 'err'); } finally { cc.disabled = false; } };
     root.querySelectorAll('[data-tab]').forEach(c => c.onclick = () => { tab = c.dataset.tab; draw(); });
     root.querySelector('#pfile').addEventListener('change', e => MB.util.squareImage(e.target.files[0], 128).then(url => { MB.store.update(s => { s.profile.avatar = url; }); MB.ui.toast('Фото профиля обновлено'); }, err => MB.ui.toast(err.message, 'err')));
     const eq = st.equity.length > 1 ? st.equity : [start, total]; MB.chart.draw(root.querySelector('#eq'), eq);
@@ -2050,7 +2068,7 @@ MB.views = MB.views || {};
         ${q('Почему сделка не проходит?', 'Причины: не хватает SOL на сделку и сетевой сбор, слишком сильное влияние на цену, цена успела измениться, или вы отклонили подпись в Phantom. Попробуйте сумму меньше или проскальзывание больше.')}
         ${q('Где мои монеты?', 'В вашем кошельке Phantom. Membuy не хранит ваши средства и не имеет к ним доступа.')}
         ${q('Это безопасно?', 'Ключи не покидают ваш кошелёк. Но мемкоины — крайне рискованный актив: цена может упасть до нуля. Никогда не вкладывайте больше, чем готовы потерять. Никому не сообщайте 12 секретных слов от кошелька.')}
-        ${q('Есть ли комиссия?', 'Комиссия площадки — не больше 0,5% от суммы сделки. Её точный размер показывается в расчёте перед каждой сделкой. Сеть Solana дополнительно берёт небольшой сетевой сбор.')}
+        ${q('Есть ли комиссия?', 'Комиссия площадки — 1% от суммы сделки. Её точный размер показывается в расчёте перед каждой сделкой. Сеть Solana дополнительно берёт небольшой сетевой сбор.')}
         ${q('Как пополнить и вывести деньги?', 'Пополнить: Профиль → «Скопировать адрес» и отправьте SOL в сети Solana с биржи или другого кошелька. Вывести: отправьте SOL из Phantom на биржу.')}
         ${q('Где новости Membuy?', `Telegram: <a class="lnk" href="${C.SOCIAL_TG}" target="_blank" rel="noopener">t.me/Membuy_market</a> · X: <a class="lnk" href="${C.SOCIAL_X}" target="_blank" rel="noopener">@golod_mem</a>`)}
         ${q('Как разместить рекламу?', 'Профиль → «Реклама». Оплата в SOL уходит владельцу площадки, объявление показывается всем после проверки.')}
@@ -2063,7 +2081,7 @@ MB.views = MB.views || {};
         <p>Membuy — интерфейс для обмена мемкоинов. Мы не храним ваши средства и не даём инвестиционных рекомендаций.</p>
         <p>Мемкоины крайне рискованны: цена может упасть до нуля. Вы пользуетесь сервисом на свой риск.</p>
         <p>Демо-режим: все монеты и сделки учебные, настоящие деньги не используются.</p>
-        <p>Режим с настоящими деньгами: сделки проходят в блокчейне Solana и не отменяются. Комиссия площадки — не больше 0,5%, точная сумма видна перед сделкой.</p>
+        <p>Режим с настоящими деньгами: сделки проходят в блокчейне Solana и не отменяются. Комиссия площадки — 1%, точная сумма видна перед сделкой.</p>
         <p>Реклама: объявления проверяет владелец площадки. Запрещены обещания дохода, обман, чужие товарные знаки и ссылки на сбор ключей.</p></div>`;
     },
   };

@@ -55,5 +55,16 @@ MB.pumpcreate = (() => {
     MB.store.note('Монета ' + v.symbol + ' выпущена на pump.fun'); setTimeout(() => MB.wallet.refresh().catch(() => {}), 6000);
     return { mint: mintAddr, sig, symbol: v.symbol };
   }
-  return { enabled, validate, create, withFee };
+  /** Награды автора: pump.fun платит создателю монеты долю с каждой сделки. Забираются все сразу одной транзакцией. */
+  async function claimCreatorFees() {
+    const st = MB.store.get(); if (!st.wallet.connected) throw new Error('Сначала подключите кошелёк');
+    await MB.wallet.web3(); const W = window.solanaWeb3;
+    const r = await fetch(C.PUMP_API + '/trade-local', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ publicKey: st.wallet.address, action: 'collectCreatorFee', priorityFee: 0.000001, pool: 'pump' }) }).catch(() => null);
+    if (!r || !r.ok) throw new Error('Наград автора пока нет');
+    const tx = W.VersionedTransaction.deserialize(new Uint8Array(await r.arrayBuffer()));
+    const keys = tx.message.staticAccountKeys.map(k => k.toBase58 ? k.toBase58() : String(k));
+    if (!keys.includes(st.wallet.address)) throw new Error('Транзакция не адресована вашему кошельку — подпись отменена');
+    const { signature } = await MB.wallet.send(tx); setTimeout(() => MB.wallet.refresh().catch(() => {}), 6000); return signature;
+  }
+  return { enabled, validate, create, withFee, claimCreatorFees };
 })();

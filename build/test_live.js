@@ -127,12 +127,16 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   p.once('dialog', d => d.accept()); await p.click(`[data-hide="${post.sig}"]`); await p.waitForTimeout(600);
   ok('владелец скрыл пост: заметка MBHIDE со своего кошелька', chain[chain.length - 1].memo === 'MBHIDE|' + post.sig && chain[chain.length - 1].payer === FEEW);
   await p.evaluate(() => MB.postchain.load(true)); ok('скрытый пост исчез из ленты', await p.evaluate(s => MB.postchain.load().then(l => !l.some(x => x.sig === s)), post.sig));
+  // ---- Награды автора (pump.fun creator fees) ----
+  await p.evaluate(() => { MB.store.set({ wallet: { connected: true, address: 'WalletAAA1111111111111111111111111111111111', sol: 2 } }); location.hash = 'profile'; }); await p.waitForTimeout(700);
+  global.__pp = null; await p.click('#cclaim'); await p.waitForTimeout(700);
+  ok('«Забрать награды»: запрос collectCreatorFee для вашего кошелька, подписано', global.__pp && global.__pp.action === 'collectCreatorFee' && global.__pp.publicKey.startsWith('WalletAAA'));
   // ---- Комиссия со сделок ----
   ok('без счёта комиссии сделки идут без комиссии', !calls.some(u => String(u).includes('platformFeeBps')) && !/feeAccount/.test(global.__swapBody || ''));
   global.__feeAcct = true; await p.evaluate(() => { MB.store.set({ wallet: { connected: true, address: 'WalletAAA1111111111111111111111111111111111', sol: 2 } }); });
   await p.goto(URL + '#t-' + MINT); await p.reload(); await p.waitForTimeout(800); await p.evaluate(() => { MB.store.set({ wallet: { connected: true, address: 'WalletAAA1111111111111111111111111111111111', sol: 2 } }); });
   await p.fill('#amt', '0.5'); await p.waitForTimeout(600);
-  ok('счёт комиссии есть: котировка с platformFeeBps=50 и строкой комиссии', calls.some(u => String(u).includes('platformFeeBps=50')) && /\$/.test(await p.textContent('#quote')));
+  ok('счёт комиссии есть: котировка с platformFeeBps=100 (1%) и строкой комиссии', calls.some(u => String(u).includes('platformFeeBps=100')) && /\$/.test(await p.textContent('#quote')));
   await p.click('#go'); await p.waitForTimeout(900); ok('сделка: Jupiter получил feeAccount вашего wSOL-счёта', (global.__swapBody || '').includes('DcjUUcAhier4oqAM7uMv3K23YQRzjyF1t38MgXifuiJW'));
   await p.evaluate(o => MB.store.set({ wallet: { connected: true, address: o, sol: 1 } }), '7gGoEh28GwkDLS8ABbGRpdJkQz78kpRBy3HrzRmBQ8PV'); await p.evaluate(() => { location.hash = 'profile'; }); await p.waitForTimeout(900);
   ok('владелец видит доход площадки: 0.42 SOL', (await p.textContent('#income')).includes('0,42') || (await p.textContent('#income')).includes('0.42'));

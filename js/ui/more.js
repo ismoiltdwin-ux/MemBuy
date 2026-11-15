@@ -24,9 +24,9 @@ MB.views = MB.views || {};
           <p class="fine">Награда считается только с комиссии Membuy, без сборов сети и pump.fun. Приглашать самого себя нельзя. Мемкоины очень рискованны — не обещайте друзьям прибыль.</p></div>
         ${R.inviter() ? `<p class="hint">Вас пригласил <code class="ugc">${esc(MB.util.short(R.inviter()))}</code></p>` : ''}
         <div id="rowner"></div>`;
-      const copy = () => { const inp = el.querySelector('#rlink'); if (navigator.clipboard) navigator.clipboard.writeText(link).then(() => MB.ui.toast('Ссылка скопирована'), () => { inp.select(); }); else inp.select(); };
+      const copy = () => { MB.track('invite'); const inp = el.querySelector('#rlink'); if (navigator.clipboard) navigator.clipboard.writeText(link).then(() => MB.ui.toast('Ссылка скопирована'), () => { inp.select(); }); else inp.select(); };
       el.querySelector('#rcopy').onclick = copy;
-      el.querySelector('#rshare').onclick = () => navigator.share ? navigator.share({ title: 'Membuy', text, url: link }).catch(() => {}) : copy();
+      el.querySelector('#rshare').onclick = () => navigator.share ? (MB.track('invite'), navigator.share({ title: 'Membuy', text, url: link }).catch(() => {})) : copy();
       const all = await R.stats().catch(() => ({})); if (root !== el) return;
       const mine = all[me] || { traders: new Set(), earnedLam: 0, paidLam: 0 };
       el.querySelector('#rstats').innerHTML = `<div><dt>Приглашено</dt><dd>${mine.traders.size}</dd></div><div><dt>Заработано</dt><dd>${sol(mine.earnedLam)}</dd></div><div><dt>К выплате</dt><dd>${sol(R.owed(mine))}</dd></div>`;
@@ -85,4 +85,26 @@ MB.views = MB.views || {};
     return { mount(el) { root = el; q = ''; el.innerHTML = `<h1 class="pt">Поиск</h1><label class="search"><span class="sr">Поиск монеты</span><input id="sq2" type="search" placeholder="Название или тикер" autocomplete="off"></label><div id="sres" class="stack" style="margin-top:14px"></div>`; const i = el.querySelector('#sq2'); i.addEventListener('input', () => { q = i.value; fill(); }); i.focus(); return fill(); }, unmount() { root = null; } };
   })();
   MB.views.notes = { mount(el) { const st = MB.store.get(); MB.store.update(s => { s.unread = 0; }); el.innerHTML = `<h1 class="pt">Уведомления</h1><div class="list">${st.notes.length ? st.notes.map(n => `<div class="row"><span class="nm"><b>${esc(n.text)}</b><small>${new Date(n.ts).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</small></span></div>`).join('') : MB.ui.empty('Уведомлений нет', 'Здесь появятся сообщения о сделках и кампаниях.')}</div>`; } };
+  /** Владелец: анонимная статистика за 30 дней (счётчики событий с сервера SOCIAL_API). */
+  MB.views.stats = (() => {
+    let root;
+    const NAMES = [['visit', 'Заходы на сайт'], ['visit_ref', 'Заходы по приглашению'], ['connect', 'Подключили кошелёк'], ['buy', 'Покупки'], ['sell', 'Продажи'], ['create', 'Выпущено монет'], ['send', 'Переводы'], ['ad_paid', 'Оплачено реклам'], ['invite', 'Поделились ссылкой'], ['follow', 'Подписки'], ['msg', 'Сообщения']];
+    async function draw() {
+      const el = root; if (!el) return;
+      el.innerHTML = '<a class="back" href="#profile">← Профиль</a><h1 class="pt">Статистика</h1><div id="sbox"><div class="hint">Загружаем…</div></div>';
+      const box = el.querySelector('#sbox');
+      if (!MB.config.LIVE || !MB.chat.enabled()) { box.innerHTML = MB.ui.empty('Статистика работает в живом режиме', ''); return; }
+      if (!MB.fees.isOwner()) { box.innerHTML = MB.ui.empty('Только для владельца', 'Подключите кошелёк владельца Membuy.'); return; }
+      try {
+        const d = await MB.chat.stats(); if (root !== el) return;
+        const today = new Date().toISOString().slice(0, 10), wk = new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10), sum = (ev, from) => d.rows.filter(r => r.ev === ev && r.day >= from).reduce((a, r) => a + r.n, 0);
+        const days = [...new Set(d.rows.map(r => r.day))].slice(0, 14);
+        box.innerHTML = `<p class="hint">Анонимные счётчики: без адресов кошельков и личных данных. Заход считается один раз за посещение.</p>
+          <div class="card"><div class="list">${NAMES.map(([k, n]) => `<div class="row"><span class="nm"><b>${n}</b><small>Сегодня: ${sum(k, today)} · за 7 дней: ${sum(k, wk)}</small></span><span class="pr"><b>${sum(k, '0')}</b><small>30 дней</small></span></div>`).join('')}</div></div>
+          <dl class="stats"><div><dt>Трейдеров с подписками</dt><dd>${d.followers}</dd></div><div><dt>Сообщений всего</dt><dd>${d.messages}</dd></div></dl>
+          ${days.length ? `<div class="card"><h2 class="h2">По дням</h2><div class="list">${days.map(day => `<div class="row"><span class="nm"><b>${day}</b><small>Заходы: ${sum('visit', day) - sum('visit', day + 'z') + sum('visit_ref', day) - sum('visit_ref', day + 'z')} · кошельки: ${sum('connect', day) - sum('connect', day + 'z')} · сделки: ${sum('buy', day) - sum('buy', day + 'z') + sum('sell', day) - sum('sell', day + 'z')}</small></span></div>`).join('')}</div></div>` : ''}`;
+      } catch (e) { if (root === el) box.innerHTML = MB.ui.empty('Не удалось загрузить', MB.util.esc(e.message)); }
+    }
+    return { mount(el) { root = el; return draw(); }, unmount() { root = null; } };
+  })();
 })();

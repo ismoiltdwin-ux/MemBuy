@@ -40,7 +40,7 @@ MB.adchain = (() => {
     const tx = new W.Transaction({ feePayer: from, recentBlockhash: blockhash });
     if (lamports > 0) tx.add(W.SystemProgram.transfer({ fromPubkey: from, toPubkey: new W.PublicKey(C.ADS_WALLET), lamports }));
     tx.add(new W.TransactionInstruction({ programId: new W.PublicKey(MEMO), keys: [{ pubkey: from, isSigner: true, isWritable: false }], data: new TextEncoder().encode(memo) }));
-    const res = await MB.wallet.send(tx); loadedAt = 0; return res.signature;
+    const res = await MB.wallet.send(tx); loadedAt = 0; if (MB.track) MB.track('ad_paid'); return res.signature;
   }
 
   /** Проверяет транзакцию в сети и запоминает результат (подтверждённая транзакция не меняется). */

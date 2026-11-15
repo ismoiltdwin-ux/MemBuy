@@ -454,7 +454,14 @@ MB.i18n = (() => {
     'Демо-режим: все монеты и сделки учебные, настоящие деньги не используются.': ["Demo mode: all coins and trades are for practice, no real money is used.", "Реҷаи демо: ҳамаи тангаҳо ва савдоҳо омӯзишӣ мебошанд, пули воқеӣ истифода намешавад."],
     'Режим с настоящими деньгами: сделки проходят в блокчейне Solana и не отменяются. Комиссия площадки — 1%, точная сумма видна перед сделкой.': ["Real-money mode: trades happen on the Solana blockchain and cannot be reversed. The platform fee is 1%; the exact amount is shown before the trade.", "Реҷаи пули воқеӣ: савдоҳо дар блокчейни Solana мегузаранд ва бекор карда намешаванд. Комиссияи платформа 1%, маблағи дақиқ пеш аз савдо намоён аст."],
     'Реклама: объявления проверяет владелец площадки. Запрещены обещания дохода, обман, чужие товарные знаки и ссылки на сбор ключей.': ["Ads: the platform owner reviews ads. Promises of income, deception, other people’s trademarks and links that collect keys are prohibited.", "Реклама: эълонҳоро соҳиби платформа месанҷад. Ваъдаи даромад, фиреб, тамғаҳои молии бегона ва пайвандҳо барои ҷамъ кардани калидҳо манъ аст."],
-    'Профиль, сделки, фото и настройки хранятся только в вашем браузере. У Membuy нет своего сервера, и мы их не получаем.': ["Your profile, trades, photo and settings are stored only in your browser. Membuy has no server of its own and does not receive them.", "Профил, савдоҳо, акс ва танзимот танҳо дар браузери шумо нигоҳ дошта мешаванд. Membuy сервери худро надорад ва онҳоро намегирад."],
+    'Профиль, сделки, фото и настройки хранятся только в вашем браузере.': ['Your profile, trades, photos and settings are stored only in your browser.', ''],
+    'Подписки и личные сообщения хранятся на сервере Membuy (Cloudflare), привязаны к адресу кошелька и видны только участникам переписки.': ['Follows and private messages are stored on the Membuy server (Cloudflare), tied to wallet addresses and visible only to the people in the conversation.', ''],
+    'Статистика анонимная: сервер считает только события («заход», «сделка» и т. п.) по дням — без адресов кошельков, IP и cookies.': ['Analytics is anonymous: the server only counts events (“visit”, “trade”, etc.) per day — no wallet addresses, IP addresses or cookies.', ''],
+    'Статистика': ['Analytics', ''], 'Выплаты за приглашения': ['Referral payouts', ''], 'Заходы на сайт': ['Site visits', ''], 'Заходы по приглашению': ['Visits via invite', ''], 'Подключили кошелёк': ['Wallets connected', ''],
+    'Покупки': ['Buys', ''], 'Продажи': ['Sells', ''], 'Выпущено монет': ['Coins launched', ''], 'Переводы': ['Transfers', ''], 'Оплачено реклам': ['Ads paid', ''], 'Поделились ссылкой': ['Invite links shared', ''],
+    'Сообщения': ['Messages', ''], '30 дней': ['30 days', ''], 'По дням': ['By day', ''], 'Трейдеров с подписками': ['Traders with follows', ''], 'Сообщений всего': ['Messages total', ''],
+    'Анонимные счётчики: без адресов кошельков и личных данных. Заход считается один раз за посещение.': ['Anonymous counters: no wallet addresses or personal data. A visit is counted once per session.', ''],
+    'Статистика работает в живом режиме': ['Analytics works in live mode', ''], 'Только для владельца': ['Owner only', ''], 'Подключите кошелёк владельца Membuy.': ['Connect the Membuy owner wallet.', ''],
     'В режиме с настоящими деньгами сайт обращается к DexScreener и GeckoTerminal (цены и графики), Jupiter (расчёт и подготовка сделки) и узлу сети Solana (балансы). Им передаются ваш IP-адрес, а Jupiter и узлу Solana — ещё и адрес кошелька, без него нельзя посчитать сделку и баланс.': ["In real-money mode the site calls DexScreener and GeckoTerminal (prices and charts), Jupiter (quotes and trade preparation) and a Solana network node (balances). They receive your IP address, and Jupiter and the Solana node also receive your wallet address — trades and balances cannot be calculated without it.", "Дар реҷаи пули воқеӣ сайт ба DexScreener ва GeckoTerminal (нархҳо ва графикҳо), Jupiter (ҳисоб ва омодасозии савдо) ва гиреҳи шабакаи Solana (балансҳо) муроҷиат мекунад. Ба онҳо IP-суроғаи шумо, ба Jupiter ва гиреҳи Solana инчунин суроғаи ҳамён фиристода мешавад — бе он савдо ва балансро ҳисоб кардан мумкин нест."],
     'Сделки и рекламные объявления записываются в блокчейн Solana и видны всем.': ["Trades and ads are recorded on the Solana blockchain and are visible to everyone.", "Савдоҳо ва эълонҳои рекламавӣ дар блокчейни Solana сабт мешаванд ва ба ҳама намоёнанд."],
     "Скоро на бирже": ["Soon", "Ба наздикӣ дар биржа"],
@@ -676,6 +683,7 @@ MB.i18n = (() => {
   };
   // Шаблоны: [регулярное выражение, English, Тоҷикӣ]
   const R = [
+    [/^Сегодня: (\d+) · за 7 дней: (\d+)$/, 'Today: $1 · last 7 days: $2', ''], [/^Заходы: (-?\d+) · кошельки: (-?\d+) · сделки: (-?\d+)$/, 'Visits: $1 · wallets: $2 · trades: $3', ''],
     [/^Данные устарели: последнее обновление (\d+) мин назад\. Проверьте интернет\.$/, 'Data is stale: last update $1 min ago. Check your connection.', ''],
     [/^(\d+)% этой комиссии — ваши\. Учёт идёт прямо в блокчейне: каждая сделка друга помечается вашим адресом\.$/, '$1% of that fee is yours. Tracking is on-chain: every trade by your friend is tagged with your address.', ''],
     [/^(\d+)% этой комиссии начисляется вам\.$/, '$1% of that fee goes to you.', ''], [/^(\d+)% комиссии$/, '$1% of fees', ''],
@@ -1069,7 +1077,7 @@ MB.wallet = (() => {
     async connect() {
       if (C.MODE === 'demo') { const st = S.get(); S.set({ wallet: { connected: true, address: 'Demo' + 'MB7xQ2kLp9aVn3TzR4', sol: st.wallet.sol || C.DEMO_START_SOL } }); return; }
       const p = provider(); if (!p) { MB.ui.noWallet(); const e = new Error(''); e.silent = true; throw e; } // окно с кнопками вместо красной ошибки
-      let res; try { res = await p.connect(); } catch (e) { throw rejected(e); } const address = res.publicKey.toString();
+      let res; try { res = await p.connect(); } catch (e) { throw rejected(e); } const address = res.publicKey.toString(); if (MB.track) MB.track('connect', true);
       S.set({ wallet: { connected: true, address, sol: 0 } }); await this.refresh();
     },
     /** Живой режим: читает из сети баланс SOL и монет кошелька (обе программы токенов Solana). */
@@ -1275,7 +1283,7 @@ MB.adchain = (() => {
     const tx = new W.Transaction({ feePayer: from, recentBlockhash: blockhash });
     if (lamports > 0) tx.add(W.SystemProgram.transfer({ fromPubkey: from, toPubkey: new W.PublicKey(C.ADS_WALLET), lamports }));
     tx.add(new W.TransactionInstruction({ programId: new W.PublicKey(MEMO), keys: [{ pubkey: from, isSigner: true, isWritable: false }], data: new TextEncoder().encode(memo) }));
-    const res = await MB.wallet.send(tx); loadedAt = 0; return res.signature;
+    const res = await MB.wallet.send(tx); loadedAt = 0; if (MB.track) MB.track('ad_paid'); return res.signature;
   }
 
   /** Проверяет транзакцию в сети и запоминает результат (подтверждённая транзакция не меняется). */
@@ -1471,7 +1479,7 @@ MB.pumpcreate = (() => {
     // это стандартный способ, который рекомендует Phantom; отдельная «только подпись» вызывает у него больше предупреждений.
     tx.sign([mint]);
     const { signature: sig } = await MB.wallet.send(tx);
-    step('Отправлено в сеть…');
+    step('Отправлено в сеть…'); if (MB.track) MB.track('create');
     MB.store.note('Монета ' + v.symbol + ' выпущена на pump.fun'); setTimeout(() => MB.wallet.refresh().catch(() => {}), 6000);
     return { mint: mintAddr, sig, symbol: v.symbol };
   }
@@ -1545,7 +1553,7 @@ MB.send = (() => {
         { pubkey: new W.PublicKey(src.pubkey), isSigner: false, isWritable: true }, { pubkey: mintPk, isSigner: false, isWritable: false },
         { pubkey: destAta, isSigner: false, isWritable: true }, { pubkey: me, isSigner: true, isWritable: false }] }));
     }
-    const { signature } = await MB.wallet.send(tx);
+    const { signature } = await MB.wallet.send(tx); if (MB.track) MB.track('send');
     MB.store.note('Отправлено ' + MB.util.num(amount, 4) + ' ' + asset.sym); setTimeout(() => MB.wallet.refresh().catch(() => {}), 5000); return signature;
   }
   return { isAddr, assets, preview, transfer };
@@ -1593,13 +1601,25 @@ MB.chat = (() => {
   }
   return {
     enabled, loggedIn: () => !!token(), login: () => login().then(sync), sync,
-    follow: async (to, on) => { const d = await api('/follow', { to, on }); MB.store.update(s => { const i = s.following.indexOf(to); if (on && i < 0) s.following.push(to); if (!on && i >= 0) s.following.splice(i, 1); }, true); return d; },
+    follow: async (to, on) => { const d = await api('/follow', { to, on }); MB.store.update(s => { const i = s.following.indexOf(to); if (on && i < 0) { s.following.push(to); if (MB.track) MB.track('follow'); } if (!on && i >= 0) s.following.splice(i, 1); }, true); return d; },
     relation: w => api('/relation?with=' + encodeURIComponent(w)),
-    send: (to, text) => api('/send', { to, text }),
+    send: (to, text) => api('/send', { to, text }).then(d => (MB.track && MB.track('msg'), d)),
+    stats: () => api('/stats'),
     msgs: (w, after = 0) => api('/msgs?with=' + encodeURIComponent(w) + '&after=' + after),
     threads: () => api('/threads'), activity: () => api('/activity'),
     open: (addr) => { location.hash = 'c-' + addr; },
     start() { if (!enabled() || pollT) return; poll(); pollT = setInterval(poll, 20000); },
+  };
+})();
+
+/* Анонимная статистика (живой режим): счётчики событий на нашем сервере SOCIAL_API — без адресов кошельков, IP и cookies.
+   Владелец видит итоги по дням в разделе «Статистика» (#stats). */
+MB.track = (() => {
+  const C = MB.config, once = new Set();
+  return (ev, oncePerSession) => {
+    if (!C.LIVE || !C.SOCIAL_API) return;
+    if (oncePerSession) { if (once.has(ev)) return; try { if (sessionStorage.getItem('mbt-' + ev)) return; sessionStorage.setItem('mbt-' + ev, '1'); } catch (e) { /* без хранилища — считаем один раз за загрузку */ } once.add(ev); }
+    try { fetch(C.SOCIAL_API.replace(/\/$/, '') + '/hit', { method: 'POST', keepalive: true, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ev }) }).catch(() => {}); } catch (e) { /* статистика не должна мешать сайту */ }
   };
 })();
 
@@ -1647,7 +1667,7 @@ MB.swap = (() => {
       const keys = tx.message && tx.message.staticAccountKeys ? tx.message.staticAccountKeys.map(k => k.toBase58 ? k.toBase58() : String(k)) : [];
       if (!keys.includes(st.wallet.address)) throw new Error('Сделка не адресована вашему кошельку — подпись отменена');
       if (q.feeOn && MB.ref) tx = await MB.ref.tag(tx); // заметка пригласившего: 10% комиссии этой сделки — его награда
-      const res = await MB.wallet.send(tx); sig = res.signature;
+      const res = await MB.wallet.send(tx); sig = res.signature; MB.track(q.side === 'buy' ? 'buy' : 'sell');
     }
     S.applyTrade({ id: q.token.id, sym: q.token.sym, name: q.token.name, side: q.side, sol, tokens, usd: q.usd, price: q.token.price, feeUsd: q.feeUsd, ts: Date.now(), sig });
     if (C.MODE !== 'demo') [4000, 15000].forEach(ms => setTimeout(() => MB.wallet.refresh().catch(() => {}), ms));
@@ -2100,7 +2120,7 @@ MB.views.profile = (() => {
     box.innerHTML = `<div class="card stack"><h2 class="h2">Доход площадки (вы владелец)</h2>
       <p class="hint">${on ? `Комиссия со сделок ${MB.config.PLATFORM_FEE_BPS / 100}% включена. Накоплено: <b>${num(bal, 4)} SOL</b>.` : 'Комиссия со сделок выключена: для неё нужен отдельный счёт. Создание стоит около 0,002 SOL (залог сети, возвращается при выводе).'}</p>
       <p class="fine">Плата за выпуск монеты (${MB.config.CREATE_FEE_SOL} SOL) и оплата рекламы приходят прямо на ваш кошелёк.</p>
-      <div class="qgrid">${on ? '<button class="btn accent" id="fwd">Вывести комиссию</button>' : '<button class="btn accent" id="fon">Включить комиссию</button>'}</div></div>`;
+      <div class="qgrid">${on ? '<button class="btn accent" id="fwd">Вывести комиссию</button>' : '<button class="btn accent" id="fon">Включить комиссию</button>'}<a class="btn ghost" href="#stats">Статистика</a><a class="btn ghost" href="#invite">Выплаты за приглашения</a></div></div>`;
     const go = (fn, ok) => async () => { try { await fn(); MB.ui.toast(ok); setTimeout(() => income(), 5000); } catch (e) { MB.ui.toast(e.message, 'err'); } };
     const a = box.querySelector('#fon'), b = box.querySelector('#fwd');
     if (a) a.onclick = go(() => MB.fees.enable(), 'Счёт для комиссии создан');
@@ -2323,9 +2343,9 @@ MB.views = MB.views || {};
           <p class="fine">Награда считается только с комиссии Membuy, без сборов сети и pump.fun. Приглашать самого себя нельзя. Мемкоины очень рискованны — не обещайте друзьям прибыль.</p></div>
         ${R.inviter() ? `<p class="hint">Вас пригласил <code class="ugc">${esc(MB.util.short(R.inviter()))}</code></p>` : ''}
         <div id="rowner"></div>`;
-      const copy = () => { const inp = el.querySelector('#rlink'); if (navigator.clipboard) navigator.clipboard.writeText(link).then(() => MB.ui.toast('Ссылка скопирована'), () => { inp.select(); }); else inp.select(); };
+      const copy = () => { MB.track('invite'); const inp = el.querySelector('#rlink'); if (navigator.clipboard) navigator.clipboard.writeText(link).then(() => MB.ui.toast('Ссылка скопирована'), () => { inp.select(); }); else inp.select(); };
       el.querySelector('#rcopy').onclick = copy;
-      el.querySelector('#rshare').onclick = () => navigator.share ? navigator.share({ title: 'Membuy', text, url: link }).catch(() => {}) : copy();
+      el.querySelector('#rshare').onclick = () => navigator.share ? (MB.track('invite'), navigator.share({ title: 'Membuy', text, url: link }).catch(() => {})) : copy();
       const all = await R.stats().catch(() => ({})); if (root !== el) return;
       const mine = all[me] || { traders: new Set(), earnedLam: 0, paidLam: 0 };
       el.querySelector('#rstats').innerHTML = `<div><dt>Приглашено</dt><dd>${mine.traders.size}</dd></div><div><dt>Заработано</dt><dd>${sol(mine.earnedLam)}</dd></div><div><dt>К выплате</dt><dd>${sol(R.owed(mine))}</dd></div>`;
@@ -2384,6 +2404,28 @@ MB.views = MB.views || {};
     return { mount(el) { root = el; q = ''; el.innerHTML = `<h1 class="pt">Поиск</h1><label class="search"><span class="sr">Поиск монеты</span><input id="sq2" type="search" placeholder="Название или тикер" autocomplete="off"></label><div id="sres" class="stack" style="margin-top:14px"></div>`; const i = el.querySelector('#sq2'); i.addEventListener('input', () => { q = i.value; fill(); }); i.focus(); return fill(); }, unmount() { root = null; } };
   })();
   MB.views.notes = { mount(el) { const st = MB.store.get(); MB.store.update(s => { s.unread = 0; }); el.innerHTML = `<h1 class="pt">Уведомления</h1><div class="list">${st.notes.length ? st.notes.map(n => `<div class="row"><span class="nm"><b>${esc(n.text)}</b><small>${new Date(n.ts).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</small></span></div>`).join('') : MB.ui.empty('Уведомлений нет', 'Здесь появятся сообщения о сделках и кампаниях.')}</div>`; } };
+  /** Владелец: анонимная статистика за 30 дней (счётчики событий с сервера SOCIAL_API). */
+  MB.views.stats = (() => {
+    let root;
+    const NAMES = [['visit', 'Заходы на сайт'], ['visit_ref', 'Заходы по приглашению'], ['connect', 'Подключили кошелёк'], ['buy', 'Покупки'], ['sell', 'Продажи'], ['create', 'Выпущено монет'], ['send', 'Переводы'], ['ad_paid', 'Оплачено реклам'], ['invite', 'Поделились ссылкой'], ['follow', 'Подписки'], ['msg', 'Сообщения']];
+    async function draw() {
+      const el = root; if (!el) return;
+      el.innerHTML = '<a class="back" href="#profile">← Профиль</a><h1 class="pt">Статистика</h1><div id="sbox"><div class="hint">Загружаем…</div></div>';
+      const box = el.querySelector('#sbox');
+      if (!MB.config.LIVE || !MB.chat.enabled()) { box.innerHTML = MB.ui.empty('Статистика работает в живом режиме', ''); return; }
+      if (!MB.fees.isOwner()) { box.innerHTML = MB.ui.empty('Только для владельца', 'Подключите кошелёк владельца Membuy.'); return; }
+      try {
+        const d = await MB.chat.stats(); if (root !== el) return;
+        const today = new Date().toISOString().slice(0, 10), wk = new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10), sum = (ev, from) => d.rows.filter(r => r.ev === ev && r.day >= from).reduce((a, r) => a + r.n, 0);
+        const days = [...new Set(d.rows.map(r => r.day))].slice(0, 14);
+        box.innerHTML = `<p class="hint">Анонимные счётчики: без адресов кошельков и личных данных. Заход считается один раз за посещение.</p>
+          <div class="card"><div class="list">${NAMES.map(([k, n]) => `<div class="row"><span class="nm"><b>${n}</b><small>Сегодня: ${sum(k, today)} · за 7 дней: ${sum(k, wk)}</small></span><span class="pr"><b>${sum(k, '0')}</b><small>30 дней</small></span></div>`).join('')}</div></div>
+          <dl class="stats"><div><dt>Трейдеров с подписками</dt><dd>${d.followers}</dd></div><div><dt>Сообщений всего</dt><dd>${d.messages}</dd></div></dl>
+          ${days.length ? `<div class="card"><h2 class="h2">По дням</h2><div class="list">${days.map(day => `<div class="row"><span class="nm"><b>${day}</b><small>Заходы: ${sum('visit', day) - sum('visit', day + 'z') + sum('visit_ref', day) - sum('visit_ref', day + 'z')} · кошельки: ${sum('connect', day) - sum('connect', day + 'z')} · сделки: ${sum('buy', day) - sum('buy', day + 'z') + sum('sell', day) - sum('sell', day + 'z')}</small></span></div>`).join('')}</div></div>` : ''}`;
+      } catch (e) { if (root === el) box.innerHTML = MB.ui.empty('Не удалось загрузить', MB.util.esc(e.message)); }
+    }
+    return { mount(el) { root = el; return draw(); }, unmount() { root = null; } };
+  })();
 })();
 
 /* Справка, условия, приватность и знакомство при первом входе. Тексты зависят от режима (демо / настоящие деньги). */
@@ -2419,7 +2461,7 @@ MB.views = MB.views || {};
   MB.views.privacy = {
     mount(el) {
       el.innerHTML = `${back}<h1 class="pt">Приватность</h1><div class="card stack">
-        <p>Профиль, сделки, фото и настройки хранятся только в вашем браузере. У Membuy нет своего сервера, и мы их не получаем.</p>
+        <p>Профиль, сделки, фото и настройки хранятся только в вашем браузере.</p><p>Подписки и личные сообщения хранятся на сервере Membuy (Cloudflare), привязаны к адресу кошелька и видны только участникам переписки.</p><p>Статистика анонимная: сервер считает только события («заход», «сделка» и т. п.) по дням — без адресов кошельков, IP и cookies.</p>
         <p>В режиме с настоящими деньгами сайт обращается к DexScreener и GeckoTerminal (цены и графики), Jupiter (расчёт и подготовка сделки) и узлу сети Solana (балансы). Им передаются ваш IP-адрес, а Jupiter и узлу Solana — ещё и адрес кошелька, без него нельзя посчитать сделку и баланс.</p>
         <p>Сделки и рекламные объявления записываются в блокчейн Solana и видны всем.</p></div>`;
     },
@@ -2611,8 +2653,8 @@ MB.views = MB.views || {};
 (() => {
   const C = MB.config; MB.data = MB.providers[C.MODE === 'live' ? 'live' : 'demo'];
   const main = document.getElementById('view'); let cur = null;
-  const routes = { market: MB.views.market, feed: MB.views.feed, leaders: MB.views.leaders, profile: MB.views.profile, create: MB.views.create, ads: MB.views.ads, invite: MB.views.invite, prefs: MB.views.prefs, search: MB.views.search, notes: MB.views.notes, help: MB.views.help, deposit: MB.views.deposit, inbox: MB.views.inbox, terms: MB.views.terms, privacy: MB.views.privacy };
-  const SUB = { create: 'profile', ads: 'profile', invite: 'profile', prefs: 'profile', notes: 'profile', search: 'market', help: 'profile', deposit: 'profile', terms: 'profile', privacy: 'profile' };
+  const routes = { market: MB.views.market, feed: MB.views.feed, leaders: MB.views.leaders, profile: MB.views.profile, create: MB.views.create, ads: MB.views.ads, invite: MB.views.invite, prefs: MB.views.prefs, search: MB.views.search, notes: MB.views.notes, help: MB.views.help, deposit: MB.views.deposit, inbox: MB.views.inbox, terms: MB.views.terms, privacy: MB.views.privacy, stats: MB.views.stats };
+  const SUB = { create: 'profile', ads: 'profile', invite: 'profile', prefs: 'profile', notes: 'profile', search: 'market', help: 'profile', deposit: 'profile', terms: 'profile', privacy: 'profile', stats: 'profile' };
   function header() {
     const st0 = MB.store.get(); document.getElementById('bell').classList.toggle('has', st0.unread > 0); document.getElementById('bell').setAttribute('aria-label', 'Уведомления' + (st0.unread ? ': новых ' + st0.unread : ''));
     document.getElementById('walletSlot').innerHTML = MB.ui.walletBtn();
@@ -2649,7 +2691,7 @@ MB.views = MB.views || {};
   function langs() { document.querySelectorAll('.langs').forEach(box => { box.innerHTML = MB.i18n.LANGS.map(([k, n]) => `<button type="button" class="chip ${k === MB.i18n.lang ? 'on' : ''}" data-lang="${k}" aria-pressed="${k === MB.i18n.lang}">${n}</button>`).join(''); }); }
   document.addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (b) MB.i18n.set(b.dataset.lang); });
   MB.util.bus.on('lang', () => { header(); langs(); route(); });
-  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route(); MB.views.onboarding.maybeShow(); if (MB.chat.enabled()) { MB.chat.start(); if (MB.chat.loggedIn()) MB.chat.sync().catch(() => {}); } MB.wallet.restore().catch(() => {}); if (C.LIVE) MB.adchain.load().then(a => a.length && MB.util.bus.emit('refresh'), () => {});
+  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route(); MB.views.onboarding.maybeShow(); if (MB.chat.enabled()) { MB.chat.start(); if (MB.chat.loggedIn()) MB.chat.sync().catch(() => {}); } MB.wallet.restore().catch(() => {}); try { MB.track(new URLSearchParams(location.search).get('ref') ? 'visit_ref' : 'visit', true); } catch (e) { /* нет location */ } if (C.LIVE) MB.adchain.load().then(a => a.length && MB.util.bus.emit('refresh'), () => {});
 })();
 
 </script>

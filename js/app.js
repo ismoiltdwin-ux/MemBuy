@@ -2,8 +2,8 @@
 (() => {
   const C = MB.config; MB.data = MB.providers[C.MODE === 'live' ? 'live' : 'demo'];
   const main = document.getElementById('view'); let cur = null;
-  const routes = { market: MB.views.market, feed: MB.views.feed, leaders: MB.views.leaders, profile: MB.views.profile, create: MB.views.create, ads: MB.views.ads, invite: MB.views.invite, prefs: MB.views.prefs, search: MB.views.search, notes: MB.views.notes, help: MB.views.help, deposit: MB.views.deposit, inbox: MB.views.inbox, terms: MB.views.terms, privacy: MB.views.privacy };
-  const SUB = { create: 'profile', ads: 'profile', invite: 'profile', prefs: 'profile', notes: 'profile', search: 'market', help: 'profile', deposit: 'profile', terms: 'profile', privacy: 'profile' };
+  const routes = { market: MB.views.market, feed: MB.views.feed, leaders: MB.views.leaders, profile: MB.views.profile, create: MB.views.create, ads: MB.views.ads, invite: MB.views.invite, prefs: MB.views.prefs, search: MB.views.search, notes: MB.views.notes, help: MB.views.help, deposit: MB.views.deposit, inbox: MB.views.inbox, terms: MB.views.terms, privacy: MB.views.privacy, stats: MB.views.stats };
+  const SUB = { create: 'profile', ads: 'profile', invite: 'profile', prefs: 'profile', notes: 'profile', search: 'market', help: 'profile', deposit: 'profile', terms: 'profile', privacy: 'profile', stats: 'profile' };
   function header() {
     const st0 = MB.store.get(); document.getElementById('bell').classList.toggle('has', st0.unread > 0); document.getElementById('bell').setAttribute('aria-label', 'Уведомления' + (st0.unread ? ': новых ' + st0.unread : ''));
     document.getElementById('walletSlot').innerHTML = MB.ui.walletBtn();
@@ -40,5 +40,5 @@
   function langs() { document.querySelectorAll('.langs').forEach(box => { box.innerHTML = MB.i18n.LANGS.map(([k, n]) => `<button type="button" class="chip ${k === MB.i18n.lang ? 'on' : ''}" data-lang="${k}" aria-pressed="${k === MB.i18n.lang}">${n}</button>`).join(''); }); }
   document.addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (b) MB.i18n.set(b.dataset.lang); });
   MB.util.bus.on('lang', () => { header(); langs(); route(); });
-  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route(); MB.views.onboarding.maybeShow(); if (MB.chat.enabled()) { MB.chat.start(); if (MB.chat.loggedIn()) MB.chat.sync().catch(() => {}); } MB.wallet.restore().catch(() => {}); if (C.LIVE) MB.adchain.load().then(a => a.length && MB.util.bus.emit('refresh'), () => {});
+  header(); langs(); MB.i18n.start(); MB.data.start(); MB.social.start(); route(); MB.views.onboarding.maybeShow(); if (MB.chat.enabled()) { MB.chat.start(); if (MB.chat.loggedIn()) MB.chat.sync().catch(() => {}); } MB.wallet.restore().catch(() => {}); try { MB.track(new URLSearchParams(location.search).get('ref') ? 'visit_ref' : 'visit', true); } catch (e) { /* нет location */ } if (C.LIVE) MB.adchain.load().then(a => a.length && MB.util.bus.emit('refresh'), () => {});
 })();

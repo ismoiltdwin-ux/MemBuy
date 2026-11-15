@@ -54,7 +54,7 @@ MB.send = (() => {
         { pubkey: new W.PublicKey(src.pubkey), isSigner: false, isWritable: true }, { pubkey: mintPk, isSigner: false, isWritable: false },
         { pubkey: destAta, isSigner: false, isWritable: true }, { pubkey: me, isSigner: true, isWritable: false }] }));
     }
-    const { signature } = await MB.wallet.send(tx);
+    const { signature } = await MB.wallet.send(tx); if (MB.track) MB.track('send');
     MB.store.note('Отправлено ' + MB.util.num(amount, 4) + ' ' + asset.sym); setTimeout(() => MB.wallet.refresh().catch(() => {}), 5000); return signature;
   }
   return { isAddr, assets, preview, transfer };

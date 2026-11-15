@@ -40,9 +40,10 @@ MB.chat = (() => {
   }
   return {
     enabled, loggedIn: () => !!token(), login: () => login().then(sync), sync,
-    follow: async (to, on) => { const d = await api('/follow', { to, on }); MB.store.update(s => { const i = s.following.indexOf(to); if (on && i < 0) s.following.push(to); if (!on && i >= 0) s.following.splice(i, 1); }, true); return d; },
+    follow: async (to, on) => { const d = await api('/follow', { to, on }); MB.store.update(s => { const i = s.following.indexOf(to); if (on && i < 0) { s.following.push(to); if (MB.track) MB.track('follow'); } if (!on && i >= 0) s.following.splice(i, 1); }, true); return d; },
     relation: w => api('/relation?with=' + encodeURIComponent(w)),
-    send: (to, text) => api('/send', { to, text }),
+    send: (to, text) => api('/send', { to, text }).then(d => (MB.track && MB.track('msg'), d)),
+    stats: () => api('/stats'),
     msgs: (w, after = 0) => api('/msgs?with=' + encodeURIComponent(w) + '&after=' + after),
     threads: () => api('/threads'), activity: () => api('/activity'),
     open: (addr) => { location.hash = 'c-' + addr; },

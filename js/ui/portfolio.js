@@ -9,7 +9,7 @@ MB.views.profile = (() => {
     box.innerHTML = `<div class="card stack"><h2 class="h2">Доход площадки (вы владелец)</h2>
       <p class="hint">${on ? `Комиссия со сделок ${MB.config.PLATFORM_FEE_BPS / 100}% включена. Накоплено: <b>${num(bal, 4)} SOL</b>.` : 'Комиссия со сделок выключена: для неё нужен отдельный счёт. Создание стоит около 0,002 SOL (залог сети, возвращается при выводе).'}</p>
       <p class="fine">Плата за выпуск монеты (${MB.config.CREATE_FEE_SOL} SOL) и оплата рекламы приходят прямо на ваш кошелёк.</p>
-      <div class="qgrid">${on ? '<button class="btn accent" id="fwd">Вывести комиссию</button>' : '<button class="btn accent" id="fon">Включить комиссию</button>'}</div></div>`;
+      <div class="qgrid">${on ? '<button class="btn accent" id="fwd">Вывести комиссию</button>' : '<button class="btn accent" id="fon">Включить комиссию</button>'}<a class="btn ghost" href="#stats">Статистика</a><a class="btn ghost" href="#invite">Выплаты за приглашения</a></div></div>`;
     const go = (fn, ok) => async () => { try { await fn(); MB.ui.toast(ok); setTimeout(() => income(), 5000); } catch (e) { MB.ui.toast(e.message, 'err'); } };
     const a = box.querySelector('#fon'), b = box.querySelector('#fwd');
     if (a) a.onclick = go(() => MB.fees.enable(), 'Счёт для комиссии создан');

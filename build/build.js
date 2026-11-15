@@ -1,6 +1,6 @@
 // Сборка Membuy: index.html (обычный сайт, отдельные файлы) и dist/membuy-artifact.html (один файл для предпросмотра).
 const fs = require('fs'), path = require('path'), R = path.join(__dirname, '..');
-const JS = ['config', 'i18n', 'util', 'store', 'data/demo', 'data/live', 'data/social', 'data/ads', 'wallet', 'fees', 'referral', 'adchain', 'postchain', 'pumpcreate', 'send', 'chat', 'swap', 'chart', 'ui/components', 'ui/market', 'ui/token', 'ui/feed', 'ui/leaders', 'ui/portfolio', 'ui/create', 'ui/adsview', 'ui/more', 'ui/info', 'ui/user', 'ui/inbox', 'app'];
+const JS = ['config', 'i18n', 'util', 'store', 'data/demo', 'data/live', 'data/social', 'data/ads', 'wallet', 'fees', 'referral', 'adchain', 'postchain', 'pumpcreate', 'send', 'chat', 'analytics', 'swap', 'chart', 'ui/components', 'ui/market', 'ui/token', 'ui/feed', 'ui/leaders', 'ui/portfolio', 'ui/create', 'ui/adsview', 'ui/more', 'ui/info', 'ui/user', 'ui/inbox', 'app'];
 const body = fs.readFileSync(path.join(__dirname, 'body.html'), 'utf8');
 // Метка версии по содержимому файла: после обновления браузеры (в том числе Telegram) берут свежий файл, а не старую копию.
 const ver = f => require('crypto').createHash('sha1').update(fs.readFileSync(path.join(R, f))).digest('hex').slice(0, 8);

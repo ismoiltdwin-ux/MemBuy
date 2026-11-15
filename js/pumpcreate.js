@@ -51,7 +51,7 @@ MB.pumpcreate = (() => {
     // это стандартный способ, который рекомендует Phantom; отдельная «только подпись» вызывает у него больше предупреждений.
     tx.sign([mint]);
     const { signature: sig } = await MB.wallet.send(tx);
-    step('Отправлено в сеть…');
+    step('Отправлено в сеть…'); if (MB.track) MB.track('create');
     MB.store.note('Монета ' + v.symbol + ' выпущена на pump.fun'); setTimeout(() => MB.wallet.refresh().catch(() => {}), 6000);
     return { mint: mintAddr, sig, symbol: v.symbol };
   }

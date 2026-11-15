@@ -15,7 +15,7 @@ MB.wallet = (() => {
     async connect() {
       if (C.MODE === 'demo') { const st = S.get(); S.set({ wallet: { connected: true, address: 'Demo' + 'MB7xQ2kLp9aVn3TzR4', sol: st.wallet.sol || C.DEMO_START_SOL } }); return; }
       const p = provider(); if (!p) { MB.ui.noWallet(); const e = new Error(''); e.silent = true; throw e; } // окно с кнопками вместо красной ошибки
-      let res; try { res = await p.connect(); } catch (e) { throw rejected(e); } const address = res.publicKey.toString();
+      let res; try { res = await p.connect(); } catch (e) { throw rejected(e); } const address = res.publicKey.toString(); if (MB.track) MB.track('connect', true);
       S.set({ wallet: { connected: true, address, sol: 0 } }); await this.refresh();
     },
     /** Живой режим: читает из сети баланс SOL и монет кошелька (обе программы токенов Solana). */

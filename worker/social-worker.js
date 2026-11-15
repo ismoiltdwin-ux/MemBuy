@@ -10,6 +10,9 @@ const b64 = u8 => btoa(String.fromCharCode(...u8)), unb64 = s => Uint8Array.from
 const isAddr = a => typeof a === 'string' && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a);
 const loginText = (addr, nonce) => `Membuy: вход в сообщения\nКошелёк: ${addr}\nКод: ${nonce}\nЭто не транзакция и ничего не стоит.`;
 let ready = false;
+// Анонимная статистика: только счётчики событий по дням — без адресов, IP и других личных данных.
+const EVENTS = ['visit', 'visit_ref', 'connect', 'buy', 'sell', 'create', 'ad_paid', 'send', 'invite', 'follow', 'msg'];
+const OWNER = '7gGoEh28GwkDLS8ABbGRpdJkQz78kpRBy3HrzRmBQ8PV'; // кошелёк владельца Membuy: только он видит статистику
 
 async function init(db) {
   if (ready) return;
@@ -21,6 +24,7 @@ async function init(db) {
     db.prepare('CREATE INDEX IF NOT EXISTS msgs_b ON msgs (b, seen)'),
     db.prepare('CREATE TABLE IF NOT EXISTS nonces (n TEXT PRIMARY KEY, addr TEXT NOT NULL, exp INTEGER NOT NULL)'),
     db.prepare('CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT NOT NULL)'),
+    db.prepare('CREATE TABLE IF NOT EXISTS stats (day TEXT NOT NULL, ev TEXT NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (day, ev))'),
   ]);
   ready = true;
 }
@@ -70,7 +74,18 @@ export default {
         if (!ok) return reply(401, { error: 'Bad signature' });
         return reply(200, { token: await makeToken(db, addr) }); }
 
+      // ---- статистика (без входа: счётчик +1, никаких личных данных) ----
+      if (path === '/hit') { const ev = String(body.ev || ''); if (!EVENTS.includes(ev)) return reply(400, { error: 'Bad event' });
+        const day = new Date().toISOString().slice(0, 10);
+        await db.prepare('INSERT INTO stats (day, ev, n) VALUES (?, ?, 1) ON CONFLICT (day, ev) DO UPDATE SET n = n + 1').bind(day, ev).run();
+        return reply(200, { ok: true }); }
+
       const me = await readToken(db, req); if (!me) return reply(401, { error: 'Login required' });
+      if (path === '/stats') { if (me !== (env.OWNER || OWNER)) return reply(403, { error: 'Owner only' });
+        const since = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+        const r = await db.prepare('SELECT day, ev, n FROM stats WHERE day >= ? ORDER BY day DESC').bind(since).all();
+        const users = (await db.prepare('SELECT COUNT(DISTINCT a) AS c FROM follows').first()).c, msgs = (await db.prepare('SELECT COUNT(*) AS c FROM msgs').first()).c;
+        return reply(200, { rows: r.results, followers: users, messages: msgs }); }
       // ---- подписки ----
       if (path === '/follow') { const { to, on } = body; if (!isAddr(to) || to === me) return reply(400, { error: 'Bad address' });
         if (on) await db.prepare('INSERT OR IGNORE INTO follows (a, b, ts) VALUES (?, ?, ?)').bind(me, to, now).run();

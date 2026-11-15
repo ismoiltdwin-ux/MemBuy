@@ -18,6 +18,8 @@ MB.config = {
   UPLOAD_URL: 'https://membuy-upload.ismoiltd-win.workers.dev',               // live: адрес сервера-посредника Cloudflare для картинок монет (пусто = создание монет выключено)
   PUMP_API: 'https://pumpportal.fun/api',
   CREATE_RESERVE_SOL: 0.03,     // live: запас SOL на выпуск монеты и сборы сети        // live: цена рекламы в SOL за один день показа
+  SOCIAL_X: 'https://x.com/golod_mem',
+  SOCIAL_TG: 'https://t.me/Membuy_market',
   SOL_MINT: 'So11111111111111111111111111111111111111112',
 };
 

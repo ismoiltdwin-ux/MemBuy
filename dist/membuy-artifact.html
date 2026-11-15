@@ -223,6 +223,9 @@ footer .langs{margin-bottom:12px}
 @media(max-width:420px){.trow{grid-template-columns:auto auto minmax(0,1fr) auto}.trow small:last-child{display:none}}
 .logo .lgimg{width:34px;height:34px;border-radius:50%;display:block;flex:none}
 @media(max-width:520px){.logo .lgimg{width:30px;height:30px}}
+.social{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.soc{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);color:var(--text);font-weight:700;font-size:14px}
+.soc:hover{border-color:var(--accent)}
 </style>
 <div class="demo" id="demoBar" hidden>Демо-режим: монеты и сделки учебные, настоящие деньги не используются</div>
 <div class="offline" id="offlineBar" hidden>Нет соединения. Показываем последние данные.</div>
@@ -232,7 +235,7 @@ footer .langs{margin-bottom:12px}
   <span class="sp"></span><a class="ico" href="#search" aria-label="Поиск"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></a><a class="ico" id="bell" href="#notes" aria-label="Уведомления"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0112 0c0 6 2 7 2 7H4s2-1 2-7"/><path d="M10 20a2 2 0 004 0"/></svg></a><span id="walletSlot"></span>
 </div></header>
 <main class="wrap"><div id="view"></div>
-  <footer><div class="langs chips" role="group" aria-label="Язык"></div><p>Membuy — интерфейс для обмена монет. Ключи и средства остаются в вашем кошельке. Мемкоины крайне рискованны: цена может упасть до нуля. Это не инвестиционная рекомендация.</p><p class="flinks"><a href="#help">Помощь</a> · <a href="#terms">Условия</a> · <a href="#privacy">Приватность</a></p></footer>
+  <footer><div class="langs chips" role="group" aria-label="Язык"></div><p>Membuy — интерфейс для обмена монет. Ключи и средства остаются в вашем кошельке. Мемкоины крайне рискованны: цена может упасть до нуля. Это не инвестиционная рекомендация.</p><p class="social"><a class="soc" href="https://x.com/golod_mem" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M17.8 3h3.1l-6.8 7.8L22 21h-6.3l-4.9-6.4L5.2 21H2.1l7.3-8.3L1.8 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z"/></svg><span>X</span></a><a class="soc" href="https://t.me/Membuy_market" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M21.9 4.3l-3.1 14.7c-.2 1-.8 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-7.9c.4-.3-.1-.5-.6-.2L6.7 12.9 2 11.4c-1-.3-1-1 .2-1.5L20.5 3c.9-.3 1.6.2 1.4 1.3z"/></svg><span>Telegram</span></a></p><p class="flinks"><a href="#help">Помощь</a> · <a href="#terms">Условия</a> · <a href="#privacy">Приватность</a></p></footer>
 </main>
 <nav class="bnav" aria-label="Разделы"><a href="#market" data-nav="market">Рынок</a><a href="#feed" data-nav="feed">Лента</a><a href="#leaders" data-nav="leaders">Рейтинг</a><a href="#profile" data-nav="profile">Профиль</a></nav>
 <div id="toasts" aria-live="polite"></div>
@@ -258,6 +261,8 @@ MB.config = {
   UPLOAD_URL: 'https://membuy-upload.ismoiltd-win.workers.dev',               // live: адрес сервера-посредника Cloudflare для картинок монет (пусто = создание монет выключено)
   PUMP_API: 'https://pumpportal.fun/api',
   CREATE_RESERVE_SOL: 0.03,     // live: запас SOL на выпуск монеты и сборы сети        // live: цена рекламы в SOL за один день показа
+  SOCIAL_X: 'https://x.com/golod_mem',
+  SOCIAL_TG: 'https://t.me/Membuy_market',
   SOL_MINT: 'So11111111111111111111111111111111111111112',
 };
 
@@ -499,6 +504,7 @@ MB.i18n = (() => {
     "Скопируйте ссылку": ["Copy the link", ""],
     "Создать ещё монету": ["Create another coin", ""],
     "Отправлено в сеть…": ["Sent to the network…", ""],
+    "Где новости Membuy?": ["Where can I follow Membuy news?", ""],
     'В ленте': ['In the feed', 'Дар лента'], 'В списке монет': ['In the coin list', 'Дар рӯйхати тангаҳо'],
     'Исмоил FX — курс Форекс': ['Ismoil FX — Forex course', 'Исмоил FX — курси Форекс'], '15 уроков на таджикском: от первой свечи до плана торговли.': ['15 lessons in Tajik: from the first candle to a trading plan.', '15 дарс бо забони тоҷикӣ: аз шамъи аввал то нақшаи савдо.'],
     'Здесь может быть ваша реклама': ['Your ad could be here', 'Рекламаи шумо метавонад ин ҷо бошад'], 'Покажите свой проект трейдерам Membuy. От $5 в день.': ['Show your project to Membuy traders. From $5 a day.', 'Лоиҳаи худро ба трейдерҳои Membuy нишон диҳед. Аз $5 дар як рӯз.'],
@@ -1766,6 +1772,7 @@ MB.views = MB.views || {};
         ${q('Это безопасно?', 'Ключи не покидают ваш кошелёк. Но мемкоины — крайне рискованный актив: цена может упасть до нуля. Никогда не вкладывайте больше, чем готовы потерять. Никому не сообщайте 12 секретных слов от кошелька.')}
         ${q('Есть ли комиссия?', 'Комиссия площадки — не больше 0,5% от суммы сделки. Её точный размер показывается в расчёте перед каждой сделкой. Сеть Solana дополнительно берёт небольшой сетевой сбор.')}
         ${q('Как пополнить и вывести деньги?', 'Пополнить: Профиль → «Скопировать адрес» и отправьте SOL в сети Solana с биржи или другого кошелька. Вывести: отправьте SOL из Phantom на биржу.')}
+        ${q('Где новости Membuy?', `Telegram: <a class="lnk" href="${C.SOCIAL_TG}" target="_blank" rel="noopener">t.me/Membuy_market</a> · X: <a class="lnk" href="${C.SOCIAL_X}" target="_blank" rel="noopener">@golod_mem</a>`)}
         ${q('Как разместить рекламу?', 'Профиль → «Реклама». Оплата в SOL уходит владельцу площадки, объявление показывается всем после проверки.')}
       </div>`;
     },

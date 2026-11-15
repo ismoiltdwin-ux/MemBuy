@@ -218,3 +218,6 @@ footer .langs{margin-bottom:12px}
 @media(max-width:420px){.trow{grid-template-columns:auto auto minmax(0,1fr) auto}.trow small:last-child{display:none}}
 .logo .lgimg{width:34px;height:34px;border-radius:50%;display:block;flex:none}
 @media(max-width:520px){.logo .lgimg{width:30px;height:30px}}
+.social{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.soc{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);color:var(--text);font-weight:700;font-size:14px}
+.soc:hover{border-color:var(--accent)}

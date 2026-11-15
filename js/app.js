@@ -28,6 +28,8 @@
   MB.util.bus.on('refresh', () => cur && cur.onTick && cur.onTick());
   MB.util.bus.on('state', () => { header(); if (cur && cur.onState) cur.onState(); });
   window.addEventListener('hashchange', route);
+  // PWA: сайт открывается и без интернета (последняя сохранённая версия). Только на https, не в предпросмотре.
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
   const off = document.getElementById('offlineBar'), net = () => { off.hidden = navigator.onLine !== false; }; window.addEventListener('online', net); window.addEventListener('offline', net); net();
   // Живой режим: если цены не обновлялись больше 90 секунд — честно показываем, что данные устарели.
   const stale = document.getElementById('staleBar');

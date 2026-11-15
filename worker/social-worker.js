@@ -46,6 +46,9 @@ export default {
     const cors = { 'Access-Control-Allow-Origin': origin, 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'content-type, authorization', 'Vary': 'Origin' };
     const reply = (status, body) => new Response(JSON.stringify(body), { status, headers: { ...cors, 'content-type': 'application/json' } });
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+    // Если адрес сервера открыли прямо в браузере — короткая понятная страница вместо ошибки.
+    if (req.method === 'GET' && new URL(req.url).pathname === '/' && !req.headers.get('Origin'))
+      return new Response('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Membuy</title><body style="background:#120f24;color:#f4f1ff;font:17px system-ui;display:grid;place-items:center;min-height:90vh;text-align:center;padding:16px"><div><h1 style="color:#ffb224">Membuy</h1><p>Это служебный сервер сообщений Membuy. Он работает только внутри сайта.</p><p><a style="color:#ffb224" href="https://ismoiltdwin-ux.github.io/MemBuy/?mode=live">Открыть Membuy →</a></p></div></body>', { headers: { 'content-type': 'text/html; charset=utf-8' } });
     if (req.headers.get('Origin') !== origin) return reply(403, { error: 'Wrong site' });
     if (!env.DB) return reply(500, { error: 'D1 database binding DB is not set' });
     const db = env.DB; await init(db);

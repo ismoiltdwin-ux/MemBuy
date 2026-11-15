@@ -3,8 +3,10 @@
 MB.providers = MB.providers || {};
 MB.providers.live = (() => {
   const TF = { '15s': ['second', 15], '1m': ['minute', 1], '5m': ['minute', 5], '15m': ['minute', 15], '1h': ['hour', 1], '4h': ['hour', 4], '1d': ['day', 1] };
-  const C = MB.config, cache = new Map(); let timer = null, solUsd = 0, solTs = 0;
-  const j = async url => { const r = await fetch(url); if (!r.ok) throw new Error('Сеть: ' + r.status); return r.json(); };
+  // Кэш с ограничением: хранит последние N записей, самые старые удаляются (память не растёт бесконечно).
+  class Lru extends Map { constructor(n) { super(); this.n = n; } set(k, v) { if (this.has(k)) this.delete(k); super.set(k, v); if (this.size > this.n) this.delete(this.keys().next().value); return this; } }
+  const C = MB.config, cache = new Lru(400); let timer = null, solUsd = 0, solTs = 0, lastOk = 0;
+  const j = async url => { const r = await fetch(url); if (!r.ok) throw new Error('Сеть: ' + r.status); const d = await r.json(); lastOk = Date.now(); return d; };
   const fromPair = p => ({
     id: p.baseToken.address, sym: p.baseToken.symbol, name: p.baseToken.name, desc: '', mint: p.baseToken.address, pool: p.pairAddress,
     price: +p.priceUsd || 0, mc: p.marketCap || p.fdv || 0, supply: (p.marketCap || p.fdv || 0) / (+p.priceUsd || 1), vol24: (p.volume && p.volume.h24) || 0,
@@ -21,7 +23,7 @@ MB.providers.live = (() => {
   const byMints = async mints => { const out = []; for (let i = 0; i < mints.length; i += 30) { const d = await j(C.DEX_API + '/latest/dex/tokens/' + mints.slice(i, i + 30).join(',')); out.push(...group(d.pairs)); } return out; };
   /** Новые монеты: последние профили токенов на DexScreener. */
   async function fresh() { const prof = await j(C.DEX_API + '/token-profiles/latest/v1'); return byMints([...new Set((prof || []).filter(x => x.chainId === 'solana').map(x => x.tokenAddress))].slice(0, 30)); }
-  let poolCache = null, poolTs = 0; const tradeCache = new Map();
+  let poolCache = null, poolTs = 0; const tradeCache = new Lru(40);
   /** Сделки из GeckoTerminal (до 300, новые первыми); запоминаются на 10 с, чтобы вкладка «Сделки» и свечи 15 с не делали лишних запросов. */
   async function rawTrades(self, id) {
     const hit = tradeCache.get(id); if (hit && Date.now() - hit.at < 10000) return hit.list;
@@ -45,6 +47,8 @@ MB.providers.live = (() => {
     return Object.values(by).map(best).filter(Boolean).map(fromPair);
   }
   return {
+    /** Когда данные последний раз успешно пришли (для значка «данные устарели»). */
+    lastOk: () => lastOk,
     start() { if (!timer) timer = setInterval(() => MB.util.bus.emit('refresh'), 15000); },
     async list(filter = 'trend', q = '') {
       let out;

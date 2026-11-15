@@ -1,5 +1,6 @@
 /* Кошелёк. Демо: учебный кошелёк с условными SOL. Live: Phantom (ключи остаются у пользователя). */
 MB.wallet = (() => {
+  const SRI = { 'https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js': 'sha384-xo1g+ODR6i1cxIVZeALc/apXFHeaJHO1j1whMO3dhtdBChWeaihnDs7UnXs9ch78' };
   const C = MB.config, S = MB.store;
   const rpc = async (method, params) => { const r = await fetch(C.RPC_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) }); const d = await r.json(); if (d.error) throw new Error(d.error.message); return d.result; };
   const provider = () => (window.phantom && window.phantom.solana) || (window.solana && window.solana.isPhantom ? window.solana : null);
@@ -10,7 +11,7 @@ MB.wallet = (() => {
     /** Подписать и отправить транзакцию через Phantom. */
     async send(tx) { try { return await provider().signAndSendTransaction(tx); } catch (e) { throw rejected(e); } },
     /** Загружает библиотеку @solana/web3.js (нужна только для подписи сделок). */
-    web3: () => window.solanaWeb3 ? Promise.resolve() : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = C.WEB3_CDN; s.onload = ok; s.onerror = () => bad(new Error('Не удалось загрузить библиотеку Solana')); document.head.appendChild(s); }),
+    web3: () => window.solanaWeb3 ? Promise.resolve() : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = C.WEB3_CDN; if (SRI[C.WEB3_CDN]) { s.integrity = SRI[C.WEB3_CDN]; s.crossOrigin = 'anonymous'; } /* проверка целостности: подменённый файл браузер не запустит */ s.onload = ok; s.onerror = () => bad(new Error('Не удалось загрузить библиотеку Solana')); document.head.appendChild(s); }),
     async connect() {
       if (C.MODE === 'demo') { const st = S.get(); S.set({ wallet: { connected: true, address: 'Demo' + 'MB7xQ2kLp9aVn3TzR4', sol: st.wallet.sol || C.DEMO_START_SOL } }); return; }
       const p = provider(); if (!p) { MB.ui.noWallet(); const e = new Error(''); e.silent = true; throw e; } // окно с кнопками вместо красной ошибки

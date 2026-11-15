@@ -22,13 +22,16 @@
   }
   let tn = 0;
   /** Раз в несколько тиков записывает стоимость портфеля для графика в профиле. */
-  async function equity() { const st = MB.store.get(); if (!st.wallet.connected || ++tn % 4) return; const sol = await MB.data.solUsd().catch(() => 0); let eq = st.wallet.sol * sol; for (const [id, h] of Object.entries(st.holdings)) { const t = await MB.data.get(id).catch(() => null); if (t) eq += h.qty * t.price; } MB.store.update(s => { s.equity.push(eq); s.equity = s.equity.slice(-120); }, true); }
+  async function equity() { const st = MB.store.get(); if (!st.wallet.connected || ++tn % 4) return; const sol = await MB.data.solUsd().catch(() => 0); let eq = st.wallet.sol * sol; const ids = Object.keys(st.holdings); if (ids.length) { const ts = MB.data.many ? await MB.data.many(ids).catch(() => []) : (await Promise.all(ids.map(id => MB.data.get(id).catch(() => null)))).filter(Boolean); ts.forEach(t => { const h = st.holdings[t.id]; if (h) eq += h.qty * t.price; }); } MB.store.update(s => { s.equity.push(eq); s.equity = s.equity.slice(-120); }, true); }
   MB.util.bus.on('tick', () => { equity(); if (cur && cur.onTick) cur.onTick(); });
   document.addEventListener('click', e => { const a = e.target.closest('[data-ad]'); if (a) MB.ads.click(a.dataset.ad); });
   MB.util.bus.on('refresh', () => cur && cur.onTick && cur.onTick());
   MB.util.bus.on('state', () => { header(); if (cur && cur.onState) cur.onState(); });
   window.addEventListener('hashchange', route);
   const off = document.getElementById('offlineBar'), net = () => { off.hidden = navigator.onLine !== false; }; window.addEventListener('online', net); window.addEventListener('offline', net); net();
+  // Живой режим: если цены не обновлялись больше 90 секунд — честно показываем, что данные устарели.
+  const stale = document.getElementById('staleBar');
+  if (stale && MB.data.lastOk) setInterval(() => { const t = MB.data.lastOk(), old = t && Date.now() - t > 90000; stale.hidden = !old || !off.hidden; if (old) stale.textContent = 'Данные устарели: последнее обновление ' + Math.round((Date.now() - t) / 60000) + ' мин назад. Проверьте интернет.'; }, 10000);
   document.getElementById('demoBar').hidden = C.MODE !== 'demo';
   if (!(C.LIVE && C.SOCIAL_API)) document.querySelectorAll('[data-nav=inbox]').forEach(a => { a.hidden = true; }); // «Сообщения» — только в живом режиме с сервером
   if (C.LIVE) { document.body.classList.add('live'); document.querySelectorAll('[data-nav]').forEach(a => { if (C.DEMO_ONLY.includes(a.dataset.nav)) a.hidden = true; }); }

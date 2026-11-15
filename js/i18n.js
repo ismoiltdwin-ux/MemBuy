@@ -8,6 +8,19 @@ MB.i18n = (() => {
 
   // Точные совпадения: 'русский': ['English', 'Тоҷикӣ']
   const D = {
+    // Приглашения 10% (живой режим)
+    'комиссии площадки с каждой сделки друзей, которых вы пригласили': ['of the platform fee on every trade by friends you invite', ''],
+    'Ваша личная ссылка привязана к адресу кошелька — на него и приходят награды.': ['Your personal link is tied to your wallet address — that is where rewards are paid.', ''],
+    'Ваша личная ссылка': ['Your personal link', ''], 'К выплате': ['To be paid', ''], 'Как это работает': ['How it works', ''], 'Выплатить': ['Pay out', ''],
+    'Комиссия площадки ещё не включена — награды начнут начисляться, как только владелец её включит.': ['The platform fee is not on yet — rewards start as soon as the owner turns it on.', ''],
+    'Друг открывает Membuy по вашей ссылке и подключает Phantom.': ['A friend opens Membuy with your link and connects Phantom.', ''],
+    'Выплаты в SOL на ваш кошелёк делает владелец Membuy. Каждую выплату видно в Solscan.': ['The Membuy owner pays rewards in SOL to your wallet. Every payout is visible on Solscan.', ''],
+    'Награда считается только с комиссии Membuy, без сборов сети и pump.fun. Приглашать самого себя нельзя. Мемкоины очень рискованны — не обещайте друзьям прибыль.': ['Rewards count only Membuy’s fee, not network or pump.fun fees. Self-referrals do not count. Memecoins are very risky — never promise friends a profit.', ''],
+    'Вас пригласил': ['Invited by', ''], 'Выплаты пригласившим (владелец)': ['Referral payouts (owner)', ''], 'Пока никого': ['Nobody yet', ''],
+    'Здесь появятся пригласившие, когда их друзья начнут торговать.': ['Referrers appear here once their friends start trading.', ''],
+    'Это может сделать только владелец площадки': ['Only the platform owner can do this', ''], 'Нечего выплачивать': ['Nothing to pay out', ''],
+    'Демо: ссылка и код — образец. В живом режиме награды считаются по-настоящему, по сделкам в блокчейне.': ['Demo: the link and code are samples. In live mode rewards are counted for real, from on-chain trades.', ''],
+    'Баланс:': ['Balance:', ''],
     // Шапка, навигация, общее
     'Демо-режим: монеты и сделки учебные, настоящие деньги не используются': ['Demo mode: coins and trades are for practice, no real money is used', 'Речаи демо: тангаҳо ва савдоҳо омӯзишӣ мебошанд, пули воқеӣ истифода намешавад'],
     'Рынок': ['Market', 'Бозор'], 'Лента': ['Feed', 'Лента'], 'Рейтинг': ['Leaderboard', 'Рейтинг'], 'Профиль': ['Profile', 'Профил'],
@@ -362,6 +375,11 @@ MB.i18n = (() => {
   };
   // Шаблоны: [регулярное выражение, English, Тоҷикӣ]
   const R = [
+    [/^Данные устарели: последнее обновление (\d+) мин назад\. Проверьте интернет\.$/, 'Data is stale: last update $1 min ago. Check your connection.', ''],
+    [/^(\d+)% этой комиссии — ваши\. Учёт идёт прямо в блокчейне: каждая сделка друга помечается вашим адресом\.$/, '$1% of that fee is yours. Tracking is on-chain: every trade by your friend is tagged with your address.', ''],
+    [/^(\d+)% этой комиссии начисляется вам\.$/, '$1% of that fee goes to you.', ''], [/^(\d+)% комиссии$/, '$1% of fees', ''],
+    [/^Друзей: (\d+) · сделок: (\d+) · комиссия: (.+)$/, 'Friends: $1 · trades: $2 · fees: $3', ''], [/^Заработано: (.+) · выплачено: (.+)$/, 'Earned: $1 · paid: $2', ''], [/^Выплачено (.+)$/, 'Paid $1', ''],
+    [/^вы подписаны друг на друга · (.+)$/, 'you follow each other · $1', ''], [/^подписался на вас · (.+)$/, 'followed you · $1', ''],
     [/^(.+) SOL · (\d+) дн\. · (.+)$/, '$1 SOL · $2 days · $3', '$1 SOL · $2 рӯз · $3'], [/^до (\d.+)$/, 'until $1', 'то $1'],
     [/^Монета (.+) выпущена$/, 'Coin $1 launched', ''], [/^Монета (.+) выпущена на pump\.fun$/, 'Coin $1 launched on pump.fun', ''], [/^Нужно не меньше (.+) SOL: первая покупка и ~(.+) SOL на выпуск и сборы сети$/, 'You need at least $1 SOL: the initial buy plus ~$2 SOL for the launch and network fees', ''],
     [/^Монета выпускается по-настоящему на pump\.fun и навсегда появляется в блокчейне Solana\. Выпуск стоит около (.+) SOL плюс первая покупка\. Данные монеты нельзя изменить после создания\.$/, 'The coin is launched for real on pump.fun and stays on the Solana blockchain forever. Launching costs about $1 SOL plus the initial buy. Coin data cannot be changed after creation.', ''],

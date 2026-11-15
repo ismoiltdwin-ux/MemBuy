@@ -37,10 +37,11 @@ MB.swap = (() => {
       const r = await fetch(`${C.JUP_API}/swap`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       if (!r.ok) throw new Error('Не удалось подготовить сделку');
       const { swapTransaction } = await r.json(), bytes = Uint8Array.from(atob(swapTransaction), c => c.charCodeAt(0));
-      const tx = window.solanaWeb3.VersionedTransaction.deserialize(bytes);
+      let tx = window.solanaWeb3.VersionedTransaction.deserialize(bytes);
       // Проверка: сделка Jupiter должна касаться именно вашего кошелька — иначе не подписываем.
       const keys = tx.message && tx.message.staticAccountKeys ? tx.message.staticAccountKeys.map(k => k.toBase58 ? k.toBase58() : String(k)) : [];
       if (!keys.includes(st.wallet.address)) throw new Error('Сделка не адресована вашему кошельку — подпись отменена');
+      if (q.feeOn && MB.ref) tx = await MB.ref.tag(tx); // заметка пригласившего: 10% комиссии этой сделки — его награда
       const res = await MB.wallet.send(tx); sig = res.signature;
     }
     S.applyTrade({ id: q.token.id, sym: q.token.sym, name: q.token.name, side: q.side, sol, tokens, usd: q.usd, price: q.token.price, feeUsd: q.feeUsd, ts: Date.now(), sig });

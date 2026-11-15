@@ -237,3 +237,6 @@ a.act{color:var(--muted);font-size:14px;font-weight:600}
 .msg.mine{align-self:flex-end;background:#3ddc9722;border-color:#3ddc9755;border-radius:16px 16px 4px 16px}
 .msg p{overflow-wrap:anywhere}.msg small{display:block;color:var(--muted);font-size:11px;margin-top:2px;text-align:right}
 .cform{display:flex;gap:8px;position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--bg);padding:8px 0}.cform .inp{flex:1}
+.refhero{text-align:center;background:linear-gradient(135deg,rgba(255,176,32,.18),rgba(140,90,255,.14));border-color:rgba(255,176,32,.45)}
+.refhero .big{font-family:Unbounded,sans-serif;font-size:44px;color:var(--accent,#ffb020);line-height:1.1}
+.refhero p{margin:4px 0 0;color:var(--text,#fff)}

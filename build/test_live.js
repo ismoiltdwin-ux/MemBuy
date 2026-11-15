@@ -40,7 +40,20 @@ const pair = (addr, sym, name, price) => ({ chainId: 'solana', pairAddress: 'Poo
   await p.click('[data-f=trend]'); await p.waitForTimeout(300);
   ok('предупреждение «Осторожно» и его скрытие', await p.locator('#caution').count() === 1 && (await p.click('#cx'), await p.locator('#caution').count()) === 0);
   await p.goto(URL + '#leaders'); await p.waitForTimeout(400); ok('прямая ссылка на рейтинг ведёт на рынок', await p.locator('#list').count() === 1);
-  await p.goto(URL + '#invite'); await p.waitForTimeout(300); ok('приглашение: ссылка на сайт в живом режиме, без выдуманных наград', (await p.inputValue('#rlink')).endsWith('?mode=live') && !(await p.textContent('#view')).includes('20%'));
+  await p.goto(URL + '#invite'); await p.waitForTimeout(500);
+  ok('приглашение: 10% комиссии, без старых «20%»; без кошелька — кнопка подключения, с кошельком — личная ссылка ?ref=адрес', await p.evaluate(() => { const v = document.querySelector('#view').textContent; if (!v.includes('10%') || v.includes('20%')) return false; const l = document.querySelector('#rlink'); return l ? /\?mode=live&ref=[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(l.value) : !!document.querySelector('#rcon'); }));
+  ok('рефералы: подсчёт по блокчейну — 10% комиссии минус выплаты; самоприглашение и чужие «выплаты» не считаются', await p.evaluate(async () => {
+    const C = MB.config, R = 'RefAAA111111111111111111111111111111111111', T = 'TrdBBB111111111111111111111111111111111111', old = MB.wallet.rpc;
+    const bal = a => [{ owner: C.FEE_WALLET, mint: C.SOL_MINT, uiTokenAmount: { amount: String(a) } }];
+    const txs = { s1: { meta: { err: null, logMessages: ['Program log: Memo (len 46): "MBR|' + R + '"'], preTokenBalances: bal(5000000), postTokenBalances: bal(6000000) }, transaction: { message: { accountKeys: [{ pubkey: T }], instructions: [] } } },
+      s2: { meta: { err: null, logMessages: ['Program log: Memo (len 46): "MBR|' + R + '"'], preTokenBalances: bal(6000000), postTokenBalances: bal(9000000) }, transaction: { message: { accountKeys: [{ pubkey: R }], instructions: [] } } },
+      p1: { meta: { err: null, logMessages: ['Program log: Memo (len 49): "MBRPAY|' + R + '"'] }, transaction: { message: { accountKeys: [{ pubkey: C.FEE_WALLET }], instructions: [{ program: 'system', parsed: { type: 'transfer', info: { source: C.FEE_WALLET, destination: R, lamports: 40000 } } }] } } },
+      p2: { meta: { err: null, logMessages: ['Program log: Memo (len 49): "MBRPAY|' + R + '"'] }, transaction: { message: { accountKeys: [{ pubkey: T }], instructions: [{ program: 'system', parsed: { type: 'transfer', info: { source: T, destination: R, lamports: 99999 } } }] } } } };
+    try { localStorage.removeItem('membuy-refscan-v1'); } catch (e) {}
+    MB.wallet.rpc = async (m, p) => m === 'getSignaturesForAddress' ? (p[0] === C.FEE_ACCOUNT ? [{ signature: 's1', memo: '[46] MBR|' + R }, { signature: 's2', memo: '[46] MBR|' + R }, { signature: 'x', memo: null }] : [{ signature: 'p1', memo: '[49] MBRPAY|' + R }, { signature: 'p2', memo: '[49] MBRPAY|' + R }]) : m === 'getTransaction' ? txs[p[0]] : null;
+    try { const st = await MB.ref.stats(true), o = st[R]; return !!o && o.trades === 1 && o.traders.size === 1 && o.feeLam === 1000000 && o.earnedLam === 100000 && o.paidLam === 40000 && MB.ref.owed(o) === 60000 && !MB.ref.inviter(); }
+    finally { MB.wallet.rpc = old; try { localStorage.removeItem('membuy-refscan-v1'); } catch (e) {} }
+  }));
   await p.goto(URL + '#t-' + MINT); await p.waitForTimeout(700); ok('страница монеты и график', (await p.textContent('.thead')).includes('Alpha Coin'));
   ok('монета: покупки/продажи за 24 ч и где торгуется', (await p.textContent('#stats')).includes('Покупок за 24 ч') && (await p.textContent('#stats')).includes('pump.fun'));
   ok('соцсети монеты: только https-ссылки', await p.locator('#socl a').count() === 1 && (await p.getAttribute('#socl a', 'href')) === 'https://x.com/alpha');

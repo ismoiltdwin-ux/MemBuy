@@ -242,9 +242,13 @@ a.act{color:var(--muted);font-size:14px;font-weight:600}
 .msg.mine{align-self:flex-end;background:#3ddc9722;border-color:#3ddc9755;border-radius:16px 16px 4px 16px}
 .msg p{overflow-wrap:anywhere}.msg small{display:block;color:var(--muted);font-size:11px;margin-top:2px;text-align:right}
 .cform{display:flex;gap:8px;position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--bg);padding:8px 0}.cform .inp{flex:1}
+.refhero{text-align:center;background:linear-gradient(135deg,rgba(255,176,32,.18),rgba(140,90,255,.14));border-color:rgba(255,176,32,.45)}
+.refhero .big{font-family:Unbounded,sans-serif;font-size:44px;color:var(--accent,#ffb020);line-height:1.1}
+.refhero p{margin:4px 0 0;color:var(--text,#fff)}
 </style>
 <div class="demo" id="demoBar" hidden>Демо-режим: монеты и сделки учебные, настоящие деньги не используются</div>
 <div class="offline" id="offlineBar" hidden>Нет соединения. Показываем последние данные.</div>
+<div class="offline" id="staleBar" role="status" hidden></div>
 <header class="top"><div class="wrap">
   <a class="logo" href="#market"><img class="lgimg" src="data:image/png;base64,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" alt="" width="34" height="34">Membuy</a>
   <nav class="tabs" aria-label="Разделы"><a href="#market" data-nav="market">Рынок</a><a href="#feed" data-nav="feed">Лента</a><a href="#leaders" data-nav="leaders">Рейтинг</a><a href="#inbox" data-nav="inbox">Сообщения</a><a href="#profile" data-nav="profile">Профиль</a></nav>
@@ -263,6 +267,7 @@ MB.config = {
   MODE: 'demo',                 // 'demo' — учебные данные и сделки; 'live' — Phantom + Jupiter + DexScreener
   APP_NAME: 'Membuy',
   PLATFORM_FEE_BPS: 100,        // комиссия площадки со сделок: 100 = 1% (как у торговых терминалов; плюс собственные сборы pump.fun/бирж)
+  REF_SHARE_BPS: 1000, // доля пригласившего: 10% комиссии площадки со сделок приглашённых (js/referral.js)
   FEE_WALLET: '7gGoEh28GwkDLS8ABbGRpdJkQz78kpRBy3HrzRmBQ8PV',   // live: ваш кошелёк — сюда идёт доход площадки
   FEE_ACCOUNT: 'DcjUUcAhier4oqAM7uMv3K23YQRzjyF1t38MgXifuiJW',  // live: wSOL-счёт этого кошелька для комиссии со сделок (Jupiter)
   CREATE_FEE_SOL: 0.01,         // live: плата Membuy за выпуск монеты, SOL (0 = без платы)
@@ -304,6 +309,19 @@ MB.i18n = (() => {
 
   // Точные совпадения: 'русский': ['English', 'Тоҷикӣ']
   const D = {
+    // Приглашения 10% (живой режим)
+    'комиссии площадки с каждой сделки друзей, которых вы пригласили': ['of the platform fee on every trade by friends you invite', ''],
+    'Ваша личная ссылка привязана к адресу кошелька — на него и приходят награды.': ['Your personal link is tied to your wallet address — that is where rewards are paid.', ''],
+    'Ваша личная ссылка': ['Your personal link', ''], 'К выплате': ['To be paid', ''], 'Как это работает': ['How it works', ''], 'Выплатить': ['Pay out', ''],
+    'Комиссия площадки ещё не включена — награды начнут начисляться, как только владелец её включит.': ['The platform fee is not on yet — rewards start as soon as the owner turns it on.', ''],
+    'Друг открывает Membuy по вашей ссылке и подключает Phantom.': ['A friend opens Membuy with your link and connects Phantom.', ''],
+    'Выплаты в SOL на ваш кошелёк делает владелец Membuy. Каждую выплату видно в Solscan.': ['The Membuy owner pays rewards in SOL to your wallet. Every payout is visible on Solscan.', ''],
+    'Награда считается только с комиссии Membuy, без сборов сети и pump.fun. Приглашать самого себя нельзя. Мемкоины очень рискованны — не обещайте друзьям прибыль.': ['Rewards count only Membuy’s fee, not network or pump.fun fees. Self-referrals do not count. Memecoins are very risky — never promise friends a profit.', ''],
+    'Вас пригласил': ['Invited by', ''], 'Выплаты пригласившим (владелец)': ['Referral payouts (owner)', ''], 'Пока никого': ['Nobody yet', ''],
+    'Здесь появятся пригласившие, когда их друзья начнут торговать.': ['Referrers appear here once their friends start trading.', ''],
+    'Это может сделать только владелец площадки': ['Only the platform owner can do this', ''], 'Нечего выплачивать': ['Nothing to pay out', ''],
+    'Демо: ссылка и код — образец. В живом режиме награды считаются по-настоящему, по сделкам в блокчейне.': ['Demo: the link and code are samples. In live mode rewards are counted for real, from on-chain trades.', ''],
+    'Баланс:': ['Balance:', ''],
     // Шапка, навигация, общее
     'Демо-режим: монеты и сделки учебные, настоящие деньги не используются': ['Demo mode: coins and trades are for practice, no real money is used', 'Речаи демо: тангаҳо ва савдоҳо омӯзишӣ мебошанд, пули воқеӣ истифода намешавад'],
     'Рынок': ['Market', 'Бозор'], 'Лента': ['Feed', 'Лента'], 'Рейтинг': ['Leaderboard', 'Рейтинг'], 'Профиль': ['Profile', 'Профил'],
@@ -658,6 +676,11 @@ MB.i18n = (() => {
   };
   // Шаблоны: [регулярное выражение, English, Тоҷикӣ]
   const R = [
+    [/^Данные устарели: последнее обновление (\d+) мин назад\. Проверьте интернет\.$/, 'Data is stale: last update $1 min ago. Check your connection.', ''],
+    [/^(\d+)% этой комиссии — ваши\. Учёт идёт прямо в блокчейне: каждая сделка друга помечается вашим адресом\.$/, '$1% of that fee is yours. Tracking is on-chain: every trade by your friend is tagged with your address.', ''],
+    [/^(\d+)% этой комиссии начисляется вам\.$/, '$1% of that fee goes to you.', ''], [/^(\d+)% комиссии$/, '$1% of fees', ''],
+    [/^Друзей: (\d+) · сделок: (\d+) · комиссия: (.+)$/, 'Friends: $1 · trades: $2 · fees: $3', ''], [/^Заработано: (.+) · выплачено: (.+)$/, 'Earned: $1 · paid: $2', ''], [/^Выплачено (.+)$/, 'Paid $1', ''],
+    [/^вы подписаны друг на друга · (.+)$/, 'you follow each other · $1', ''], [/^подписался на вас · (.+)$/, 'followed you · $1', ''],
     [/^(.+) SOL · (\d+) дн\. · (.+)$/, '$1 SOL · $2 days · $3', '$1 SOL · $2 рӯз · $3'], [/^до (\d.+)$/, 'until $1', 'то $1'],
     [/^Монета (.+) выпущена$/, 'Coin $1 launched', ''], [/^Монета (.+) выпущена на pump\.fun$/, 'Coin $1 launched on pump.fun', ''], [/^Нужно не меньше (.+) SOL: первая покупка и ~(.+) SOL на выпуск и сборы сети$/, 'You need at least $1 SOL: the initial buy plus ~$2 SOL for the launch and network fees', ''],
     [/^Монета выпускается по-настоящему на pump\.fun и навсегда появляется в блокчейне Solana\. Выпуск стоит около (.+) SOL плюс первая покупка\. Данные монеты нельзя изменить после создания\.$/, 'The coin is launched for real on pump.fun and stays on the Solana blockchain forever. Launching costs about $1 SOL plus the initial buy. Coin data cannot be changed after creation.', ''],
@@ -857,8 +880,10 @@ MB.providers.demo = (() => {
 MB.providers = MB.providers || {};
 MB.providers.live = (() => {
   const TF = { '15s': ['second', 15], '1m': ['minute', 1], '5m': ['minute', 5], '15m': ['minute', 15], '1h': ['hour', 1], '4h': ['hour', 4], '1d': ['day', 1] };
-  const C = MB.config, cache = new Map(); let timer = null, solUsd = 0, solTs = 0;
-  const j = async url => { const r = await fetch(url); if (!r.ok) throw new Error('Сеть: ' + r.status); return r.json(); };
+  // Кэш с ограничением: хранит последние N записей, самые старые удаляются (память не растёт бесконечно).
+  class Lru extends Map { constructor(n) { super(); this.n = n; } set(k, v) { if (this.has(k)) this.delete(k); super.set(k, v); if (this.size > this.n) this.delete(this.keys().next().value); return this; } }
+  const C = MB.config, cache = new Lru(400); let timer = null, solUsd = 0, solTs = 0, lastOk = 0;
+  const j = async url => { const r = await fetch(url); if (!r.ok) throw new Error('Сеть: ' + r.status); const d = await r.json(); lastOk = Date.now(); return d; };
   const fromPair = p => ({
     id: p.baseToken.address, sym: p.baseToken.symbol, name: p.baseToken.name, desc: '', mint: p.baseToken.address, pool: p.pairAddress,
     price: +p.priceUsd || 0, mc: p.marketCap || p.fdv || 0, supply: (p.marketCap || p.fdv || 0) / (+p.priceUsd || 1), vol24: (p.volume && p.volume.h24) || 0,
@@ -875,7 +900,7 @@ MB.providers.live = (() => {
   const byMints = async mints => { const out = []; for (let i = 0; i < mints.length; i += 30) { const d = await j(C.DEX_API + '/latest/dex/tokens/' + mints.slice(i, i + 30).join(',')); out.push(...group(d.pairs)); } return out; };
   /** Новые монеты: последние профили токенов на DexScreener. */
   async function fresh() { const prof = await j(C.DEX_API + '/token-profiles/latest/v1'); return byMints([...new Set((prof || []).filter(x => x.chainId === 'solana').map(x => x.tokenAddress))].slice(0, 30)); }
-  let poolCache = null, poolTs = 0; const tradeCache = new Map();
+  let poolCache = null, poolTs = 0; const tradeCache = new Lru(40);
   /** Сделки из GeckoTerminal (до 300, новые первыми); запоминаются на 10 с, чтобы вкладка «Сделки» и свечи 15 с не делали лишних запросов. */
   async function rawTrades(self, id) {
     const hit = tradeCache.get(id); if (hit && Date.now() - hit.at < 10000) return hit.list;
@@ -899,6 +924,8 @@ MB.providers.live = (() => {
     return Object.values(by).map(best).filter(Boolean).map(fromPair);
   }
   return {
+    /** Когда данные последний раз успешно пришли (для значка «данные устарели»). */
+    lastOk: () => lastOk,
     start() { if (!timer) timer = setInterval(() => MB.util.bus.emit('refresh'), 15000); },
     async list(filter = 'trend', q = '') {
       let out;
@@ -1024,6 +1051,7 @@ MB.ads = (() => {
 
 /* Кошелёк. Демо: учебный кошелёк с условными SOL. Live: Phantom (ключи остаются у пользователя). */
 MB.wallet = (() => {
+  const SRI = { 'https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js': 'sha384-xo1g+ODR6i1cxIVZeALc/apXFHeaJHO1j1whMO3dhtdBChWeaihnDs7UnXs9ch78' };
   const C = MB.config, S = MB.store;
   const rpc = async (method, params) => { const r = await fetch(C.RPC_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) }); const d = await r.json(); if (d.error) throw new Error(d.error.message); return d.result; };
   const provider = () => (window.phantom && window.phantom.solana) || (window.solana && window.solana.isPhantom ? window.solana : null);
@@ -1034,7 +1062,7 @@ MB.wallet = (() => {
     /** Подписать и отправить транзакцию через Phantom. */
     async send(tx) { try { return await provider().signAndSendTransaction(tx); } catch (e) { throw rejected(e); } },
     /** Загружает библиотеку @solana/web3.js (нужна только для подписи сделок). */
-    web3: () => window.solanaWeb3 ? Promise.resolve() : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = C.WEB3_CDN; s.onload = ok; s.onerror = () => bad(new Error('Не удалось загрузить библиотеку Solana')); document.head.appendChild(s); }),
+    web3: () => window.solanaWeb3 ? Promise.resolve() : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = C.WEB3_CDN; if (SRI[C.WEB3_CDN]) { s.integrity = SRI[C.WEB3_CDN]; s.crossOrigin = 'anonymous'; } /* проверка целостности: подменённый файл браузер не запустит */ s.onload = ok; s.onerror = () => bad(new Error('Не удалось загрузить библиотеку Solana')); document.head.appendChild(s); }),
     async connect() {
       if (C.MODE === 'demo') { const st = S.get(); S.set({ wallet: { connected: true, address: 'Demo' + 'MB7xQ2kLp9aVn3TzR4', sol: st.wallet.sol || C.DEMO_START_SOL } }); return; }
       const p = provider(); if (!p) { MB.ui.noWallet(); const e = new Error(''); e.silent = true; throw e; } // окно с кнопками вместо красной ошибки
@@ -1108,6 +1136,98 @@ MB.fees = (() => {
       return send((W, me) => [new W.TransactionInstruction({ programId: new W.PublicKey(TOKEN), data: Uint8Array.of(9), keys: [
         { pubkey: new W.PublicKey(C.FEE_ACCOUNT), isSigner: false, isWritable: true }, { pubkey: me, isSigner: false, isWritable: true }, { pubkey: me, isSigner: true, isWritable: false }] })]); },
   };
+})();
+
+/* Приглашения (живой режим): 10% комиссии площадки со сделок приглашённых друзей.
+   Ссылка: ...?mode=live&ref=<кошелёк пригласившего>. Пригласивший запоминается в браузере друга (первый — навсегда).
+   Учёт без сервера, прямо в блокчейне: в сделку друга добавляется заметка «MBR|<кошелёк пригласившего>».
+   Площадка получает комиссию на FEE_ACCOUNT; REF_SHARE_BPS (10%) от неё — награда пригласившего.
+   Выплачивает владелец площадки (кнопка «Выплатить»: перевод SOL с заметкой «MBRPAY|<кошелёк>»). Всё видно в Solscan. */
+MB.ref = (() => {
+  const C = MB.config, KEY = 'membuy-ref', CACHE = 'membuy-refscan-v1';
+  const MEMO = 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr', CB = 'ComputeBudget111111111111111111111111111111';
+  const isAddr = a => /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(String(a || '').trim());
+  const share = () => (C.REF_SHARE_BPS == null ? 1000 : C.REF_SHARE_BPS) / 1e4;
+  const me = () => MB.store.get().wallet.address;
+  const enabled = () => C.LIVE && !!C.FEE_ACCOUNT && !!C.FEE_WALLET && share() > 0;
+
+  // Запоминаем пригласившего из ссылки (только первого — чужая ссылка позже его не заменит).
+  try { const r = new URLSearchParams(location.search).get('ref'); if (r && isAddr(r) && !localStorage.getItem(KEY)) localStorage.setItem(KEY, r.trim()); } catch (e) { /* нет хранилища */ }
+  /** Кто пригласил этот кошелёк (не сам себя). */
+  const inviter = () => { let r = ''; try { r = localStorage.getItem(KEY) || ''; } catch (e) { /* нет хранилища */ } return isAddr(r) && r !== me() ? r : ''; };
+  const link = addr => location.origin + location.pathname + '?mode=live&ref=' + encodeURIComponent(addr);
+
+  /** Добавляет заметку пригласившего в сделку Jupiter. Если что-то не так (размер, сеть) — сделка уходит без заметки. */
+  async function tag(tx) {
+    const r = inviter(); if (!enabled() || !r) return tx;
+    try {
+      const W = window.solanaWeb3, conn = new W.Connection(C.RPC_URL, 'confirmed');
+      const luts = await Promise.all(tx.message.addressTableLookups.map(l => conn.getAddressLookupTable(l.accountKey).then(x => x.value)));
+      if (luts.some(x => !x)) return tx;
+      const msg = W.TransactionMessage.decompile(tx.message, { addressLookupTableAccounts: luts });
+      // Заметка тратит немного вычислений — поднимаем лимит, который выставил Jupiter, с запасом.
+      msg.instructions.forEach(ix => { if (ix.programId.toBase58() === CB && ix.data[0] === 2 && ix.data.length >= 5) { const d = new Uint8Array(ix.data), v = new DataView(d.buffer); v.setUint32(1, Math.min(1400000, v.getUint32(1, true) + 30000), true); ix.data = d; } });
+      msg.instructions.push(new W.TransactionInstruction({ programId: new W.PublicKey(MEMO), keys: [], data: new TextEncoder().encode('MBR|' + r) }));
+      const out = new W.VersionedTransaction(msg.compileToV0Message(luts));
+      return out.serialize().length <= 1232 ? out : tx;
+    } catch (e) { return tx; }
+  }
+
+  // ---- Подсчёт по блокчейну ----
+  const load = () => { try { return JSON.parse(localStorage.getItem(CACHE) || '{}'); } catch (e) { return {}; } };
+  const save = c => { try { localStorage.setItem(CACHE, JSON.stringify(c)); } catch (e) { /* переполнено — посчитаем заново */ } };
+  const rpc = (m, p) => MB.wallet.rpc(m, p);
+  async function pool(items, n, fn) { const q = items.slice(); await Promise.all(Array.from({ length: n }, async () => { while (q.length) await fn(q.shift()); })); }
+  const memoOf = (s, tag) => { const m = String(s || '').match(new RegExp(tag + '\\|([1-9A-HJ-NP-Za-km-z]{32,44})')); return m ? m[1] : ''; };
+  let last = null, lastAt = 0;
+
+  /** Все награды: { [пригласивший]: { traders:Set, trades, feeLam, earnedLam, paidLam } }. Кэш в браузере, обновление раз в минуту. */
+  async function stats(force) {
+    if (!enabled()) return {};
+    if (last && !force && Date.now() - lastAt < 60000) return last;
+    const c = load(); c.t = c.t || {}; c.p = c.p || {};
+    // 1) Сделки с заметкой MBR, прошедшие через счёт комиссии.
+    const sigs = (await rpc('getSignaturesForAddress', [C.FEE_ACCOUNT, { limit: 1000 }]).catch(() => [])) || [];
+    const need = sigs.filter(s => !s.err && memoOf(s.memo, 'MBR') && !(s.signature in c.t)).map(s => s.signature);
+    await pool(need, 4, async sig => {
+      const tx = await rpc('getTransaction', [sig, { encoding: 'jsonParsed', maxSupportedTransactionVersion: 0, commitment: 'confirmed' }]).catch(() => null);
+      if (!tx || !tx.meta || tx.meta.err) { c.t[sig] = 0; return; }
+      const ref = memoOf((tx.meta.logMessages || []).join('\n'), 'MBR'), trader = tx.transaction.message.accountKeys[0].pubkey || tx.transaction.message.accountKeys[0];
+      const bal = arr => (arr || []).filter(b => b.owner === C.FEE_WALLET && b.mint === C.SOL_MINT).reduce((s, b) => s + +b.uiTokenAmount.amount, 0);
+      const fee = bal(tx.meta.postTokenBalances) - bal(tx.meta.preTokenBalances);
+      c.t[sig] = ref && fee > 0 && trader !== ref ? [ref, trader, fee] : 0;
+    });
+    // 2) Выплаты: перевод SOL от владельца пригласившему с заметкой MBRPAY.
+    const pays = (await rpc('getSignaturesForAddress', [C.FEE_WALLET, { limit: 1000 }]).catch(() => [])) || [];
+    const needP = pays.filter(s => !s.err && memoOf(s.memo, 'MBRPAY') && !(s.signature in c.p)).map(s => s.signature);
+    await pool(needP, 4, async sig => {
+      const tx = await rpc('getTransaction', [sig, { encoding: 'jsonParsed', maxSupportedTransactionVersion: 0, commitment: 'confirmed' }]).catch(() => null);
+      if (!tx || !tx.meta || tx.meta.err) { c.p[sig] = 0; return; }
+      const ref = memoOf((tx.meta.logMessages || []).join('\n'), 'MBRPAY'), payer = tx.transaction.message.accountKeys[0].pubkey;
+      const lam = tx.transaction.message.instructions.filter(i => i.program === 'system' && i.parsed && i.parsed.type === 'transfer' && i.parsed.info.source === C.FEE_WALLET && i.parsed.info.destination === ref).reduce((s, i) => s + +i.parsed.info.lamports, 0);
+      c.p[sig] = payer === C.FEE_WALLET && ref && lam > 0 ? [ref, lam] : 0;
+    });
+    save(c);
+    const out = {}, get = r => (out[r] = out[r] || { traders: new Set(), trades: 0, feeLam: 0, earnedLam: 0, paidLam: 0 });
+    Object.values(c.t).forEach(v => { if (!v) return; const o = get(v[0]); o.traders.add(v[1]); o.trades++; o.feeLam += v[2]; });
+    Object.values(out).forEach(o => { o.earnedLam = Math.floor(o.feeLam * share()); });
+    Object.values(c.p).forEach(v => { if (v) get(v[0]).paidLam += v[1]; });
+    last = out; lastAt = Date.now(); return out;
+  }
+  const owed = o => Math.max(0, o.earnedLam - o.paidLam);
+
+  /** Владелец: выплатить пригласившему его награду в SOL (одна транзакция с заметкой для учёта). */
+  async function pay(ref, lamports) {
+    if (!MB.fees.isOwner()) throw new Error('Это может сделать только владелец площадки');
+    if (!isAddr(ref) || !(lamports > 0)) throw new Error('Нечего выплачивать');
+    await MB.wallet.web3(); const W = window.solanaWeb3, from = new W.PublicKey(me());
+    const { blockhash } = (await rpc('getLatestBlockhash', [{ commitment: 'confirmed' }])).value;
+    const tx = new W.Transaction({ feePayer: from, recentBlockhash: blockhash });
+    tx.add(W.SystemProgram.transfer({ fromPubkey: from, toPubkey: new W.PublicKey(ref), lamports: Math.floor(lamports) }));
+    tx.add(new W.TransactionInstruction({ programId: new W.PublicKey(MEMO), keys: [{ pubkey: from, isSigner: true, isWritable: false }], data: new TextEncoder().encode('MBRPAY|' + ref) }));
+    const r = await MB.wallet.send(tx); lastAt = 0; setTimeout(() => MB.wallet.refresh().catch(() => {}), 5000); return r.signature;
+  }
+  return { enabled, share, inviter, link, tag, stats, owed, pay, isAddr };
 })();
 
 /* Настоящая реклама без сервера (живой режим). Всё хранится в блокчейне Solana:
@@ -1519,10 +1639,11 @@ MB.swap = (() => {
       const r = await fetch(`${C.JUP_API}/swap`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       if (!r.ok) throw new Error('Не удалось подготовить сделку');
       const { swapTransaction } = await r.json(), bytes = Uint8Array.from(atob(swapTransaction), c => c.charCodeAt(0));
-      const tx = window.solanaWeb3.VersionedTransaction.deserialize(bytes);
+      let tx = window.solanaWeb3.VersionedTransaction.deserialize(bytes);
       // Проверка: сделка Jupiter должна касаться именно вашего кошелька — иначе не подписываем.
       const keys = tx.message && tx.message.staticAccountKeys ? tx.message.staticAccountKeys.map(k => k.toBase58 ? k.toBase58() : String(k)) : [];
       if (!keys.includes(st.wallet.address)) throw new Error('Сделка не адресована вашему кошельку — подпись отменена');
+      if (q.feeOn && MB.ref) tx = await MB.ref.tag(tx); // заметка пригласившего: 10% комиссии этой сделки — его награда
       const res = await MB.wallet.send(tx); sig = res.signature;
     }
     S.applyTrade({ id: q.token.id, sym: q.token.sym, name: q.token.name, side: q.side, sol, tokens, usd: q.usd, price: q.token.price, feeUsd: q.feeUsd, ts: Date.now(), sig });
@@ -2179,28 +2300,49 @@ MB.views = MB.views || {};
   const { esc, price, usd } = MB.util;
   MB.views.invite = (() => {
     let root;
-    /** Живой режим: ссылка для друзей и кнопка «Поделиться». Наград пока нет — для них нужен учёт сделок на сервере. */
-    function live(el) {
-      root = el; const link = location.origin + location.pathname + '?mode=live';
-      const text = 'Membuy — buy and sell Solana memecoins in two taps. Live charts, real trades, pump.fun launches. Your funds stay in your wallet.';
+    /** Живой режим: личная ссылка, награды 10% (учёт в блокчейне, js/referral.js), выплаты владельцем. */
+    const sol = l => MB.util.num(l / 1e9, 4) + ' SOL';
+    async function live(el) {
+      root = el; const st = MB.store.get(), R = MB.ref, pct = Math.round(R.share() * 100), fee = MB.config.PLATFORM_FEE_BPS / 100;
+      if (!st.wallet.connected) {
+        el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Пригласить друзей</h1><div class="card stack refhero"><b class="big">${pct}%</b><p>комиссии площадки с каждой сделки друзей, которых вы пригласили</p></div>` + MB.ui.empty('Подключите кошелёк', 'Ваша личная ссылка привязана к адресу кошелька — на него и приходят награды.', '<button class="btn accent" id="rcon">Подключить кошелёк</button>');
+        el.querySelector('#rcon').onclick = () => MB.wallet.connect().then(() => live(el), e => MB.ui.toast(e.message, 'err')); return;
+      }
+      const me = st.wallet.address, link = R.link(me), feeOn = await MB.fees.ready(); if (root !== el) return;
+      const text = `Membuy: trade Solana memecoins in two taps, follow traders and chat. Join with my link 👇`;
       el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Пригласить друзей</h1>
-        <div class="card stack"><div class="fld"><span>Ссылка на Membuy</span><input id="rlink" class="inp" readonly value="${esc(link)}"></div>
+        <div class="card stack refhero"><b class="big">${pct}%</b><p>комиссии площадки с каждой сделки друзей, которых вы пригласили</p></div>
+        <div class="card stack"><div class="fld"><span>Ваша личная ссылка</span><input id="rlink" class="inp" readonly value="${esc(link)}"></div>
           <div class="qgrid"><button class="btn accent" id="rshare">Поделиться</button><button class="btn ghost" id="rcopy">Скопировать ссылку</button></div></div>
-        <div class="note">Награды за приглашения пока не начисляются: для честного учёта сделок друзей нужен сервер. Мы сообщим, когда это заработает.</div>`;
+        ${feeOn ? '' : '<div class="note">Комиссия площадки ещё не включена — награды начнут начисляться, как только владелец её включит.</div>'}
+        <dl class="stats" id="rstats"><div><dt>Приглашено</dt><dd>…</dd></div><div><dt>Заработано</dt><dd>…</dd></div><div><dt>К выплате</dt><dd>…</dd></div></dl>
+        <div class="card"><h2 class="h2">Как это работает</h2><ol class="ol"><li>Друг открывает Membuy по вашей ссылке и подключает Phantom.</li><li>С каждой его сделки площадка берёт комиссию ${fee}%.</li><li>${pct}% этой комиссии — ваши. Учёт идёт прямо в блокчейне: каждая сделка друга помечается вашим адресом.</li><li>Выплаты в SOL на ваш кошелёк делает владелец Membuy. Каждую выплату видно в Solscan.</li></ol>
+          <p class="fine">Награда считается только с комиссии Membuy, без сборов сети и pump.fun. Приглашать самого себя нельзя. Мемкоины очень рискованны — не обещайте друзьям прибыль.</p></div>
+        ${R.inviter() ? `<p class="hint">Вас пригласил <code class="ugc">${esc(MB.util.short(R.inviter()))}</code></p>` : ''}
+        <div id="rowner"></div>`;
       const copy = () => { const inp = el.querySelector('#rlink'); if (navigator.clipboard) navigator.clipboard.writeText(link).then(() => MB.ui.toast('Ссылка скопирована'), () => { inp.select(); }); else inp.select(); };
       el.querySelector('#rcopy').onclick = copy;
       el.querySelector('#rshare').onclick = () => navigator.share ? navigator.share({ title: 'Membuy', text, url: link }).catch(() => {}) : copy();
+      const all = await R.stats().catch(() => ({})); if (root !== el) return;
+      const mine = all[me] || { traders: new Set(), earnedLam: 0, paidLam: 0 };
+      el.querySelector('#rstats').innerHTML = `<div><dt>Приглашено</dt><dd>${mine.traders.size}</dd></div><div><dt>Заработано</dt><dd>${sol(mine.earnedLam)}</dd></div><div><dt>К выплате</dt><dd>${sol(R.owed(mine))}</dd></div>`;
+      if (!MB.fees.isOwner()) return;
+      const rows = Object.entries(all).sort((a, b) => R.owed(b[1]) - R.owed(a[1]));
+      const box = el.querySelector('#rowner');
+      box.innerHTML = `<div class="card"><h2 class="h2">Выплаты пригласившим (владелец)</h2>${rows.length ? `<div class="list">${rows.map(([a, o], i) => `<div class="row"><span class="nm"><b><a class="ugc" href="#u-${esc(a)}">${esc(MB.util.short(a))}</a></b><small>Друзей: ${o.traders.size} · сделок: ${o.trades} · комиссия: ${sol(o.feeLam)}</small><small>Заработано: ${sol(o.earnedLam)} · выплачено: ${sol(o.paidLam)}</small></span><span class="pr"><b>${sol(R.owed(o))}</b>${R.owed(o) > 0 ? `<button class="btn accent sm2" data-pay="${i}">Выплатить</button>` : ''}</span></div>`).join('')}</div>` : MB.ui.empty('Пока никого', 'Здесь появятся пригласившие, когда их друзья начнут торговать.')}</div>`;
+      box.querySelectorAll('[data-pay]').forEach(b => b.onclick = async () => { const [a, o] = rows[+b.dataset.pay]; b.disabled = true;
+        try { const sig = await R.pay(a, R.owed(o)); MB.ui.toast('Выплачено ' + sol(R.owed(o))); await R.stats(true); live(el); void sig; } catch (e) { MB.ui.toast(e.message, 'err'); b.disabled = false; } });
     }
     return {
       mount(el) {
         if (MB.config.LIVE) return live(el);
         root = el; const st = MB.store.get(), code = st.profile.name.replace(/[^a-z0-9_]/gi, '').toUpperCase().slice(0, 12) || 'MEMBUY', link = location.origin + location.pathname + '?ref=' + code;
         el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Пригласить друзей</h1>
-          <div class="note">Демо: ссылка и код работают как образец. Начисления появятся после запуска сервера, который считает сделки приглашённых.</div>
+          <div class="note">Демо: ссылка и код — образец. В живом режиме награды считаются по-настоящему, по сделкам в блокчейне.</div>
           <div class="card stack"><div class="fld"><span>Ваш код</span><b class="code">${esc(code)}</b></div>
             <div class="fld"><span>Ваша ссылка</span><input id="rlink" class="inp" readonly value="${esc(link)}"></div><button class="btn accent" id="rcopy">Скопировать ссылку</button></div>
-          <dl class="stats"><div><dt>Приглашено</dt><dd>0</dd></div><div><dt>Заработано</dt><dd>$0</dd></div><div><dt>Ваша доля</dt><dd>20% комиссии</dd></div></dl>
-          <div class="card"><h2 class="h2">Как это будет работать</h2><ol class="ol"><li>Друг открывает Membuy по вашей ссылке и подключает кошелёк.</li><li>С каждой его сделки площадка берёт комиссию ${MB.config.PLATFORM_FEE_BPS / 100}%.</li><li>20% этой комиссии начисляется вам.</li></ol></div>`;
+          <dl class="stats"><div><dt>Приглашено</dt><dd>0</dd></div><div><dt>Заработано</dt><dd>$0</dd></div><div><dt>Ваша доля</dt><dd>${Math.round(MB.config.REF_SHARE_BPS / 100) || 10}% комиссии</dd></div></dl>
+          <div class="card"><h2 class="h2">Как это будет работать</h2><ol class="ol"><li>Друг открывает Membuy по вашей ссылке и подключает кошелёк.</li><li>С каждой его сделки площадка берёт комиссию ${MB.config.PLATFORM_FEE_BPS / 100}%.</li><li>${Math.round(MB.config.REF_SHARE_BPS / 100) || 10}% этой комиссии начисляется вам.</li></ol></div>`;
         el.querySelector('#rcopy').onclick = () => { const inp = el.querySelector('#rlink'); const fb = () => { inp.focus(); inp.select(); MB.ui.toast('Ссылка выделена — скопируйте её'); }; if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(inp.value).then(() => MB.ui.toast('Ссылка скопирована'), fb); else fb(); };
       }, unmount() { root = null; },
     };
@@ -2486,13 +2628,16 @@ MB.views = MB.views || {};
   }
   let tn = 0;
   /** Раз в несколько тиков записывает стоимость портфеля для графика в профиле. */
-  async function equity() { const st = MB.store.get(); if (!st.wallet.connected || ++tn % 4) return; const sol = await MB.data.solUsd().catch(() => 0); let eq = st.wallet.sol * sol; for (const [id, h] of Object.entries(st.holdings)) { const t = await MB.data.get(id).catch(() => null); if (t) eq += h.qty * t.price; } MB.store.update(s => { s.equity.push(eq); s.equity = s.equity.slice(-120); }, true); }
+  async function equity() { const st = MB.store.get(); if (!st.wallet.connected || ++tn % 4) return; const sol = await MB.data.solUsd().catch(() => 0); let eq = st.wallet.sol * sol; const ids = Object.keys(st.holdings); if (ids.length) { const ts = MB.data.many ? await MB.data.many(ids).catch(() => []) : (await Promise.all(ids.map(id => MB.data.get(id).catch(() => null)))).filter(Boolean); ts.forEach(t => { const h = st.holdings[t.id]; if (h) eq += h.qty * t.price; }); } MB.store.update(s => { s.equity.push(eq); s.equity = s.equity.slice(-120); }, true); }
   MB.util.bus.on('tick', () => { equity(); if (cur && cur.onTick) cur.onTick(); });
   document.addEventListener('click', e => { const a = e.target.closest('[data-ad]'); if (a) MB.ads.click(a.dataset.ad); });
   MB.util.bus.on('refresh', () => cur && cur.onTick && cur.onTick());
   MB.util.bus.on('state', () => { header(); if (cur && cur.onState) cur.onState(); });
   window.addEventListener('hashchange', route);
   const off = document.getElementById('offlineBar'), net = () => { off.hidden = navigator.onLine !== false; }; window.addEventListener('online', net); window.addEventListener('offline', net); net();
+  // Живой режим: если цены не обновлялись больше 90 секунд — честно показываем, что данные устарели.
+  const stale = document.getElementById('staleBar');
+  if (stale && MB.data.lastOk) setInterval(() => { const t = MB.data.lastOk(), old = t && Date.now() - t > 90000; stale.hidden = !old || !off.hidden; if (old) stale.textContent = 'Данные устарели: последнее обновление ' + Math.round((Date.now() - t) / 60000) + ' мин назад. Проверьте интернет.'; }, 10000);
   document.getElementById('demoBar').hidden = C.MODE !== 'demo';
   if (!(C.LIVE && C.SOCIAL_API)) document.querySelectorAll('[data-nav=inbox]').forEach(a => { a.hidden = true; }); // «Сообщения» — только в живом режиме с сервером
   if (C.LIVE) { document.body.classList.add('live'); document.querySelectorAll('[data-nav]').forEach(a => { if (C.DEMO_ONLY.includes(a.dataset.nav)) a.hidden = true; }); }

@@ -4,28 +4,49 @@ MB.views = MB.views || {};
   const { esc, price, usd } = MB.util;
   MB.views.invite = (() => {
     let root;
-    /** Живой режим: ссылка для друзей и кнопка «Поделиться». Наград пока нет — для них нужен учёт сделок на сервере. */
-    function live(el) {
-      root = el; const link = location.origin + location.pathname + '?mode=live';
-      const text = 'Membuy — buy and sell Solana memecoins in two taps. Live charts, real trades, pump.fun launches. Your funds stay in your wallet.';
+    /** Живой режим: личная ссылка, награды 10% (учёт в блокчейне, js/referral.js), выплаты владельцем. */
+    const sol = l => MB.util.num(l / 1e9, 4) + ' SOL';
+    async function live(el) {
+      root = el; const st = MB.store.get(), R = MB.ref, pct = Math.round(R.share() * 100), fee = MB.config.PLATFORM_FEE_BPS / 100;
+      if (!st.wallet.connected) {
+        el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Пригласить друзей</h1><div class="card stack refhero"><b class="big">${pct}%</b><p>комиссии площадки с каждой сделки друзей, которых вы пригласили</p></div>` + MB.ui.empty('Подключите кошелёк', 'Ваша личная ссылка привязана к адресу кошелька — на него и приходят награды.', '<button class="btn accent" id="rcon">Подключить кошелёк</button>');
+        el.querySelector('#rcon').onclick = () => MB.wallet.connect().then(() => live(el), e => MB.ui.toast(e.message, 'err')); return;
+      }
+      const me = st.wallet.address, link = R.link(me), feeOn = await MB.fees.ready(); if (root !== el) return;
+      const text = `Membuy: trade Solana memecoins in two taps, follow traders and chat. Join with my link 👇`;
       el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Пригласить друзей</h1>
-        <div class="card stack"><div class="fld"><span>Ссылка на Membuy</span><input id="rlink" class="inp" readonly value="${esc(link)}"></div>
+        <div class="card stack refhero"><b class="big">${pct}%</b><p>комиссии площадки с каждой сделки друзей, которых вы пригласили</p></div>
+        <div class="card stack"><div class="fld"><span>Ваша личная ссылка</span><input id="rlink" class="inp" readonly value="${esc(link)}"></div>
           <div class="qgrid"><button class="btn accent" id="rshare">Поделиться</button><button class="btn ghost" id="rcopy">Скопировать ссылку</button></div></div>
-        <div class="note">Награды за приглашения пока не начисляются: для честного учёта сделок друзей нужен сервер. Мы сообщим, когда это заработает.</div>`;
+        ${feeOn ? '' : '<div class="note">Комиссия площадки ещё не включена — награды начнут начисляться, как только владелец её включит.</div>'}
+        <dl class="stats" id="rstats"><div><dt>Приглашено</dt><dd>…</dd></div><div><dt>Заработано</dt><dd>…</dd></div><div><dt>К выплате</dt><dd>…</dd></div></dl>
+        <div class="card"><h2 class="h2">Как это работает</h2><ol class="ol"><li>Друг открывает Membuy по вашей ссылке и подключает Phantom.</li><li>С каждой его сделки площадка берёт комиссию ${fee}%.</li><li>${pct}% этой комиссии — ваши. Учёт идёт прямо в блокчейне: каждая сделка друга помечается вашим адресом.</li><li>Выплаты в SOL на ваш кошелёк делает владелец Membuy. Каждую выплату видно в Solscan.</li></ol>
+          <p class="fine">Награда считается только с комиссии Membuy, без сборов сети и pump.fun. Приглашать самого себя нельзя. Мемкоины очень рискованны — не обещайте друзьям прибыль.</p></div>
+        ${R.inviter() ? `<p class="hint">Вас пригласил <code class="ugc">${esc(MB.util.short(R.inviter()))}</code></p>` : ''}
+        <div id="rowner"></div>`;
       const copy = () => { const inp = el.querySelector('#rlink'); if (navigator.clipboard) navigator.clipboard.writeText(link).then(() => MB.ui.toast('Ссылка скопирована'), () => { inp.select(); }); else inp.select(); };
       el.querySelector('#rcopy').onclick = copy;
       el.querySelector('#rshare').onclick = () => navigator.share ? navigator.share({ title: 'Membuy', text, url: link }).catch(() => {}) : copy();
+      const all = await R.stats().catch(() => ({})); if (root !== el) return;
+      const mine = all[me] || { traders: new Set(), earnedLam: 0, paidLam: 0 };
+      el.querySelector('#rstats').innerHTML = `<div><dt>Приглашено</dt><dd>${mine.traders.size}</dd></div><div><dt>Заработано</dt><dd>${sol(mine.earnedLam)}</dd></div><div><dt>К выплате</dt><dd>${sol(R.owed(mine))}</dd></div>`;
+      if (!MB.fees.isOwner()) return;
+      const rows = Object.entries(all).sort((a, b) => R.owed(b[1]) - R.owed(a[1]));
+      const box = el.querySelector('#rowner');
+      box.innerHTML = `<div class="card"><h2 class="h2">Выплаты пригласившим (владелец)</h2>${rows.length ? `<div class="list">${rows.map(([a, o], i) => `<div class="row"><span class="nm"><b><a class="ugc" href="#u-${esc(a)}">${esc(MB.util.short(a))}</a></b><small>Друзей: ${o.traders.size} · сделок: ${o.trades} · комиссия: ${sol(o.feeLam)}</small><small>Заработано: ${sol(o.earnedLam)} · выплачено: ${sol(o.paidLam)}</small></span><span class="pr"><b>${sol(R.owed(o))}</b>${R.owed(o) > 0 ? `<button class="btn accent sm2" data-pay="${i}">Выплатить</button>` : ''}</span></div>`).join('')}</div>` : MB.ui.empty('Пока никого', 'Здесь появятся пригласившие, когда их друзья начнут торговать.')}</div>`;
+      box.querySelectorAll('[data-pay]').forEach(b => b.onclick = async () => { const [a, o] = rows[+b.dataset.pay]; b.disabled = true;
+        try { const sig = await R.pay(a, R.owed(o)); MB.ui.toast('Выплачено ' + sol(R.owed(o))); await R.stats(true); live(el); void sig; } catch (e) { MB.ui.toast(e.message, 'err'); b.disabled = false; } });
     }
     return {
       mount(el) {
         if (MB.config.LIVE) return live(el);
         root = el; const st = MB.store.get(), code = st.profile.name.replace(/[^a-z0-9_]/gi, '').toUpperCase().slice(0, 12) || 'MEMBUY', link = location.origin + location.pathname + '?ref=' + code;
         el.innerHTML = `<a class="back" href="#profile">← Профиль</a><h1 class="pt">Пригласить друзей</h1>
-          <div class="note">Демо: ссылка и код работают как образец. Начисления появятся после запуска сервера, который считает сделки приглашённых.</div>
+          <div class="note">Демо: ссылка и код — образец. В живом режиме награды считаются по-настоящему, по сделкам в блокчейне.</div>
           <div class="card stack"><div class="fld"><span>Ваш код</span><b class="code">${esc(code)}</b></div>
             <div class="fld"><span>Ваша ссылка</span><input id="rlink" class="inp" readonly value="${esc(link)}"></div><button class="btn accent" id="rcopy">Скопировать ссылку</button></div>
-          <dl class="stats"><div><dt>Приглашено</dt><dd>0</dd></div><div><dt>Заработано</dt><dd>$0</dd></div><div><dt>Ваша доля</dt><dd>20% комиссии</dd></div></dl>
-          <div class="card"><h2 class="h2">Как это будет работать</h2><ol class="ol"><li>Друг открывает Membuy по вашей ссылке и подключает кошелёк.</li><li>С каждой его сделки площадка берёт комиссию ${MB.config.PLATFORM_FEE_BPS / 100}%.</li><li>20% этой комиссии начисляется вам.</li></ol></div>`;
+          <dl class="stats"><div><dt>Приглашено</dt><dd>0</dd></div><div><dt>Заработано</dt><dd>$0</dd></div><div><dt>Ваша доля</dt><dd>${Math.round(MB.config.REF_SHARE_BPS / 100) || 10}% комиссии</dd></div></dl>
+          <div class="card"><h2 class="h2">Как это будет работать</h2><ol class="ol"><li>Друг открывает Membuy по вашей ссылке и подключает кошелёк.</li><li>С каждой его сделки площадка берёт комиссию ${MB.config.PLATFORM_FEE_BPS / 100}%.</li><li>${Math.round(MB.config.REF_SHARE_BPS / 100) || 10}% этой комиссии начисляется вам.</li></ol></div>`;
         el.querySelector('#rcopy').onclick = () => { const inp = el.querySelector('#rlink'); const fb = () => { inp.focus(); inp.select(); MB.ui.toast('Ссылка выделена — скопируйте её'); }; if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(inp.value).then(() => MB.ui.toast('Ссылка скопирована'), fb); else fb(); };
       }, unmount() { root = null; },
     };

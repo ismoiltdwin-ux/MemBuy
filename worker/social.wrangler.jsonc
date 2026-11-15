@@ -1,0 +1,8 @@
+// Сервер подписок и сообщений Membuy. Публикация: npx wrangler deploy -c worker/social.wrangler.jsonc
+{
+  "name": "membuy-social",
+  "main": "social-worker.js",
+  "compatibility_date": "2025-01-01",
+  "workers_dev": true,
+  "d1_databases": [{ "binding": "DB", "database_name": "membuy-social", "database_id": "63206819-107f-46d4-8985-1c296d91f076" }]
+}

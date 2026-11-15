@@ -788,21 +788,24 @@ MB.store = (() => {
   });
   let state = fresh();
   try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.wallet) state = Object.assign(fresh(), s); if (MB.config.MODE === 'live') state.wallet = { connected: false, address: '', sol: 0 }; } catch (e) { /* хранилище недоступно — работаем в памяти */ }
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* игнорируем */ } };
+  // Наружу отдаём только «замороженную» копию: случайно изменить состояние мимо update() нельзя.
+  const freeze = o => { if (o && typeof o === 'object' && !Object.isFrozen(o)) { Object.freeze(o); Object.values(o).forEach(freeze); } return o; };
+  let view = null; const snap = () => view || (view = freeze(JSON.parse(JSON.stringify(state))));
+  const save = () => { view = null; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* игнорируем */ } };
   return {
-    get: () => state,
-    set(patch) { Object.assign(state, patch); save(); MB.util.bus.emit('state', state); },
-    reset() { state = fresh(); save(); MB.util.bus.emit('state', state); },
+    get: snap,
+    set(patch) { Object.assign(state, patch); save(); MB.util.bus.emit('state', snap()); },
+    reset() { state = fresh(); save(); MB.util.bus.emit('state', snap()); },
     /** Меняет состояние функцией и сохраняет. silent=true — без перерисовки экранов. */
-    update(fn, silent) { fn(state); save(); if (!silent) MB.util.bus.emit('state', state); },
-    note(text) { if (!state.notify) return; state.notes.unshift({ text, ts: Date.now() }); state.notes = state.notes.slice(0, 30); state.unread++; save(); },
+    update(fn, silent) { fn(state); save(); if (!silent) MB.util.bus.emit('state', snap()); },
+    note(text) { view = null; if (!state.notify) return; state.notes.unshift({ text, ts: Date.now() }); state.notes = state.notes.slice(0, 30); state.unread++; save(); },
     /** Записывает исполненную сделку и обновляет позицию по средней цене. */
     applyTrade(t) {
       const h = state.holdings[t.id] || { qty: 0, costUsd: 0, sym: t.sym, name: t.name };
       if (t.side === 'buy') { h.qty += t.tokens; h.costUsd += t.usd; state.wallet.sol -= t.sol; }
       else { const part = Math.min(1, t.tokens / h.qty); h.costUsd -= h.costUsd * part; h.qty -= t.tokens; state.wallet.sol += t.sol; }
       if (h.qty <= 1e-9) delete state.holdings[t.id]; else state.holdings[t.id] = h;
-      state.trades.unshift(t); state.trades = state.trades.slice(0, 100); this.note((t.side === 'buy' ? 'Куплено ' : 'Продано ') + MB.util.num(t.tokens, 2) + ' ' + t.sym); save(); MB.util.bus.emit('state', state);
+      state.trades.unshift(t); state.trades = state.trades.slice(0, 100); this.note((t.side === 'buy' ? 'Куплено ' : 'Продано ') + MB.util.num(t.tokens, 2) + ' ' + t.sym); save(); MB.util.bus.emit('state', snap());
     },
   };
 })();

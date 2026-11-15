@@ -216,3 +216,5 @@ footer .langs{margin-bottom:12px}
 .bar{height:6px;border-radius:4px;background:var(--surface2);overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
 @media(max-width:860px){.actc{order:5}}
 @media(max-width:420px){.trow{grid-template-columns:auto auto minmax(0,1fr) auto}.trow small:last-child{display:none}}
+.logo .lgimg{width:34px;height:34px;border-radius:50%;display:block;flex:none}
+@media(max-width:520px){.logo .lgimg{width:30px;height:30px}}

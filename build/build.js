@@ -12,6 +12,8 @@ fs.writeFileSync(path.join(R, 'index.html'), `<!doctype html>
 <meta name="description" content="Membuy — терминал для покупки и продажи мемкоинов Solana.">
 <meta name="theme-color" content="#120f24">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="img/logo-32.png">
+<link rel="apple-touch-icon" href="img/icon-180.png">
 ${fonts}
 <link rel="stylesheet" href="css/app.css">
 </head>

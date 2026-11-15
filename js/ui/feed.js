@@ -83,7 +83,7 @@ MB.views.feed = (() => {
       <div id="recent"></div><div class="card composer" id="composer"></div><div class="list" id="flist"><div class="hint">Загружаем посты…</div></div>`;
     el.querySelectorAll('[data-ltab]').forEach(c => c.onclick = () => { ltab = c.dataset.ltab; el.querySelectorAll('[data-ltab]').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-selected', x === c); }); liveList(); });
     el.querySelector('#flist').addEventListener('click', async e => { const b = e.target.closest('button'); if (!b) return;
-      if (b.dataset.lfollow) { MB.store.update(s => { const i = s.following.indexOf(b.dataset.lfollow); if (i >= 0) s.following.splice(i, 1); else s.following.push(b.dataset.lfollow); }, true); liveList(); }
+      if (b.dataset.lfollow) { const w = b.dataset.lfollow, on = !MB.store.get().following.includes(w); if (MB.chat.enabled()) { try { const d = await MB.chat.follow(w, on); if (d.mutual) MB.ui.toast('Подписка взаимная — можно писать'); } catch (err) { MB.ui.toast(err.message, 'err'); return; } } else MB.store.update(s => { const i = s.following.indexOf(w); if (i >= 0) s.following.splice(i, 1); else s.following.push(w); }, true); liveList(); }
       if (b.dataset.hide && confirm(MB.t('Скрыть этот пост для всех?'))) { try { await MB.postchain.hide(b.dataset.hide); MB.ui.toast('Пост скрыт'); setTimeout(() => liveList(true), 4000); } catch (err) { MB.ui.toast(err.message, 'err'); } } });
     recentCard(); liveComposer(); liveList();
   }

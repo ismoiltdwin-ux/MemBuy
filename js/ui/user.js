@@ -49,18 +49,19 @@ MB.views = MB.views || {};
   MB.views.user = (() => {
     let root, addr = '';
     async function draw() {
-      if (!root) return; const st = MB.store.get(), me = st.wallet.address, fol = st.following.includes(addr), mine = addr === me;
+      if (!root) return; const st = MB.store.get(), me = st.wallet.address, mine = addr === me; let fol = st.following.includes(addr);
       const posts = MB.postchain && MB.postchain.enabled() ? (await MB.postchain.load().catch(() => [])).filter(p => p.author === addr) : [];
       if (!root) return; const name = (posts.find(p => p.name) || {}).name || '';
       const sol = await MB.wallet.rpc('getBalance', [addr]).then(r => r.value / 1e9, () => null); if (!root) return;
-      const chat = MB.chat && MB.chat.enabled();
+      const chat = MB.chat && MB.chat.enabled(), rel = chat && MB.chat.loggedIn() && !mine ? await MB.chat.relation(addr).catch(() => null) : null; if (!root) return;
+      if (rel) fol = rel.iFollow;
       root.innerHTML = `<a class="back" href="#feed">← Лента</a>
-        <div class="prof">${MB.ui.avatar({ sym: (name || addr).slice(0, 2).toUpperCase(), hue: hue(addr) }, 84)}<div class="nm"><h1 class="ugc">${esc(name || short(addr))}</h1><small><code class="ugc">${esc(short(addr))}</code> <button class="chip sm2" id="ucopy">Скопировать адрес</button></small>${sol != null ? `<small>Баланс: <b>${num(sol, 3)} SOL</b></small>` : ''}</div></div>
+        <div class="prof">${MB.ui.avatar({ sym: (name || addr).slice(0, 2).toUpperCase(), hue: hue(addr) }, 84)}<div class="nm"><h1 class="ugc">${esc(name || short(addr))}</h1><small><code class="ugc">${esc(short(addr))}</code> <button class="chip sm2" id="ucopy">Скопировать адрес</button></small>${sol != null ? `<small>Баланс: <b>${num(sol, 3)} SOL</b></small>` : ''}${rel ? `<small>Подписчики: <b>${rel.followers}</b> · Подписки: <b>${rel.following}</b>${rel.followsMe ? ' · <b class="up">подписан на вас</b>' : ''}</small>` : ''}</div></div>
         ${mine ? '' : `<div class="qgrid"><button class="btn ${fol ? 'ghost' : 'accent'}" id="ufol">${fol ? 'Вы подписаны' : 'Подписаться'}</button>${chat ? '<button class="btn ghost" id="umsg">Сообщение</button>' : ''}<button class="btn ghost" id="usend">Отправить</button></div>`}
         <div id="umsgnote"></div>
         <h2 class="h2">Посты</h2><div class="list">${posts.length ? posts.slice(0, 20).map(p => `<article class="post"><p class="pt2">${esc(p.text)}</p><small class="hint">${new Date(p.ts * 1000).toLocaleString(MB.i18n.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</small></article>`).join('') : MB.ui.empty('Постов пока нет', '')}</div>`;
       root.querySelector('#ucopy').onclick = () => navigator.clipboard && navigator.clipboard.writeText(addr).then(() => MB.ui.toast('Адрес скопирован'), () => {});
-      const f = root.querySelector('#ufol'); if (f) f.onclick = async () => { MB.store.update(s => { const i = s.following.indexOf(addr); if (i >= 0) s.following.splice(i, 1); else s.following.push(addr); }, true); if (chat) await MB.chat.follow(addr, !fol).catch(e => MB.ui.toast(e.message, 'err')); draw(); };
+      const f = root.querySelector('#ufol'); if (f) f.onclick = async () => { if (chat) { try { const d = await MB.chat.follow(addr, !fol); if (d.mutual) MB.ui.toast('Подписка взаимная — можно писать'); } catch (e) { MB.ui.toast(e.message, 'err'); return; } } else MB.store.update(s => { const i = s.following.indexOf(addr); if (i >= 0) s.following.splice(i, 1); else s.following.push(addr); }, true); draw(); };
       const s = root.querySelector('#usend'); if (s) s.onclick = () => MB.ui.sendSheet(addr, name);
       const m = root.querySelector('#umsg'); if (m) m.onclick = () => MB.chat.open(addr, name);
     }

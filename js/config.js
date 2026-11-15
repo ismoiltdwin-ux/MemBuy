@@ -17,6 +17,7 @@ MB.config = {
   WEB3_CDN: 'https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js',
   ADS_WALLET: '7gGoEh28GwkDLS8ABbGRpdJkQz78kpRBy3HrzRmBQ8PV',               // live: адрес вашего кошелька Phantom — сюда приходит оплата рекламы, с него вы одобряете объявления (пусто = площадка выключена)
   ADS_SOL_PER_DAY: 0.05,        // старый тариф: нужен только для объявлений, оплаченных до перехода на часы
+  SOCIAL_API: '',               // live: адрес сервера подписок и сообщений (worker/social-worker.js); пусто = сообщения выключены
   POST_FEE_SOL: 0.0001,         // live: сбор за пост в ленте (защита от спама), уходит на FEE_WALLET
   ADS_AUTO_APPROVE: true,       // live: объявление включается сразу после оплаты, если проходит автопроверку (подозрительные ждут владельца)
   ADS_PLANS: [{ id: '1h', hours: 1, usd: 10 }, { id: '5h', hours: 5, usd: 30 }, { id: '24h', hours: 24, sol: 1 }], // тарифы рекламы: в $ (пересчёт в SOL по курсу при оплате) или в SOL

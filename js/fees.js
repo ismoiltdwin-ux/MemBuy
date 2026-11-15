@@ -1,5 +1,5 @@
 /* Доход площадки (живой режим).
-   • Сделки: Jupiter берёт PLATFORM_FEE_BPS (0,5%) и кладёт на FEE_ACCOUNT — wSOL-счёт кошелька FEE_WALLET.
+   • Сделки: Jupiter берёт PLATFORM_FEE_BPS (сейчас 1%) и кладёт на FEE_ACCOUNT — wSOL-счёт кошелька FEE_WALLET.
      Пока этот счёт не создан, комиссия не включается (иначе Jupiter отклонил бы сделку).
    • Выпуск монеты: в транзакцию выпуска добавляется перевод CREATE_FEE_SOL на FEE_WALLET (см. pumpcreate.js).
    • Реклама: оплата сразу идёт на ADS_WALLET (см. adchain.js).

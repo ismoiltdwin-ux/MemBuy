@@ -14,8 +14,21 @@ fs.writeFileSync(path.join(R, 'index.html'), `<!doctype html>
 <meta name="description" content="Membuy — терминал для покупки и продажи мемкоинов Solana.">
 <meta name="theme-color" content="#120f24">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="img/logo-32.png">
+<link rel="icon" type="image/png" sizes="32x32" href="img/logo-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
 <link rel="apple-touch-icon" href="img/icon-180.png">
+<meta name="application-name" content="Membuy">
+<meta name="apple-mobile-web-app-title" content="Membuy">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Membuy">
+<meta property="og:title" content="Membuy">
+<meta property="og:description" content="Trade Solana memecoins in two taps. Live charts, follow traders, chat, send coins. Your keys stay in Phantom.">
+<meta property="og:url" content="https://ismoiltdwin-ux.github.io/MemBuy/?mode=live">
+<meta property="og:image" content="https://ismoiltdwin-ux.github.io/MemBuy/img/icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@golod_mem">
+<meta name="twitter:title" content="Membuy">
+<meta name="twitter:image" content="https://ismoiltdwin-ux.github.io/MemBuy/img/icon-512.png">
 ${fonts}
 <link rel="stylesheet" href="css/app.css?v=${ver('css/app.css')}">
 </head>

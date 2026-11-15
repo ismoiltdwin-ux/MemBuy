@@ -11,7 +11,22 @@ MB.ui = MB.ui || {};
     return MB.ui.avatar({ sym: String(name).replace(/[^a-zа-я0-9]/gi, '').slice(0, 2).toUpperCase() || 'U', hue, icon: photo || undefined }, size);
   };
   MB.ui.chg = v => `<span class="chg ${v >= 0 ? 'up' : 'down'}">${MB.util.pct(v)}</span>`;
+  /** Нет кошелька в этом браузере (Telegram, Instagram, обычный Safari): предлагаем открыть сайт прямо в приложении Phantom. */
+  MB.ui.noWallet = () => {
+    const box = document.getElementById('onb'); if (!box) return;
+    const url = new URL(location.href); url.searchParams.set('mode', 'live');
+    const open = 'https://phantom.app/ul/browse/' + encodeURIComponent(url.toString()) + '?ref=' + encodeURIComponent(location.origin);
+    const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent), inApp = /Telegram|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent);
+    box.hidden = false;
+    box.innerHTML = `<div class="onb" role="dialog" aria-modal="true" aria-labelledby="nwt"><div class="card"><h2 id="nwt">Откройте Membuy в Phantom</h2>
+      <p class="hint">${mobile ? (inApp ? 'Этот браузер (например, внутри Telegram) не видит кошелёк.' : 'В обычном браузере телефона кошелёк не подключается.') + ' Нажмите кнопку — Membuy откроется прямо в приложении Phantom, там можно подключить кошелёк и торговать.' : 'Установите расширение Phantom для браузера и обновите страницу.'}</p>
+      <div class="stack">${mobile ? `<a class="btn big accent" href="${MB.util.esc(open)}">Открыть в Phantom</a>` : ''}<a class="btn ghost" href="https://phantom.com/download" target="_blank" rel="noopener">Установить Phantom</a><button class="btn ghost" id="nwx">Позже</button></div>
+      <p class="fine">Phantom — бесплатный кошелёк Solana. Ключи хранятся только у вас.</p></div></div>`;
+    const close = () => { box.hidden = true; box.innerHTML = ''; };
+    box.querySelector('#nwx').onclick = close; box.querySelector('.onb').addEventListener('click', e => { if (e.target.classList.contains('onb')) close(); });
+  };
   MB.ui.toast = (msg, kind = 'ok') => {
+    if (!msg) return; // пустое сообщение (например, уже показано окно) — не показываем
     const box = document.getElementById('toasts'), el = document.createElement('div'); el.className = 'toast ' + kind; el.setAttribute('role', 'status'); el.textContent = msg; box.appendChild(el);
     setTimeout(() => el.remove(), 4200);
   };

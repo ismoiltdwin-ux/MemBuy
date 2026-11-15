@@ -13,7 +13,7 @@ MB.wallet = (() => {
     web3: () => window.solanaWeb3 ? Promise.resolve() : new Promise((ok, bad) => { const s = document.createElement('script'); s.src = C.WEB3_CDN; s.onload = ok; s.onerror = () => bad(new Error('Не удалось загрузить библиотеку Solana')); document.head.appendChild(s); }),
     async connect() {
       if (C.MODE === 'demo') { const st = S.get(); S.set({ wallet: { connected: true, address: 'Demo' + 'MB7xQ2kLp9aVn3TzR4', sol: st.wallet.sol || C.DEMO_START_SOL } }); return; }
-      const p = provider(); if (!p) throw new Error('Кошелёк Phantom не найден. Установите Phantom и откройте сайт в его браузере.');
+      const p = provider(); if (!p) { MB.ui.noWallet(); const e = new Error(''); e.silent = true; throw e; } // окно с кнопками вместо красной ошибки
       let res; try { res = await p.connect(); } catch (e) { throw rejected(e); } const address = res.publicKey.toString();
       S.set({ wallet: { connected: true, address, sol: 0 } }); await this.refresh();
     },

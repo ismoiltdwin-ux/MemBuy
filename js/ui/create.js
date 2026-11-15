@@ -35,7 +35,7 @@ MB.views.create = (() => {
         <button class="btn big accent" type="submit" id="cgo">Выпустить монету</button>
         <div id="cstat" class="tstatus" role="status" aria-live="polite"></div>
       </form><div id="cdone"></div>`;
-    const stat = (t, k = '') => { const s = el.querySelector('#cstat'); if (s) { s.className = 'tstatus' + (k ? ' ' + k : ''); s.textContent = t; } };
+    const stat = (t, k = '') => { const s = el.querySelector('#cstat'); if (s && !t) { s.className = 'tstatus'; s.textContent = ''; return; } if (s) { s.className = 'tstatus' + (k ? ' ' + k : ''); s.textContent = t; } };
     el.querySelector('#cfile').addEventListener('change', e => { file = e.target.files[0] || null; if (!file) return; const url = URL.createObjectURL(file); el.querySelector('#prev').innerHTML = `<img class="ava" src="${url}" alt="Картинка монеты" width="72" height="72" style="width:72px;height:72px">`; });
     el.querySelector('#lform').addEventListener('submit', async e => { e.preventDefault(); const b = el.querySelector('#cgo'); if (b.disabled) return;
       const val = id => el.querySelector('#' + id).value;

@@ -25,7 +25,7 @@ MB.views.token = (() => {
     root.querySelector('#go').onclick = go; renderQuote(); showStatus(); if (prev) requote();
   }
   function showStatus() { const el = root && root.querySelector('#tstatus'); if (!el) return; el.className = 'tstatus' + (status ? ' ' + status.kind : ''); el.textContent = status ? status.text : ''; }
-  const say = (text, kind = 'ok') => { status = { text, kind }; showStatus(); MB.ui.toast(text, kind === 'err' ? 'err' : 'ok'); };
+  const say = (text, kind = 'ok') => { if (!text) { status = null; showStatus(); return; } status = { text, kind }; showStatus(); MB.ui.toast(text, kind === 'err' ? 'err' : 'ok'); };
   function renderQuote() {
     const el = root.querySelector('#quote'); if (!el) return;
     if (!quote) { el.innerHTML = '<div class="hint">Введите сумму, чтобы увидеть расчёт.</div>'; return; }

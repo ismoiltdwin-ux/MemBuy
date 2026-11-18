@@ -8,6 +8,7 @@ MB.i18n = (() => {
 
   // Точные совпадения: 'русский': ['English', 'Тоҷикӣ']
   const D = {
+    '★ Официальная монета Membuy': ['★ Official Membuy coin', ''],
     // Приглашения 10% (живой режим)
     'комиссии площадки с каждой сделки друзей, которых вы пригласили': ['of the platform fee on every trade by friends you invite', ''],
     'Ваша личная ссылка привязана к адресу кошелька — на него и приходят награды.': ['Your personal link is tied to your wallet address — that is where rewards are paid.', ''],

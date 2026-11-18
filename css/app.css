@@ -240,3 +240,6 @@ a.act{color:var(--muted);font-size:14px;font-weight:600}
 .refhero{text-align:center;background:linear-gradient(135deg,rgba(255,176,32,.18),rgba(140,90,255,.14));border-color:rgba(255,176,32,.45)}
 .refhero .big{font-family:Unbounded,sans-serif;font-size:44px;color:var(--accent,#ffb020);line-height:1.1}
 .refhero p{margin:4px 0 0;color:var(--text,#fff)}
+.offc{margin:0 0 12px;border:1px solid rgba(255,176,32,.55);border-radius:18px;padding:8px 8px 2px;background:linear-gradient(135deg,rgba(255,176,32,.12),rgba(140,90,255,.08))}
+.offl{display:block;color:var(--accent,#ffb020);font-size:13px;margin:2px 6px 6px}
+.offc .row{margin:0}

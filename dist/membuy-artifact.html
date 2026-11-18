@@ -245,6 +245,9 @@ a.act{color:var(--muted);font-size:14px;font-weight:600}
 .refhero{text-align:center;background:linear-gradient(135deg,rgba(255,176,32,.18),rgba(140,90,255,.14));border-color:rgba(255,176,32,.45)}
 .refhero .big{font-family:Unbounded,sans-serif;font-size:44px;color:var(--accent,#ffb020);line-height:1.1}
 .refhero p{margin:4px 0 0;color:var(--text,#fff)}
+.offc{margin:0 0 12px;border:1px solid rgba(255,176,32,.55);border-radius:18px;padding:8px 8px 2px;background:linear-gradient(135deg,rgba(255,176,32,.12),rgba(140,90,255,.08))}
+.offl{display:block;color:var(--accent,#ffb020);font-size:13px;margin:2px 6px 6px}
+.offc .row{margin:0}
 </style>
 <div class="demo" id="demoBar" hidden>Демо-режим: монеты и сделки учебные, настоящие деньги не используются</div>
 <div class="offline" id="offlineBar" hidden>Нет соединения. Показываем последние данные.</div>
@@ -289,6 +292,7 @@ MB.config = {
   PUMP_API: 'https://pumpportal.fun/api',
   CREATE_RESERVE_SOL: 0.03,     // live: запас SOL на выпуск монеты и сборы сети        // live: цена рекламы в SOL за один день показа
   SOCIAL_X: 'https://x.com/golod_mem',
+  OFFICIAL_MINT: '3xqd7mn1Nwu5bj8pU2iHAnpTeqzGF2niNEavZLZgpump', // официальная монета $MBUY — закреплена вверху «Рынка» (живой режим)
   SOCIAL_TG: 'https://t.me/Membuy_market',
   SOL_MINT: 'So11111111111111111111111111111111111111112',
 };
@@ -309,6 +313,7 @@ MB.i18n = (() => {
 
   // Точные совпадения: 'русский': ['English', 'Тоҷикӣ']
   const D = {
+    '★ Официальная монета Membuy': ['★ Official Membuy coin', ''],
     // Приглашения 10% (живой режим)
     'комиссии площадки с каждой сделки друзей, которых вы пригласили': ['of the platform fee on every trade by friends you invite', ''],
     'Ваша личная ссылка привязана к адресу кошелька — на него и приходят награды.': ['Your personal link is tied to your wallet address — that is where rewards are paid.', ''],
@@ -1805,6 +1810,13 @@ MB.views.market = (() => {
       ${MB.chart.spark(t.series, t.chg24 >= 0)}<span class="pr"><b class="p">${price(t.price)}</b><span class="c">${MB.ui.chg(t.chg24)}</span></span></a>`;
   const caution = () => { try { if (localStorage.getItem(CKEY)) return ''; } catch (e) { /* нет хранилища */ }
     return `<div class="note caution" id="caution"><b>Осторожно</b><span>Новые монеты очень волатильны. Выпустить монету может кто угодно, в том числе мошенники.</span><button class="x" id="cx" aria-label="Скрыть предупреждение">×</button></div>`; };
+  /** Живой режим: официальная монета $MBUY закреплена над списком. */
+  async function official() {
+    const C = MB.config, box = root && root.querySelector('#official'); if (!box || !C.LIVE || !C.OFFICIAL_MINT) return;
+    const t = await MB.data.get(C.OFFICIAL_MINT).catch(() => null); if (!t || !root || !root.contains(box)) return;
+    if (!t.icon) t.icon = 'img/icon-192.png';
+    box.innerHTML = `<div class="offc"><b class="offl">★ Официальная монета Membuy</b>${row(t)}</div>`;
+  }
   async function fill() {
     const list = root.querySelector('#list');
     try { const items = await MB.data.list(filter, q); list.innerHTML = items.length ? items.map((t, i) => row(t) + (i === Math.min(3, items.length - 1) && !q.trim() ? MB.ads.card(MB.ads.pick('market', 0)) : '')).join('') : (filter === 'fav' && !q.trim() ? MB.ui.empty('В избранном пусто', 'Откройте монету и нажмите «В избранное».') : MB.ui.empty('Ничего не найдено', 'Попробуйте другое название или тикер.')); }
@@ -1816,7 +1828,8 @@ MB.views.market = (() => {
       el.innerHTML = `<section class="hero"><h1>Мемкоины Solana <span>в одном месте</span></h1><p>Находите монеты, смотрите графики и меняйте SOL на монету за пару касаний. Ключи остаются в вашем кошельке.</p></section>
         <div class="tools"><label class="search"><span class="sr">Поиск монеты</span><input id="q" type="search" placeholder="Название или тикер" autocomplete="off" value="${esc(q)}"></label>
         <div class="chips" role="tablist" aria-label="Сортировка">${FILTERS.map(([k, n]) => `<button class="chip ${k === filter ? 'on' : ''}" role="tab" aria-selected="${k === filter}" data-f="${k}">${n}</button>`).join('')}</div></div>
-        ${caution()}<div class="list" id="list" aria-live="off"></div>`;
+        <div id="official"></div>${caution()}<div class="list" id="list" aria-live="off"></div>`;
+      official();
       const cx = el.querySelector('#cx'); if (cx) cx.onclick = () => { try { localStorage.setItem(CKEY, '1'); } catch (e) { /* нет хранилища */ } el.querySelector('#caution').remove(); };
       el.querySelector('#q').addEventListener('input', e => { q = e.target.value; fill(); });
       el.querySelectorAll('.chip[data-f]').forEach(c => c.onclick = () => { filter = c.dataset.f; el.querySelectorAll('.chip[data-f]').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-selected', x === c); }); fill(); });
